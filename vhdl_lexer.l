@@ -138,6 +138,20 @@ void frontend_vhdl_yyerror(const char *msg);
 (?i:xnor)               { return KW_XNOR; }
 (?i:xor)                { return KW_XOR; }
 
+[0-9][0-9_]*(\.[0-9][0-9_]*)?([Ee][+-]?[0-9][0-9_]*)?     {
+    // Decimal literal
+    frontend_vhdl_yylval = new VhdlParseTreeNode(PT_LIT_DECIMAL);
+    frontend_vhdl_yylval->str = new std::string(yytext);
+    return TOK_DECIMAL;
+}
+
+[0-9][0-9_]*#[0-9A-Fa-f][0-9A-Fa-f_]*(\.[0-9A-Fa-f][0-9A-Fa-f_]*)?#([Ee][+-]?[0-9][0-9_]*)?  {
+    // Based literal
+    frontend_vhdl_yylval = new VhdlParseTreeNode(PT_LIT_BASED);
+    frontend_vhdl_yylval->str = new std::string(yytext);
+    return TOK_BASED;
+}
+
 \"              { BEGIN(STRING); }
 <STRING>\"\"    { yymore(); }
 <STRING>\"      {

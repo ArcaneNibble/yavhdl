@@ -142,6 +142,8 @@ struct VhdlParseTreeNode *parse_output;
 
 %token TOK_STRING
 %token TOK_BITSTRING
+%token TOK_DECIMAL
+%token TOK_BASED
 
 %define api.value.type {struct VhdlParseTreeNode *}
 
@@ -156,12 +158,22 @@ not_actualy_design_file:
     literal;
 
 literal:
-    string_literal
+    numeric_literal
+    | string_literal
     | bit_string_literal
     | KW_NULL   { $$ = new VhdlParseTreeNode(PT_LIT_NULL); }
 
-bit_string_literal: TOK_BITSTRING
+numeric_literal:
+    abstract_literal
+    // TODO
 
+abstract_literal:
+    decimal_literal
+    | based_literal
+
+based_literal: TOK_BASED
+decimal_literal: TOK_DECIMAL
+bit_string_literal: TOK_BITSTRING
 string_literal: TOK_STRING
 
 %%
