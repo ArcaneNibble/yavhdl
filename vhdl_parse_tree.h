@@ -14,7 +14,13 @@ enum ParseTreeNodeType
 
     PT_BASIC_ID,
     PT_EXT_ID,
+
+    PT_NAME_SELECTED,
+
+    PT_TOK_ALL,
 };
+
+#define NUM_FIXED_PIECES 8
 
 struct VhdlParseTreeNode {
     enum ParseTreeNodeType type;
@@ -23,6 +29,8 @@ struct VhdlParseTreeNode {
     std::string *str;
     std::string *str2;
     char chr;
+    struct VhdlParseTreeNode *pieces[NUM_FIXED_PIECES];
+    int piece_count;
 
     VhdlParseTreeNode(enum ParseTreeNodeType type);
     ~VhdlParseTreeNode();

@@ -303,4 +303,6 @@ void frontend_vhdl_yyerror(const char *msg);
 [ \xA0\t\v\r\n\f]   /* ignore separators (including NBSP) */
 "--"[^\r\n]*        /* ignore single-line comments */
 
+. { return *yytext; }
+
 %%

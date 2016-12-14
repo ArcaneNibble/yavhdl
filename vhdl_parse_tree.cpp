@@ -1,6 +1,7 @@
 #include "vhdl_parse_tree.h"
 
 #include <iostream>
+#include <cstring>
 using namespace std;
 
 // Keep in sync with enum
@@ -14,6 +15,10 @@ const char *parse_tree_types[] = {
 
     "PT_BASIC_ID",
     "PT_EXT_ID",
+
+    "PT_NAME_SELECTED",
+
+    "PT_TOK_ALL",
 };
 
 void print_chr_escaped(char c) {
@@ -37,12 +42,17 @@ VhdlParseTreeNode::VhdlParseTreeNode(enum ParseTreeNodeType type) {
     // Default contents
     this->str = nullptr;
     this->str2 = nullptr;
+    this->piece_count = 0;
+    memset(this->pieces, 0, sizeof(this->pieces));
 }
 
 VhdlParseTreeNode::~VhdlParseTreeNode() {
     // Destroy contents
     delete this->str;
     delete this->str2;
+    for (int i = 0; i < this->piece_count; i++) {
+        delete this->pieces[i];
+    }
 }
 
 void VhdlParseTreeNode::debug_print() {
@@ -72,6 +82,13 @@ void VhdlParseTreeNode::debug_print() {
             cout << ", \"base_str\": \"";
             print_string_escaped(this->str2);
             cout << "\"";
+            break;
+
+        case PT_NAME_SELECTED:
+            cout << ", \"name\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"suffix\": ";
+            this->pieces[1]->debug_print();
             break;
 
         default:

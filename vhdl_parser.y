@@ -177,7 +177,27 @@ _toplevel_token:
 
 // Fake start token for testing
 not_actualy_design_file:
-    literal;
+    name;
+
+// This is a super hacked up version of the name grammar production
+// It accepts far more than it should. This will be disambiguated in a second
+// pass that is not part of the (generated) parser.
+name:
+    identifier              // was simple_name
+    | string_literal        // was operator_symbol
+    | character_literal
+    | name '.' suffix   {   // was selected_name
+        $$ = new VhdlParseTreeNode(PT_NAME_SELECTED);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+suffix:
+    identifier              // was simple_name
+    | character_literal
+    | string_literal        // was operator_symbol
+    | KW_ALL    { $$ = new VhdlParseTreeNode(PT_TOK_ALL); }
 
 literal:
     numeric_literal
