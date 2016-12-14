@@ -161,6 +161,13 @@ void frontend_vhdl_yyerror(const char *msg);
     return TOK_BASIC_ID;
 }
 
+"'"[\x20-\x7E\xA0-\xFF]"'" {
+    // Character literal
+    frontend_vhdl_yylval = new VhdlParseTreeNode(PT_LIT_CHAR);
+    frontend_vhdl_yylval->chr = yytext[1];
+    return TOK_CHAR;
+}
+
 \\              { BEGIN(EXT_ID); }
 <EXT_ID>\\\\    { yymore(); }
 <EXT_ID>\\      {

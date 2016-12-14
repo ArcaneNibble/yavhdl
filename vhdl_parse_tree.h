@@ -10,6 +10,7 @@ enum ParseTreeNodeType
     PT_LIT_BITSTRING,
     PT_LIT_DECIMAL,
     PT_LIT_BASED,
+    PT_LIT_CHAR,
 
     PT_BASIC_ID,
     PT_EXT_ID,
@@ -21,6 +22,7 @@ struct VhdlParseTreeNode {
     // Contents
     std::string *str;
     std::string *str2;
+    char chr;
 
     VhdlParseTreeNode(enum ParseTreeNodeType type);
     ~VhdlParseTreeNode();

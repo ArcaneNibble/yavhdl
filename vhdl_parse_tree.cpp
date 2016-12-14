@@ -10,19 +10,24 @@ const char *parse_tree_types[] = {
     "PT_LIT_BITSTRING",
     "PT_LIT_DECIMAL",
     "PT_LIT_BASED",
+    "PT_LIT_CHAR",
 
     "PT_BASIC_ID",
     "PT_EXT_ID",
 };
 
+void print_chr_escaped(char c) {
+    if (c >= 0x20 && c <= 0x7E && c != '"') {
+        cout << c;
+    } else {
+        cout << "\\x" << hex << (+c & 0xFF);
+    }
+}
+
 void print_string_escaped(std::string *s) {
     for (size_t i = 0; i < s->length(); i++) {
         char c = (*s)[i];
-        if (c >= 0x20 && c <= 0x7E && c != '"') {
-            cout << c;
-        } else {
-            cout << "\\x" << hex << (+c & 0xFF);
-        }
+        print_chr_escaped(c);
     }
 }
 
@@ -51,6 +56,12 @@ void VhdlParseTreeNode::debug_print() {
         case PT_EXT_ID:
             cout << ", \"str\": \"";
             print_string_escaped(this->str);
+            cout << "\"";
+            break;
+
+        case PT_LIT_CHAR:
+            cout << ", \"char\": \"";
+            print_chr_escaped(this->chr);
             cout << "\"";
             break;
 

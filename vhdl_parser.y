@@ -144,6 +144,7 @@ struct VhdlParseTreeNode *parse_output;
 %token TOK_BITSTRING
 %token TOK_DECIMAL
 %token TOK_BASED
+%token TOK_CHAR
 
 %token TOK_BASIC_ID
 %token TOK_EXT_ID
@@ -158,10 +159,11 @@ _toplevel_token:
 
 // Fake start token for testing
 not_actualy_design_file:
-    identifier;
+    literal;
 
 literal:
     numeric_literal
+    | enumeration_literal
     | string_literal
     | bit_string_literal
     | KW_NULL   { $$ = new VhdlParseTreeNode(PT_LIT_NULL); }
@@ -174,9 +176,14 @@ abstract_literal:
     decimal_literal
     | based_literal
 
+enumeration_literal:
+    identifier
+    | character_literal
+
 based_literal: TOK_BASED
-decimal_literal: TOK_DECIMAL
 bit_string_literal: TOK_BITSTRING
+character_literal: TOK_CHAR
+decimal_literal: TOK_DECIMAL
 string_literal: TOK_STRING
 
 identifier:
