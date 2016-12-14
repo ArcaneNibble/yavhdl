@@ -177,7 +177,7 @@ _toplevel_token:
 
 // Fake start token for testing
 not_actualy_design_file:
-    factor;
+    expression;
 
 // This is a super hacked up version of the name grammar production
 // It accepts far more than it should. This will be disambiguated in a second
@@ -193,6 +193,240 @@ name:
         $$->pieces[1] = $3;
     }
     //TODO
+
+expression:
+    logical_expression
+    | DL_QQ primary     {
+        $$ = new VhdlParseTreeNode(PT_UNARY_OPERATOR);
+        $$->op_type = OP_COND;
+        $$->pieces[0] = $2;
+    }
+
+logical_expression:
+    relation
+    | logical_expression KW_AND relation    {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_AND;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    | logical_expression KW_OR relation     {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_OR;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    | logical_expression KW_XOR relation    {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_XOR;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    | relation KW_NAND relation             {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_NAND;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    | relation KW_NOR relation              {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_NOR;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    | logical_expression KW_XNOR relation   {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_XNOR;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+relation:
+    shift_expression
+    | shift_expression '=' shift_expression     {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_EQ;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    | shift_expression DL_NEQ shift_expression  {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_NEQ;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+    | shift_expression '<' shift_expression     {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_LT;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+    | shift_expression DL_LEQ shift_expression  {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_LTE;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+    | shift_expression '>' shift_expression     {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_GT;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+    | shift_expression DL_GEQ shift_expression  {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_GTE;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+    | shift_expression DL_MEQ shift_expression  {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_MEQ;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+    | shift_expression DL_MNE shift_expression  {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_MNE;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+    | shift_expression DL_MLT shift_expression  {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_MLT;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+    | shift_expression DL_MLE shift_expression  {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_MLE;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+    | shift_expression DL_MGT shift_expression  {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_MGT;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+    | shift_expression DL_MGE shift_expression  {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_MGE;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+
+shift_expression:
+    simple_expression
+    | simple_expression KW_SLL simple_expression    {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_SLL;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    | simple_expression KW_SRL simple_expression    {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_SRL;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    | simple_expression KW_SLA simple_expression    {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_SLA;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    | simple_expression KW_SRA simple_expression    {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_SRA;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    | simple_expression KW_ROL simple_expression    {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_ROL;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    | simple_expression KW_ROR simple_expression    {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_ROR;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+simple_expression:
+    _term_with_sign
+    | simple_expression '+' term    {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_ADD;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    | simple_expression '-' term    {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_SUB;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    | simple_expression '&' term    {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_CONCAT;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+// FIXME: Check if this precedence is right
+_term_with_sign:
+    term
+    | '+' term      {
+        $$ = new VhdlParseTreeNode(PT_UNARY_OPERATOR);
+        $$->op_type = OP_ADD;
+        $$->pieces[0] = $2;
+    }
+    | '-' term      {
+        $$ = new VhdlParseTreeNode(PT_UNARY_OPERATOR);
+        $$->op_type = OP_SUB;
+        $$->pieces[0] = $2;
+    }
+
+term:
+    factor
+    | term '*' factor       {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_MUL;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    | term '/' factor       {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_DIV;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    | term KW_MOD factor    {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_MOD;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    | term KW_REM factor    {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_REM;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
 
 factor:
     primary
@@ -249,6 +483,11 @@ primary:
     | numeric_literal
     | bit_string_literal
     | KW_NULL   { $$ = new VhdlParseTreeNode(PT_LIT_NULL); }
+
+    | '(' expression ')'    {
+        // Will probably be removed, probably conflicts with aggregate
+        $$ = $2;
+    }
     //TODO
 
 suffix:
