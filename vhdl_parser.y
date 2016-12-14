@@ -140,14 +140,10 @@ struct VhdlParseTreeNode *parse_output;
 %token KW_XNOR
 %token KW_XOR
 
-%token <string> TOK_STRING
+%token TOK_STRING
+%token TOK_BITSTRING
 
-%union {
-    std::string *string;
-    struct VhdlParseTreeNode *parse_tree;
-}
-
-%type <parse_tree> literal string_literal not_actualy_design_file
+%define api.value.type {struct VhdlParseTreeNode *}
 
 %%
 
@@ -161,13 +157,12 @@ not_actualy_design_file:
 
 literal:
     string_literal
+    | bit_string_literal
     | KW_NULL   { $$ = new VhdlParseTreeNode(PT_LIT_NULL); }
 
-string_literal:
-    TOK_STRING  {
-        $$ = new VhdlParseTreeNode(PT_LIT_STRING);
-        $$->str = $1;
-    }
+bit_string_literal: TOK_BITSTRING
+
+string_literal: TOK_STRING
 
 %%
 

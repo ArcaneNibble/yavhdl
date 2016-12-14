@@ -5,6 +5,7 @@
 using namespace std;
 
 #include "vhdl_parser.tab.h"
+#include "vhdl_parse_tree.h"
 
 void frontend_vhdl_yyerror(const char *msg);
    
@@ -17,6 +18,7 @@ void frontend_vhdl_yyerror(const char *msg);
 
 %x COMMENT
 %x STRING
+%x BITSTRING
 
 %%
 
@@ -153,7 +155,8 @@ void frontend_vhdl_yyerror(const char *msg);
     }
     the_str[j] = 0;
 
-    frontend_vhdl_yylval.string = new std::string(the_str);
+    frontend_vhdl_yylval = new VhdlParseTreeNode(PT_LIT_STRING);
+    frontend_vhdl_yylval->str = new std::string(the_str);
     free(the_str);
     return TOK_STRING;
 }
@@ -163,6 +166,52 @@ void frontend_vhdl_yyerror(const char *msg);
     throw 1;
 }
 <STRING>.   {
+    frontend_vhdl_yyerror("Illegal string contents");
+    throw 1;
+}
+
+[0-9][0-9_]*([US]?[BOX]|D)\"    { BEGIN(BITSTRING); yymore(); }
+<BITSTRING>\"\"                 { yymore(); }
+<BITSTRING>\"                   {
+    BEGIN(0);
+    char *the_str = strdup(yytext);
+
+    frontend_vhdl_yylval = new VhdlParseTreeNode(PT_LIT_BITSTRING);
+
+    // Strip last quote
+    the_str[strlen(the_str) - 1] = 0;
+
+    // Everything up to the first quote is the base specifier
+    size_t main_str_offset = -1;
+    for (size_t i = 0; i < strlen(the_str); i++) {
+        if (the_str[i] == '"') {
+            the_str[i] = 0;
+            main_str_offset = i + 1;
+            frontend_vhdl_yylval->str2 = new std::string(the_str);
+            break;
+        }
+    }
+
+    // Undo the quote escaping
+    size_t j = main_str_offset;
+    for (size_t i = main_str_offset;
+         i - main_str_offset < strlen(the_str + main_str_offset);
+         i++, j++) {
+        the_str[j] = the_str[i];
+        if (the_str[i] == '"') i++;
+    }
+    the_str[j] = 0;
+
+    frontend_vhdl_yylval->str = new std::string(the_str + main_str_offset);
+    free(the_str);
+    return TOK_BITSTRING;
+}
+<BITSTRING>[\x20-\x7E\xA0-\xFF]    { yymore(); }
+<BITSTRING>\n  {
+    frontend_vhdl_yyerror("Illegal newline in string");
+    throw 1;
+}
+<BITSTRING>.   {
     frontend_vhdl_yyerror("Illegal string contents");
     throw 1;
 }

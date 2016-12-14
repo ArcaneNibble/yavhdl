@@ -7,6 +7,7 @@ enum ParseTreeNodeType
 {
     PT_LIT_NULL,
     PT_LIT_STRING,
+    PT_LIT_BITSTRING,
 };
 
 struct VhdlParseTreeNode {
@@ -14,6 +15,7 @@ struct VhdlParseTreeNode {
 
     // Contents
     std::string *str;
+    std::string *str2;
 
     VhdlParseTreeNode(enum ParseTreeNodeType type);
     ~VhdlParseTreeNode();

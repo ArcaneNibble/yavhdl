@@ -7,6 +7,7 @@ using namespace std;
 const char *parse_tree_types[] = {
     "PT_LIT_NULL",
     "PT_LIT_STRING",
+    "PT_LIT_BITSTRING",
 };
 
 void print_string_escaped(std::string *s) {
@@ -25,11 +26,13 @@ VhdlParseTreeNode::VhdlParseTreeNode(enum ParseTreeNodeType type) {
 
     // Default contents
     this->str = nullptr;
+    this->str2 = nullptr;
 }
 
 VhdlParseTreeNode::~VhdlParseTreeNode() {
     // Destroy contents
     delete this->str;
+    delete this->str2;
 }
 
 void VhdlParseTreeNode::debug_print() {
@@ -39,6 +42,15 @@ void VhdlParseTreeNode::debug_print() {
         case PT_LIT_STRING:
             cout << ", \"str\": \"";
             print_string_escaped(this->str);
+            cout << "\"";
+            break;
+
+        case PT_LIT_BITSTRING:
+            cout << ", \"str\": \"";
+            print_string_escaped(this->str);
+            cout << "\"";
+            cout << ", \"base_str\": \"";
+            print_string_escaped(this->str2);
             cout << "\"";
             break;
 
