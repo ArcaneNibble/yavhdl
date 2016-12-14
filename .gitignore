@@ -1,0 +1,3 @@
+lex.*_yy.c
+*.tab.*
+vhdl_parser
