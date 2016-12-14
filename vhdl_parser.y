@@ -177,7 +177,7 @@ _toplevel_token:
 
 // Fake start token for testing
 not_actualy_design_file:
-    name;
+    factor;
 
 // This is a super hacked up version of the name grammar production
 // It accepts far more than it should. This will be disambiguated in a second
@@ -192,19 +192,70 @@ name:
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
+    //TODO
+
+factor:
+    primary
+    | primary DL_EXP primary {
+        $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
+        $$->op_type = OP_EXP;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    | KW_ABS primary    {
+        $$ = new VhdlParseTreeNode(PT_UNARY_OPERATOR);
+        $$->op_type = OP_ABS;
+        $$->pieces[0] = $2;
+    }
+    | KW_NOT primary    {
+        $$ = new VhdlParseTreeNode(PT_UNARY_OPERATOR);
+        $$->op_type = OP_NOT;
+        $$->pieces[0] = $2;
+    }
+    | KW_AND primary    {
+        $$ = new VhdlParseTreeNode(PT_UNARY_OPERATOR);
+        $$->op_type = OP_AND;
+        $$->pieces[0] = $2;
+    }
+    | KW_OR primary     {
+        $$ = new VhdlParseTreeNode(PT_UNARY_OPERATOR);
+        $$->op_type = OP_OR;
+        $$->pieces[0] = $2;
+    }
+    | KW_NAND primary   {
+        $$ = new VhdlParseTreeNode(PT_UNARY_OPERATOR);
+        $$->op_type = OP_NAND;
+        $$->pieces[0] = $2;
+    }
+    | KW_NOR primary    {
+        $$ = new VhdlParseTreeNode(PT_UNARY_OPERATOR);
+        $$->op_type = OP_NOR;
+        $$->pieces[0] = $2;
+    }
+    | KW_XOR primary    {
+        $$ = new VhdlParseTreeNode(PT_UNARY_OPERATOR);
+        $$->op_type = OP_XOR;
+        $$->pieces[0] = $2;
+    }
+    | KW_XNOR primary   {
+        $$ = new VhdlParseTreeNode(PT_UNARY_OPERATOR);
+        $$->op_type = OP_XNOR;
+        $$->pieces[0] = $2;
+    }
+
+primary:
+    name
+    // literal is folded in
+    | numeric_literal
+    | bit_string_literal
+    | KW_NULL   { $$ = new VhdlParseTreeNode(PT_LIT_NULL); }
+    //TODO
 
 suffix:
     identifier              // was simple_name
     | character_literal
     | string_literal        // was operator_symbol
     | KW_ALL    { $$ = new VhdlParseTreeNode(PT_TOK_ALL); }
-
-literal:
-    numeric_literal
-    | enumeration_literal
-    | string_literal
-    | bit_string_literal
-    | KW_NULL   { $$ = new VhdlParseTreeNode(PT_LIT_NULL); }
 
 numeric_literal:
     abstract_literal

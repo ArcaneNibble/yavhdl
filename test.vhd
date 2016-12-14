@@ -1,1 +1,1 @@
-foo.all
+foo.all ** bar.baz

@@ -19,6 +19,47 @@ const char *parse_tree_types[] = {
     "PT_NAME_SELECTED",
 
     "PT_TOK_ALL",
+
+    "PT_UNARY_OPERATOR",
+    "PT_BINARY_OPERATOR",
+};
+
+const char *parse_operators[] = {
+    "??",
+    "and",
+    "or",
+    "nand",
+    "nor",
+    "xor",
+    "xnor",
+    "=",
+    "/=",
+    "<",
+    "<=",
+    ">",
+    ">=",
+    "?=",
+    "?/=",
+    "?<",
+    "?<=",
+    "?>",
+    "?>=",
+    "sll",
+    "srl",
+    "sla",
+    "sra",
+    "rol",
+    "ror",
+    "+",
+    "-",
+    "&",
+    "*",
+    "/",
+    "mod",
+    "rem",
+    "**",
+    "abs",
+    "not",
 };
 
 void print_chr_escaped(char c) {
@@ -50,7 +91,8 @@ VhdlParseTreeNode::~VhdlParseTreeNode() {
     // Destroy contents
     delete this->str;
     delete this->str2;
-    for (int i = 0; i < this->piece_count; i++) {
+    // Destroy all pieces for nodes that don't track their count
+    for (int i = 0; i < NUM_FIXED_PIECES; i++) {
         delete this->pieces[i];
     }
 }
@@ -88,6 +130,20 @@ void VhdlParseTreeNode::debug_print() {
             cout << ", \"name\": ";
             this->pieces[0]->debug_print();
             cout << ", \"suffix\": ";
+            this->pieces[1]->debug_print();
+            break;
+
+        case PT_UNARY_OPERATOR:
+            cout << ", \"op\": " << parse_operators[this->op_type];
+            cout << ", \"x\": ";
+            this->pieces[0]->debug_print();
+            break;
+
+        case PT_BINARY_OPERATOR:
+            cout << ", \"op\": " << parse_operators[this->op_type];
+            cout << ", \"x\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"y\": ";
             this->pieces[1]->debug_print();
             break;
 
