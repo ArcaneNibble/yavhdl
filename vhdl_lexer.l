@@ -5,6 +5,8 @@
 using namespace std;
 
 #include "vhdl_parser.tab.h"
+
+void frontend_vhdl_yyerror(const char *msg);
    
 %}
 
@@ -134,17 +136,36 @@ using namespace std;
 (?i:xnor)               { return KW_XNOR; }
 (?i:xor)                { return KW_XOR; }
 
-\"          { BEGIN(STRING); }
-<STRING>\"  {
+\"              { BEGIN(STRING); }
+<STRING>\"\"    { yymore(); }
+<STRING>\"      {
     BEGIN(0);
     char *the_str = strdup(yytext);
+
     // Strip last quote
     the_str[strlen(the_str) - 1] = 0;
+
+    // Undo the quote escaping
+    size_t j = 0;
+    for (size_t i = 0; i < strlen(the_str); i++, j++) {
+        the_str[j] = the_str[i];
+        if (the_str[i] == '"') i++;
+    }
+    the_str[j] = 0;
+
     frontend_vhdl_yylval.string = new std::string(the_str);
     free(the_str);
     return TOK_STRING;
 }
-<STRING>.   { yymore(); }
+<STRING>[\x20-\x7E\xA0-\xFF]    { yymore(); }
+<STRING>\n  {
+    frontend_vhdl_yyerror("Illegal newline in string");
+    throw 1;
+}
+<STRING>.   {
+    frontend_vhdl_yyerror("Illegal string contents");
+    throw 1;
+}
 
 "/*"            { BEGIN(COMMENT); }
 <COMMENT>.      /* ignore comment body */

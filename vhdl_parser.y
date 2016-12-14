@@ -184,7 +184,12 @@ int main(int argc, char **argv) {
     }
     frontend_vhdl_yyin = f;
 
-    if (yyparse() != 0) {
+    int ret = 1;
+    try {
+        ret = yyparse();
+    } catch(int) {}
+
+    if (ret != 0) {
         cout << "Parse error!\n";
         return 1;
     }

@@ -9,6 +9,17 @@ const char *parse_tree_types[] = {
     "PT_LIT_STRING",
 };
 
+void print_string_escaped(std::string *s) {
+    for (size_t i = 0; i < s->length(); i++) {
+        char c = (*s)[i];
+        if (c >= 0x20 && c <= 0x7E && c != '"') {
+            cout << c;
+        } else {
+            cout << "\\x" << hex << (+c & 0xFF);
+        }
+    }
+}
+
 VhdlParseTreeNode::VhdlParseTreeNode(enum ParseTreeNodeType type) {
     this->type = type;
 
@@ -26,7 +37,9 @@ void VhdlParseTreeNode::debug_print() {
 
     switch (this->type) {
         case PT_LIT_STRING:
-            cout << ", \"str\": \"" << *this->str << "\"";
+            cout << ", \"str\": \"";
+            print_string_escaped(this->str);
+            cout << "\"";
             break;
 
         default:
