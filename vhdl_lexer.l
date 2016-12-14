@@ -139,6 +139,23 @@ void frontend_vhdl_yyerror(const char *msg);
 (?i:xnor)               { return KW_XNOR; }
 (?i:xor)                { return KW_XOR; }
 
+"=>"    { return DL_ARR; }
+"**"    { return DL_EXP; }
+":="    { return DL_ASS; }
+"/="    { return DL_NEQ; }
+">="    { return DL_GEQ; }
+"<="    { return DL_LEQ; }
+"<>"    { return DL_BOX; }
+"??"    { return DL_QQ; }
+"?="    { return DL_MEQ; }
+"?/="   { return DL_MNE; }
+"?<"    { return DL_MLT; }
+"?<="   { return DL_MLE; }
+"?>"    { return DL_MGT; }
+"?>="   { return DL_MGE; }
+"<<"    { return DL_LL; }
+">>"    { return DL_RR; }
+
 [0-9][0-9_]*(\.[0-9][0-9_]*)?([Ee][+-]?[0-9][0-9_]*)?     {
     // Decimal literal
     frontend_vhdl_yylval = new VhdlParseTreeNode(PT_LIT_DECIMAL);

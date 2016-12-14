@@ -140,6 +140,24 @@ struct VhdlParseTreeNode *parse_output;
 %token KW_XNOR
 %token KW_XOR
 
+// Multi-character delimiters
+%token DL_ARR
+%token DL_EXP
+%token DL_ASS
+%token DL_NEQ
+%token DL_GEQ
+%token DL_LEQ
+%token DL_BOX
+%token DL_QQ
+%token DL_MEQ
+%token DL_MNE
+%token DL_MLT
+%token DL_MLE
+%token DL_MGT
+%token DL_MGE
+%token DL_LL
+%token DL_RR
+
 %token TOK_STRING
 %token TOK_BITSTRING
 %token TOK_DECIMAL
