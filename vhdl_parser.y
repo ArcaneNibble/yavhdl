@@ -145,6 +145,9 @@ struct VhdlParseTreeNode *parse_output;
 %token TOK_DECIMAL
 %token TOK_BASED
 
+%token TOK_BASIC_ID
+%token TOK_EXT_ID
+
 %define api.value.type {struct VhdlParseTreeNode *}
 
 %%
@@ -155,7 +158,7 @@ _toplevel_token:
 
 // Fake start token for testing
 not_actualy_design_file:
-    literal;
+    identifier;
 
 literal:
     numeric_literal
@@ -175,6 +178,13 @@ based_literal: TOK_BASED
 decimal_literal: TOK_DECIMAL
 bit_string_literal: TOK_BITSTRING
 string_literal: TOK_STRING
+
+identifier:
+    basic_identifier
+    | extended_identifier
+
+basic_identifier: TOK_BASIC_ID
+extended_identifier: TOK_EXT_ID
 
 %%
 

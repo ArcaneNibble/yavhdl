@@ -10,6 +10,9 @@ enum ParseTreeNodeType
     PT_LIT_BITSTRING,
     PT_LIT_DECIMAL,
     PT_LIT_BASED,
+
+    PT_BASIC_ID,
+    PT_EXT_ID,
 };
 
 struct VhdlParseTreeNode {

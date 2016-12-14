@@ -19,6 +19,7 @@ void frontend_vhdl_yyerror(const char *msg);
 %x COMMENT
 %x STRING
 %x BITSTRING
+%x EXT_ID
 
 %%
 
@@ -150,6 +151,46 @@ void frontend_vhdl_yyerror(const char *msg);
     frontend_vhdl_yylval = new VhdlParseTreeNode(PT_LIT_BASED);
     frontend_vhdl_yylval->str = new std::string(yytext);
     return TOK_BASED;
+}
+
+[A-Za-z\xC0-\xD6\xD8-\xF6\xF8-\xFF][A-Za-z\xC0-\xD6\xD8-\xF6\xF8-\xFF0-9_]* {
+    // FIXME: Are trailing underscores allowed here? On numbers?
+    // Basic identifier
+    frontend_vhdl_yylval = new VhdlParseTreeNode(PT_BASIC_ID);
+    frontend_vhdl_yylval->str = new std::string(yytext);
+    return TOK_BASIC_ID;
+}
+
+\\              { BEGIN(EXT_ID); }
+<EXT_ID>\\\\    { yymore(); }
+<EXT_ID>\\      {
+    BEGIN(0);
+    char *the_str = strdup(yytext);
+
+    // Strip last backslash
+    the_str[strlen(the_str) - 1] = 0;
+
+    // Undo the backslash escaping
+    size_t j = 0;
+    for (size_t i = 0; i < strlen(the_str); i++, j++) {
+        the_str[j] = the_str[i];
+        if (the_str[i] == '\\') i++;
+    }
+    the_str[j] = 0;
+
+    frontend_vhdl_yylval = new VhdlParseTreeNode(PT_EXT_ID);
+    frontend_vhdl_yylval->str = new std::string(the_str);
+    free(the_str);
+    return TOK_EXT_ID;
+}
+<EXT_ID>[\x20-\x7E\xA0-\xFF]    { yymore(); }
+<EXT_ID>\n  {
+    frontend_vhdl_yyerror("Illegal newline in extended identifier");
+    throw 1;
+}
+<EXT_ID>.   {
+    frontend_vhdl_yyerror("Illegal extended identifier contents");
+    throw 1;
 }
 
 \"              { BEGIN(STRING); }

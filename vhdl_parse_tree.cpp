@@ -10,6 +10,9 @@ const char *parse_tree_types[] = {
     "PT_LIT_BITSTRING",
     "PT_LIT_DECIMAL",
     "PT_LIT_BASED",
+
+    "PT_BASIC_ID",
+    "PT_EXT_ID",
 };
 
 void print_string_escaped(std::string *s) {
@@ -44,6 +47,8 @@ void VhdlParseTreeNode::debug_print() {
         case PT_LIT_STRING:
         case PT_LIT_DECIMAL:
         case PT_LIT_BASED:
+        case PT_BASIC_ID:
+        case PT_EXT_ID:
             cout << ", \"str\": \"";
             print_string_escaped(this->str);
             cout << "\"";
