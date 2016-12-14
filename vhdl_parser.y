@@ -138,7 +138,10 @@ extern FILE *frontend_vhdl_yyin;
 
 // Fake start token for testing
 not_actualy_design_file:
-    ;
+    literal;
+
+literal:
+    KW_NULL;
 
 %%
 
