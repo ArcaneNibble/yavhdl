@@ -1,5 +1,9 @@
 %{
 
+#include <iostream>
+#include <string>
+using namespace std;
+
 #include "vhdl_parser.tab.h"
    
 %}
@@ -10,6 +14,7 @@
 %option prefix="frontend_vhdl_yy"
 
 %x COMMENT
+%x STRING
 
 %%
 
@@ -128,6 +133,18 @@
 (?i:with)               { return KW_WITH; }
 (?i:xnor)               { return KW_XNOR; }
 (?i:xor)                { return KW_XOR; }
+
+\"          { BEGIN(STRING); }
+<STRING>\"  {
+    BEGIN(0);
+    char *the_str = strdup(yytext);
+    // Strip last quote
+    the_str[strlen(the_str) - 1] = 0;
+    frontend_vhdl_yylval.string = new std::string(the_str);
+    free(the_str);
+    return TOK_STRING;
+}
+<STRING>.   { yymore(); }
 
 "/*"            { BEGIN(COMMENT); }
 <COMMENT>.      /* ignore comment body */

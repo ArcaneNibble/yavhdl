@@ -6,13 +6,14 @@
 enum ParseTreeNodeType
 {
     PT_LIT_NULL,
+    PT_LIT_STRING,
 };
 
 struct VhdlParseTreeNode {
     enum ParseTreeNodeType type;
 
     // Contents
-    std::string str;
+    std::string *str;
 
     VhdlParseTreeNode(enum ParseTreeNodeType type);
     ~VhdlParseTreeNode();

@@ -2,6 +2,7 @@
 
 #include <cstdio>
 #include <iostream>
+#include <string>
 using namespace std;
 
 #include "vhdl_parse_tree.h"
@@ -9,6 +10,7 @@ using namespace std;
 int frontend_vhdl_yylex(void);
 void frontend_vhdl_yyerror(const char *msg);
 int frontend_vhdl_yyget_lineno(void);
+int frontend_vhdl_yylex_destroy(void);
 extern FILE *frontend_vhdl_yyin;
 
 struct VhdlParseTreeNode *parse_output;
@@ -138,11 +140,14 @@ struct VhdlParseTreeNode *parse_output;
 %token KW_XNOR
 %token KW_XOR
 
+%token <string> TOK_STRING
+
 %union {
+    std::string *string;
     struct VhdlParseTreeNode *parse_tree;
 }
 
-%type <parse_tree> literal not_actualy_design_file
+%type <parse_tree> literal string_literal not_actualy_design_file
 
 %%
 
@@ -155,7 +160,14 @@ not_actualy_design_file:
     literal;
 
 literal:
-    KW_NULL     { $$ = new VhdlParseTreeNode(PT_LIT_NULL); }
+    string_literal
+    | KW_NULL   { $$ = new VhdlParseTreeNode(PT_LIT_NULL); }
+
+string_literal:
+    TOK_STRING  {
+        $$ = new VhdlParseTreeNode(PT_LIT_STRING);
+        $$->str = $1;
+    }
 
 %%
 
@@ -177,9 +189,13 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    frontend_vhdl_yylex_destroy();
+
     parse_output->debug_print();
     cout << "\n";
     delete parse_output;
+
+    fclose(f);
 }
 
 void frontend_vhdl_yyerror(const char *msg) {
