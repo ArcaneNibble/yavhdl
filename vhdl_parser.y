@@ -4,10 +4,14 @@
 #include <iostream>
 using namespace std;
 
+#include "vhdl_parse_tree.h"
+
 int frontend_vhdl_yylex(void);
 void frontend_vhdl_yyerror(const char *msg);
 int frontend_vhdl_yyget_lineno(void);
 extern FILE *frontend_vhdl_yyin;
+
+struct VhdlParseTreeNode *parse_output;
 
 %}
 
@@ -134,14 +138,24 @@ extern FILE *frontend_vhdl_yyin;
 %token KW_XNOR
 %token KW_XOR
 
+%union {
+    struct VhdlParseTreeNode *parse_tree;
+}
+
+%type <parse_tree> literal not_actualy_design_file
+
 %%
+
+// Start token used for saving the parse tree
+_toplevel_token:
+    not_actualy_design_file { parse_output = $1; }
 
 // Fake start token for testing
 not_actualy_design_file:
     literal;
 
 literal:
-    KW_NULL;
+    KW_NULL     { $$ = new VhdlParseTreeNode(PT_LIT_NULL); }
 
 %%
 
@@ -158,10 +172,16 @@ int main(int argc, char **argv) {
     }
     frontend_vhdl_yyin = f;
 
-    yyparse();
+    if (yyparse() != 0) {
+        cout << "Parse error!\n";
+        return 1;
+    }
 
+    parse_output->debug_print();
+    cout << "\n";
+    delete parse_output;
 }
 
 void frontend_vhdl_yyerror(const char *msg) {
-    cout << "Error " << msg << " on line " << frontend_vhdl_yyget_lineno();
+    cout << "Error " << msg << " on line " << frontend_vhdl_yyget_lineno() << "\n";
 }
