@@ -23,7 +23,7 @@ struct VhdlParseTreeNode *parse_output;
 %define parse.lac full
 %debug
 
-// Reserved keywords
+// Reserved words, section 15.10
 %token KW_ABS
 %token KW_ACCESS
 %token KW_AFTER
@@ -140,7 +140,7 @@ struct VhdlParseTreeNode *parse_output;
 %token KW_XNOR
 %token KW_XOR
 
-// Multi-character delimiters
+// Multi-character delimiters, section 15.3
 %token DL_ARR
 %token DL_EXP
 %token DL_ASS
@@ -158,6 +158,7 @@ struct VhdlParseTreeNode *parse_output;
 %token DL_LL
 %token DL_RR
 
+// Miscellaneous tokens for lexer literals
 %token TOK_STRING
 %token TOK_BITSTRING
 %token TOK_DECIMAL
