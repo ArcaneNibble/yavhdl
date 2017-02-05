@@ -23,6 +23,9 @@ void frontend_vhdl_yyerror(const char *msg);
 
 %%
 
+%{
+// Reserved words, section 15.10
+%}
 (?i:abs)                { return KW_ABS; }
 (?i:access)             { return KW_ACCESS; }
 (?i:after)              { return KW_AFTER; }
@@ -139,6 +142,9 @@ void frontend_vhdl_yyerror(const char *msg);
 (?i:xnor)               { return KW_XNOR; }
 (?i:xor)                { return KW_XOR; }
 
+%{
+// Multi-character delimiters, section 15.3
+%}
 "=>"    { return DL_ARR; }
 "**"    { return DL_EXP; }
 ":="    { return DL_ASS; }
@@ -156,21 +162,30 @@ void frontend_vhdl_yyerror(const char *msg);
 "<<"    { return DL_LL; }
 ">>"    { return DL_RR; }
 
-[0-9][0-9_]*(\.[0-9][0-9_]*)?([Ee][+-]?[0-9][0-9_]*)?     {
+%{
+// Decimal literals, section 15.5.2
+%}
+[0-9](_?[0-9])*(\.[0-9](_?[0-9])*)?([Ee][+-]?[0-9](_?[0-9])*)?     {
     // Decimal literal
     frontend_vhdl_yylval = new VhdlParseTreeNode(PT_LIT_DECIMAL);
     frontend_vhdl_yylval->str = new std::string(yytext);
     return TOK_DECIMAL;
 }
 
-[0-9][0-9_]*#[0-9A-Fa-f][0-9A-Fa-f_]*(\.[0-9A-Fa-f][0-9A-Fa-f_]*)?#([Ee][+-]?[0-9][0-9_]*)?  {
+%{
+// Based literals, section 15.5.3
+%}
+[0-9](_?[0-9])*#[0-9A-Fa-f](_?[0-9A-Fa-f])*(\.[0-9A-Fa-f](_?[0-9A-Fa-f])*)?#([Ee][+-]?[0-9](_?[0-9])*)?  {
     // Based literal
     frontend_vhdl_yylval = new VhdlParseTreeNode(PT_LIT_BASED);
     frontend_vhdl_yylval->str = new std::string(yytext);
     return TOK_BASED;
 }
 
-[A-Za-z\xC0-\xD6\xD8-\xF6\xF8-\xFF][A-Za-z\xC0-\xD6\xD8-\xF6\xF8-\xFF0-9_]* {
+%{
+// Basic identifiers, section 15.4.2
+%}
+[A-Za-z\xC0-\xD6\xD8-\xF6\xF8-\xFF](_?[A-Za-z\xC0-\xD6\xD8-\xF6\xF8-\xFF0-9])* {
     // FIXME: Are trailing underscores allowed here? On numbers?
     // Basic identifier
     frontend_vhdl_yylval = new VhdlParseTreeNode(PT_BASIC_ID);
@@ -178,6 +193,9 @@ void frontend_vhdl_yyerror(const char *msg);
     return TOK_BASIC_ID;
 }
 
+%{
+// Character literals, section 15.6
+%}
 "'"[\x20-\x7E\xA0-\xFF]"'" {
     // Character literal
     frontend_vhdl_yylval = new VhdlParseTreeNode(PT_LIT_CHAR);
@@ -185,6 +203,12 @@ void frontend_vhdl_yyerror(const char *msg);
     return TOK_CHAR;
 }
 
+%{
+// Extended identifiers, section 15.4.3
+// This uses start conditions because all sorts of characters are allowed in
+// extended identifiers, including things that will normally lex as something
+// else.
+%}
 \\              { BEGIN(EXT_ID); }
 <EXT_ID>\\\\    { yymore(); }
 <EXT_ID>\\      {
@@ -217,6 +241,11 @@ void frontend_vhdl_yyerror(const char *msg);
     throw 1;
 }
 
+%{
+// String literals, section 15.7
+// This uses almost the same logic as extended identifiers, except that quotes
+// need to be doubled rather than backslashes.
+%}
 \"              { BEGIN(STRING); }
 <STRING>\"\"    { yymore(); }
 <STRING>\"      {
@@ -249,7 +278,11 @@ void frontend_vhdl_yyerror(const char *msg);
     throw 1;
 }
 
-[0-9][0-9_]*([US]?[BOX]|D)\"    { BEGIN(BITSTRING); yymore(); }
+%{
+// Bit string literals, section 15.8
+// Again similar logic as strings.
+%}
+[0-9](_?[0-9])*([US]?[BOX]|D)\"    { BEGIN(BITSTRING); yymore(); }
 <BITSTRING>\"\"                 { yymore(); }
 <BITSTRING>\"                   {
     BEGIN(0);
@@ -295,14 +328,27 @@ void frontend_vhdl_yyerror(const char *msg);
     throw 1;
 }
 
+%{
+// Multi-line comments, section 15.9
+%}
 "/*"            { BEGIN(COMMENT); }
 <COMMENT>.      /* ignore comment body */
 <COMMENT>\n     /* ignore comment body */
 <COMMENT>"*/"   { BEGIN(0); }
 
-[ \xA0\t\v\r\n\f]   /* ignore separators (including NBSP) */
+%{
+// Single-line comments, section 15.9
+%}
 "--"[^\r\n]*        /* ignore single-line comments */
 
+%{
+// Separators, section 15.3
+%}
+[ \xA0\t\v\r\n\f]   /* ignore separators (including NBSP) */
+
+%{
+// Pass unknown characters to the parser
+%}
 . { return *yytext; }
 
 %%

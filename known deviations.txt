@@ -1,4 +1,3 @@
 known deviations:
 
-underscores in places
 tool directives
