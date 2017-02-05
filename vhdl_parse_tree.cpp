@@ -4,6 +4,7 @@
 #include <cstring>
 using namespace std;
 
+// Names, used for pretty-printing
 // Keep in sync with enum
 const char *parse_tree_types[] = {
     "PT_LIT_NULL",
@@ -62,6 +63,7 @@ const char *parse_operators[] = {
     "not",
 };
 
+// Escape values for JSON output
 void print_chr_escaped(char c) {
     if (c >= 0x20 && c <= 0x7E && c != '"') {
         cout << c;
@@ -77,26 +79,32 @@ void print_string_escaped(std::string *s) {
     }
 }
 
+// Create a new parse tree node with type but no data
 VhdlParseTreeNode::VhdlParseTreeNode(enum ParseTreeNodeType type) {
     this->type = type;
 
     // Default contents
     this->str = nullptr;
     this->str2 = nullptr;
+    this->chr = 0;
     this->piece_count = 0;
     memset(this->pieces, 0, sizeof(this->pieces));
 }
 
+// Destroy a parse tree node and free associated data
 VhdlParseTreeNode::~VhdlParseTreeNode() {
     // Destroy contents
     delete this->str;
     delete this->str2;
-    // Destroy all pieces for nodes that don't track their count
+    // Destroy all pieces for nodes
+    // Just in case nodes don't track their count, free the maximum rather than
+    // the stored count. This is safe because freeing null is safe.
     for (int i = 0; i < NUM_FIXED_PIECES; i++) {
         delete this->pieces[i];
     }
 }
 
+// Pretty-print the node into a JSON-like format
 void VhdlParseTreeNode::debug_print() {
     cout << "{\"type\": \"" << parse_tree_types[this->type] << "\"";
 

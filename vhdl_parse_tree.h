@@ -5,6 +5,7 @@
 
 enum ParseTreeNodeType
 {
+    // Various types of literals (spread throughout the spec)
     PT_LIT_NULL,
     PT_LIT_STRING,
     PT_LIT_BITSTRING,
@@ -12,6 +13,7 @@ enum ParseTreeNodeType
     PT_LIT_BASED,
     PT_LIT_CHAR,
 
+    // Names and identifiers, section 8
     PT_BASIC_ID,
     PT_EXT_ID,
 
@@ -19,10 +21,12 @@ enum ParseTreeNodeType
 
     PT_TOK_ALL,
 
+    // Expressions, section 9
     PT_UNARY_OPERATOR,
     PT_BINARY_OPERATOR,
 };
 
+// Operators, section 9.2
 enum ParseTreeOperatorType
 {
     OP_COND,
@@ -62,6 +66,7 @@ enum ParseTreeOperatorType
     OP_NOT,
 };
 
+// Definition of a parse tree node
 #define NUM_FIXED_PIECES 8
 
 struct VhdlParseTreeNode {
