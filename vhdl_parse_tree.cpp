@@ -18,6 +18,9 @@ const char *parse_tree_types[] = {
     "PT_EXT_ID",
 
     "PT_NAME_SELECTED",
+    "PT_NAME_AMBIG_PARENS",
+
+    "PT_EXPRESSION_LIST",
 
     "PT_TOK_ALL",
 
@@ -138,6 +141,20 @@ void VhdlParseTreeNode::debug_print() {
             cout << ", \"name\": ";
             this->pieces[0]->debug_print();
             cout << ", \"suffix\": ";
+            this->pieces[1]->debug_print();
+            break;
+
+        case PT_NAME_AMBIG_PARENS:
+            cout << ", \"name\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"parens\": ";
+            this->pieces[1]->debug_print();
+            break;
+
+        case PT_EXPRESSION_LIST:
+            cout << ", \"rest\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"this_piece\": ";
             this->pieces[1]->debug_print();
             break;
 

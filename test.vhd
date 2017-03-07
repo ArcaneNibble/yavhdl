@@ -1,1 +1,1 @@
-a.b.c.d
+foo(bar, baz, qux)

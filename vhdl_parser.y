@@ -188,13 +188,41 @@ name:
     identifier              // was simple_name
     | string_literal        // was operator_symbol
     | character_literal
-    | name '.' suffix   {   // was selected_name
-        $$ = new VhdlParseTreeNode(PT_NAME_SELECTED);
+    | selected_name
+    // This handles anything that involves parentheses, including some things
+    // that are actually a "primary." It needs to be disambiguated later in
+    // second-stage parsing. However, it notably includes indexed and slice
+    // names.
+    | name '(' _ambig_name_parens ')'   {
+        $$ = new VhdlParseTreeNode(PT_NAME_AMBIG_PARENS);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
     //TODO
+
+// Section 8.3
+selected_name:
+    name '.' suffix   {
+        $$ = new VhdlParseTreeNode(PT_NAME_SELECTED);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+_ambig_name_parens:
+    // This should handle indexed names, type conversions, some cases of
+    // function calls, and very few cases of slice names (subtype indications)?
+    _one_or_more_expressions
+
+_one_or_more_expressions:
+    expression
+    | _one_or_more_expressions ',' expression   {
+        $$ = new VhdlParseTreeNode(PT_EXPRESSION_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
 
 suffix:
     identifier              // was simple_name
