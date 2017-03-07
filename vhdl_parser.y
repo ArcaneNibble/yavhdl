@@ -180,6 +180,7 @@ _toplevel_token:
 not_actualy_design_file:
     expression;
 
+// Names, section 8
 // This is a super hacked up version of the name grammar production
 // It accepts far more than it should. This will be disambiguated in a second
 // pass that is not part of the (generated) parser.
@@ -195,6 +196,13 @@ name:
     }
     //TODO
 
+suffix:
+    identifier              // was simple_name
+    | character_literal
+    | string_literal        // was operator_symbol
+    | KW_ALL    { $$ = new VhdlParseTreeNode(PT_TOK_ALL); }
+
+// Expressions, section 9
 expression:
     logical_expression
     | DL_QQ primary     {
@@ -478,6 +486,8 @@ factor:
         $$->pieces[0] = $2;
     }
 
+// Here is a hacked "primary" rule that relies on "name" to parse a bunch of
+// stuff that will be disambiguated later
 primary:
     name
     // literal is folded in
@@ -490,12 +500,6 @@ primary:
         $$ = $2;
     }
     //TODO
-
-suffix:
-    identifier              // was simple_name
-    | character_literal
-    | string_literal        // was operator_symbol
-    | KW_ALL    { $$ = new VhdlParseTreeNode(PT_TOK_ALL); }
 
 numeric_literal:
     abstract_literal
