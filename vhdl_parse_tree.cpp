@@ -27,6 +27,8 @@ const char *parse_tree_types[] = {
     "PT_SUBTYPE_INDICATION",
     "PT_RECORD_ELEMENT_RESOLUTION",
 
+    "PT_RANGE",
+
     "PT_EXPRESSION_LIST",
     "PT_ID_LIST",
     "PT_RECORD_RESOLUTION",
@@ -73,6 +75,11 @@ const char *parse_operators[] = {
     "**",
     "abs",
     "not",
+};
+
+const char *range_direction[] = {
+    "downto",
+    "to",
 };
 
 // Escape values for JSON output
@@ -170,6 +177,10 @@ void VhdlParseTreeNode::debug_print() {
                 cout << ", \"signature\": ";
                 this->pieces[2]->debug_print();
             }
+            if (this->pieces[3]) {
+                cout << ", \"expression\": ";
+                this->pieces[3]->debug_print();
+            }
             break;
 
         case PT_SIGNATURE:
@@ -203,6 +214,14 @@ void VhdlParseTreeNode::debug_print() {
             this->pieces[1]->debug_print();
             break;
 
+        case PT_RANGE:
+            cout << ", \"dir\": \"" << range_direction[this->range_dir];
+            cout << "\", \"x\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"y\": ";
+            this->pieces[1]->debug_print();
+            break;
+
         case PT_EXPRESSION_LIST:
         case PT_ID_LIST:
         case PT_RECORD_RESOLUTION:
@@ -213,14 +232,14 @@ void VhdlParseTreeNode::debug_print() {
             break;
 
         case PT_UNARY_OPERATOR:
-            cout << ", \"op\": " << parse_operators[this->op_type];
-            cout << ", \"x\": ";
+            cout << ", \"op\": \"" << parse_operators[this->op_type];
+            cout << "\", \"x\": ";
             this->pieces[0]->debug_print();
             break;
 
         case PT_BINARY_OPERATOR:
-            cout << ", \"op\": " << parse_operators[this->op_type];
-            cout << ", \"x\": ";
+            cout << ", \"op\": \"" << parse_operators[this->op_type];
+            cout << "\", \"x\": ";
             this->pieces[0]->debug_print();
             cout << ", \"y\": ";
             this->pieces[1]->debug_print();

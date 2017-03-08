@@ -1,7 +1,1 @@
-foo(
-
-
-base range foo'bar
-
-
-)
+foo'bar(baz)

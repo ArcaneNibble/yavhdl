@@ -27,6 +27,8 @@ enum ParseTreeNodeType
     PT_SUBTYPE_INDICATION,
     PT_RECORD_ELEMENT_RESOLUTION,
 
+    PT_RANGE,
+
     PT_EXPRESSION_LIST,
     PT_ID_LIST,
     PT_RECORD_RESOLUTION,
@@ -78,6 +80,12 @@ enum ParseTreeOperatorType
     OP_NOT,
 };
 
+enum ParseTreeRangeDirection
+{
+    RANGE_DOWN,
+    RANGE_UP,
+};
+
 // Definition of a parse tree node
 #define NUM_FIXED_PIECES 8
 
@@ -92,6 +100,7 @@ struct VhdlParseTreeNode {
     int piece_count;
 
     ParseTreeOperatorType op_type;
+    ParseTreeRangeDirection range_dir;
 
     VhdlParseTreeNode(enum ParseTreeNodeType type);
     ~VhdlParseTreeNode();

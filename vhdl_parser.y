@@ -202,7 +202,7 @@ name:
         $$->pieces[1] = $3;
     }
     | slice_name
-    | attribute_name
+    | _almost_attribute_name
     //TODO
 
 // Section 8.3
@@ -230,7 +230,7 @@ discrete_range:
 // Note that we do not handle the possible occurrence of (expression) at the
 // end because it is ambiguous with function calls. _ambig_name_parens should
 // pick that up.
-attribute_name:
+_almost_attribute_name:
     name '\'' identifier    {
         $$ = new VhdlParseTreeNode(PT_NAME_ATTRIBUTE);
         $$->piece_count = 2;
@@ -243,6 +243,16 @@ attribute_name:
         $$->pieces[0] = $1;
         $$->pieces[1] = $4;
         $$->pieces[2] = $2;
+    }
+
+// We need the actual attribute_name for range constraints. This introduces a
+// S/R conflict.
+attribute_name:
+    _almost_attribute_name
+    | _almost_attribute_name '(' expression ')'     {
+        $$ = $1;
+        $$->piece_count = 4;
+        $$->pieces[3] = $3;
     }
 
 _ambig_name_parens:
@@ -328,6 +338,18 @@ range_constraint:
 
 range:
     attribute_name
+    | simple_expression KW_DOWNTO simple_expression {
+        $$ = new VhdlParseTreeNode(PT_RANGE);
+        $$->range_dir = RANGE_DOWN;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    | simple_expression KW_TO simple_expression {
+        $$ = new VhdlParseTreeNode(PT_RANGE);
+        $$->range_dir = RANGE_UP;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
 
 // Section 4.5.3
 signature:
