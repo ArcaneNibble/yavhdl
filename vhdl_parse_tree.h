@@ -19,8 +19,12 @@ enum ParseTreeNodeType
 
     PT_NAME_SELECTED,
     PT_NAME_AMBIG_PARENS,
+    PT_NAME_ATTRIBUTE,
+
+    PT_SIGNATURE,
 
     PT_EXPRESSION_LIST,
+    PT_ID_LIST,
 
     PT_TOK_ALL,
 

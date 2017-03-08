@@ -1,1 +1,1 @@
-foo(bar, baz, qux)
+[foo, bar, baz, qux return asdf]

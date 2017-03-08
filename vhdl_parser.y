@@ -178,7 +178,7 @@ _toplevel_token:
 
 // Fake start token for testing
 not_actualy_design_file:
-    expression;
+    signature;
 
 // Names, section 8
 // This is a super hacked up version of the name grammar production
@@ -199,12 +199,25 @@ name:
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
+    | attribute_name
     //TODO
 
 // Section 8.3
 selected_name:
     name '.' suffix   {
         $$ = new VhdlParseTreeNode(PT_NAME_SELECTED);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+// Section 8.6
+// Note that we do not handle the possible occurrence of (expression) at the
+// end because it is ambiguous with function calls. _ambig_name_parens should
+// pick that up.
+attribute_name:
+    name '\'' identifier    {
+        $$ = new VhdlParseTreeNode(PT_NAME_ATTRIBUTE);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
@@ -219,6 +232,42 @@ _one_or_more_expressions:
     expression
     | _one_or_more_expressions ',' expression   {
         $$ = new VhdlParseTreeNode(PT_EXPRESSION_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+// Section 4.5.3
+signature:
+    '[' ']' {
+        $$ = new VhdlParseTreeNode(PT_SIGNATURE);
+        $$->piece_count = 2;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = nullptr;
+    }
+    | '[' _one_or_more_ids ']' {
+        $$ = new VhdlParseTreeNode(PT_SIGNATURE);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = nullptr;
+    }
+    | '[' KW_RETURN identifier ']' {
+        $$ = new VhdlParseTreeNode(PT_SIGNATURE);
+        $$->piece_count = 2;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = $3;
+    }
+    | '[' _one_or_more_ids KW_RETURN identifier ']' {
+        $$ = new VhdlParseTreeNode(PT_SIGNATURE);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+    }
+
+_one_or_more_ids:
+    identifier
+    | _one_or_more_ids ',' identifier   {
+        $$ = new VhdlParseTreeNode(PT_ID_LIST);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
