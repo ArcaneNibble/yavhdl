@@ -1,1 +1,1 @@
-foo(asdf range bar'baz(qux))
+5 ns

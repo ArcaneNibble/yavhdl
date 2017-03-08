@@ -688,6 +688,7 @@ primary:
     name
     // literal is folded in
     | numeric_literal
+    // enumeration and string literals already happen because of name
     | bit_string_literal
     | KW_NULL   { $$ = new VhdlParseTreeNode(PT_LIT_NULL); }
 
@@ -699,11 +700,21 @@ primary:
 
 numeric_literal:
     abstract_literal
-    // TODO
+    | _almost_physical_literal
 
 abstract_literal:
     decimal_literal
     | based_literal
+
+// This requires the abstract_literal otherwise it becomes ambiguous with just
+// name.
+_almost_physical_literal:
+    abstract_literal identifier     {
+        $$ = new VhdlParseTreeNode(PT_LIT_PHYS);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $1;
+    }
 
 enumeration_literal:
     identifier

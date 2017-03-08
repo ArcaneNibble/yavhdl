@@ -13,6 +13,7 @@ const char *parse_tree_types[] = {
     "PT_LIT_DECIMAL",
     "PT_LIT_BASED",
     "PT_LIT_CHAR",
+    "PT_LIT_PHYS",
 
     "PT_BASIC_ID",
     "PT_EXT_ID",
@@ -151,6 +152,15 @@ void VhdlParseTreeNode::debug_print() {
             cout << ", \"base_str\": \"";
             print_string_escaped(this->str2);
             cout << "\"";
+            break;
+
+        case PT_LIT_PHYS:
+            cout << ", \"unit\": \"";
+            this->pieces[0]->debug_print();
+            if (this->pieces[1]) {
+                cout << ", \"val\": \"";
+                this->pieces[1]->debug_print();
+            }
             break;
 
         case PT_NAME_SELECTED:

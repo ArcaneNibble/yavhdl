@@ -12,6 +12,7 @@ enum ParseTreeNodeType
     PT_LIT_DECIMAL,
     PT_LIT_BASED,
     PT_LIT_CHAR,
+    PT_LIT_PHYS,
 
     // Names and identifiers, section 8
     PT_BASIC_ID,
