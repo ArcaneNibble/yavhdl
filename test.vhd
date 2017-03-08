@@ -1,1 +1,7 @@
-foo((((((((((((bar))))))))))) baz)
+foo(
+
+
+(a b, c d, e f, g (h i)) base
+
+
+)

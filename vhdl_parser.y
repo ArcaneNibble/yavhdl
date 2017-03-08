@@ -271,6 +271,7 @@ _almost_subtype_indication:
         $$->pieces[2] = nullptr;
     }
 
+// We get 2 R/R conflicts in this rule
 resolution_indication:
     // The following two are for function names
     identifier
@@ -282,6 +283,25 @@ resolution_indication:
 
 element_resolution:
     resolution_indication   // was array_element_resolution
+    | record_resolution
+
+record_resolution:
+    record_element_resolution
+    | record_resolution ',' record_element_resolution {
+        $$ = new VhdlParseTreeNode(PT_RECORD_RESOLUTION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+record_element_resolution:
+    // S/R conflict here
+    identifier resolution_indication    {
+        $$ = new VhdlParseTreeNode(PT_RECORD_ELEMENT_RESOLUTION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
 
 // Section 4.5.3
 signature:

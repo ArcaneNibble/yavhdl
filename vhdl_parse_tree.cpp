@@ -25,9 +25,11 @@ const char *parse_tree_types[] = {
     "PT_SIGNATURE",
 
     "PT_SUBTYPE_INDICATION",
+    "PT_RECORD_ELEMENT_RESOLUTION",
 
     "PT_EXPRESSION_LIST",
     "PT_ID_LIST",
+    "PT_RECORD_RESOLUTION",
 
     "PT_TOK_ALL",
 
@@ -194,8 +196,16 @@ void VhdlParseTreeNode::debug_print() {
             }
             break;
 
+        case PT_RECORD_ELEMENT_RESOLUTION:
+            cout << ", \"element_name\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"resolution_indication\": ";
+            this->pieces[1]->debug_print();
+            break;
+
         case PT_EXPRESSION_LIST:
         case PT_ID_LIST:
+        case PT_RECORD_RESOLUTION:
             cout << ", \"rest\": ";
             this->pieces[0]->debug_print();
             cout << ", \"this_piece\": ";
