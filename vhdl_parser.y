@@ -270,6 +270,20 @@ _almost_subtype_indication:
         $$->pieces[1] = $1;
         $$->pieces[2] = nullptr;
     }
+    | identifier constraint     {
+        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = nullptr;
+        $$->pieces[2] = $2;
+    }
+    | resolution_indication identifier constraint   {
+        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $1;
+        $$->pieces[2] = $3;
+    }
 
 // We get 2 R/R conflicts in this rule
 resolution_indication:
@@ -302,6 +316,18 @@ record_element_resolution:
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
+
+constraint:
+    range_constraint
+    // TODO
+
+range_constraint:
+    KW_RANGE range  {
+        $$ = $2;
+    }
+
+range:
+    attribute_name
 
 // Section 4.5.3
 signature:
