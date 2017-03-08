@@ -199,6 +199,7 @@ name:
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
+    | slice_name
     | attribute_name
     //TODO
 
@@ -210,6 +211,18 @@ selected_name:
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
+
+// Section 8.5
+slice_name:
+    name '(' discrete_range ')' {
+        $$ = new VhdlParseTreeNode(PT_NAME_SLICE);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+discrete_range:
+    _almost_subtype_indication
 
 // Section 8.6
 // Note that we do not handle the possible occurrence of (expression) at the
@@ -232,7 +245,8 @@ attribute_name:
 
 _ambig_name_parens:
     // This should handle indexed names, type conversions, some cases of
-    // function calls, and very few cases of slice names (subtype indications)?
+    // function calls, and very few cases of slice names (subtype indications
+    // with neither a resolution indication nor a constraint?)
     _one_or_more_expressions
 
 _one_or_more_expressions:
@@ -243,6 +257,20 @@ _one_or_more_expressions:
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
+
+// Does not handle the case of only a type_mark because that can cause
+// ambiguities
+_almost_subtype_indication:
+    resolution_indication identifier    {
+        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $1;
+        $$->pieces[2] = nullptr;
+    }
+
+resolution_indication:
+    identifier
 
 // Section 4.5.3
 signature:

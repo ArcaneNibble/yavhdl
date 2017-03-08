@@ -1,1 +1,1 @@
-main_name[foo, bar, baz, qux return asdf]'attrib(arg1 + arg2)
+foo(bar baz)

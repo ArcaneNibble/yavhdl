@@ -19,9 +19,12 @@ const char *parse_tree_types[] = {
 
     "PT_NAME_SELECTED",
     "PT_NAME_AMBIG_PARENS",
+    "PT_NAME_SLICE",
     "PT_NAME_ATTRIBUTE",
 
     "PT_SIGNATURE",
+
+    "PT_SUBTYPE_INDICATION",
 
     "PT_EXPRESSION_LIST",
     "PT_ID_LIST",
@@ -149,6 +152,7 @@ void VhdlParseTreeNode::debug_print() {
             break;
 
         case PT_NAME_AMBIG_PARENS:
+        case PT_NAME_SLICE:
             cout << ", \"name\": ";
             this->pieces[0]->debug_print();
             cout << ", \"parens\": ";
@@ -174,6 +178,19 @@ void VhdlParseTreeNode::debug_print() {
             if (this->pieces[1]) {
                 cout << ", \"ret\": ";
                 this->pieces[1]->debug_print();
+            }
+            break;
+
+        case PT_SUBTYPE_INDICATION:
+            cout << ", \"type_mark\": ";
+            this->pieces[0]->debug_print();
+            if (this->pieces[1]) {
+                cout << ", \"resolution_indication\": ";
+                this->pieces[1]->debug_print();
+            }
+            if (this->pieces[2]) {
+                cout << ", \"constraint\": ";
+                this->pieces[2]->debug_print();
             }
             break;
 
