@@ -1,1 +1,1 @@
-foo'bar(baz)
+foo(asdf range bar'baz(qux))

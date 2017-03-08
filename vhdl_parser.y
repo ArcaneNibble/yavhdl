@@ -216,15 +216,17 @@ selected_name:
 
 // Section 8.5
 slice_name:
-    name '(' discrete_range ')' {
+    name '(' _almost_discrete_range ')' {
         $$ = new VhdlParseTreeNode(PT_NAME_SLICE);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
 
-discrete_range:
+// Rather chopped up for use in name
+_almost_discrete_range:
     _almost_subtype_indication
+    | _almost_range
 
 // Section 8.6
 // Note that we do not handle the possible occurrence of (expression) at the
@@ -337,8 +339,11 @@ range_constraint:
     }
 
 range:
-    attribute_name
-    | simple_expression KW_DOWNTO simple_expression {
+    _almost_range
+    | attribute_name
+
+_almost_range:
+    simple_expression KW_DOWNTO simple_expression {
         $$ = new VhdlParseTreeNode(PT_RANGE);
         $$->range_dir = RANGE_DOWN;
         $$->pieces[0] = $1;
