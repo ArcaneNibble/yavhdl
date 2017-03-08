@@ -19,8 +19,10 @@ struct VhdlParseTreeNode *parse_output;
 
 %name-prefix "frontend_vhdl_yy"
 
+%glr-parser
+
 %define parse.error verbose
-%define parse.lac full
+// %define parse.lac full
 %debug
 
 // Reserved words, section 15.10
@@ -270,7 +272,16 @@ _almost_subtype_indication:
     }
 
 resolution_indication:
+    // The following two are for function names
     identifier
+    | string_literal
+    | '(' element_resolution ')'    {
+        // FIXME: Do I need to store more information here?
+        $$ = $2;
+    }
+
+element_resolution:
+    resolution_indication   // was array_element_resolution
 
 // Section 4.5.3
 signature:
