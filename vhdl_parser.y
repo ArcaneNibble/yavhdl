@@ -178,7 +178,7 @@ _toplevel_token:
 
 // Fake start token for testing
 not_actualy_design_file:
-    signature;
+    expression;
 
 // Names, section 8
 // This is a super hacked up version of the name grammar production
@@ -221,6 +221,13 @@ attribute_name:
         $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
+    }
+    | name signature '\'' identifier    {
+        $$ = new VhdlParseTreeNode(PT_NAME_ATTRIBUTE);
+        $$->piece_count = 3;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $2;
     }
 
 _ambig_name_parens:
