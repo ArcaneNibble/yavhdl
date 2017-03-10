@@ -1,1 +1,1 @@
-<<constant foo : bar>>
+<<constant foo : baz bar>>

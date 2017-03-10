@@ -318,6 +318,13 @@ discrete_subtype_indication:
 
 subtype_indication:
     identifier
+    | resolution_indication identifier  {
+        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $1;
+        $$->pieces[2] = nullptr;
+    }
     // TODO
 
 resolution_indication:
