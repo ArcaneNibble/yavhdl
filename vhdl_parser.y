@@ -335,15 +335,53 @@ record_element_resolution:
 constraint:
     range_constraint
     | array_constraint
+    // TODO
 
 _almost_constraint:
     range_constraint
     | _almost_array_constraint
-    // TODO
+    // | _almost_record_constraint
 
 element_constraint:
     array_constraint
     // TODO
+
+// Must have two things otherwise ambiguous
+_almost_record_constraint:
+    '(' _one_or_more_record_element_constraint ')'  {
+        $$ = $2;
+    }
+
+_one_or_more_record_element_constraint:
+    record_element_constraint
+    | _one_or_more_record_element_constraint ',' record_element_constraint  {
+        $$ = new VhdlParseTreeNode(PT_RECORD_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+_two_or_more_record_element_constraint:
+    record_element_constraint ',' record_element_constraint {
+        $$ = new VhdlParseTreeNode(PT_RECORD_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    | _two_or_more_record_element_constraint ',' record_element_constraint  {
+        $$ = new VhdlParseTreeNode(PT_RECORD_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+record_element_constraint:
+    identifier element_constraint   {
+        $$ = new VhdlParseTreeNode(PT_RECORD_ELEMENT_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
 
 // This does not allow only a single index constraint because that becomes
 // ambiguous with name and parentheses.
