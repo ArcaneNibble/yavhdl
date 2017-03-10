@@ -33,6 +33,7 @@ const char *parse_tree_types[] = {
     "PT_ARRAY_CONSTRAINT",
     "PT_INDEX_CONSTRAINT",
     "PT_RECORD_CONSTRAINT",
+    "PT_RECORD_ELEMENT_CONSTRAINT",
 
     "PT_EXPRESSION_LIST",
     "PT_ID_LIST",

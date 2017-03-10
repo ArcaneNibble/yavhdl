@@ -279,10 +279,9 @@ _one_or_more_expressions:
 
 // Does not handle the case of only a type_mark because that can cause
 // ambiguities. Does not allow a resolution indication because that isn't
-// actually permitted (see 5.3.2.1). Asking for the constraint causes a S/R
-// conflict.
+// actually permitted (see 5.3.2.1).
 _almost_discrete_subtype_indication:
-    identifier _almost_constraint     {
+    identifier _discrete_constraint     {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
         $$->piece_count = 3;
         $$->pieces[0] = $1;
@@ -331,6 +330,12 @@ record_element_resolution:
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
+
+// When a "discrete" subtype indication is needed, the _only_ type of
+// constraint we can have is a range constraint. Arrays and records aren't
+// discrete.
+_discrete_constraint:
+    range_constraint
 
 constraint:
     range_constraint

@@ -1,1 +1,1 @@
-'a'.'b''c."e"'f
+foo(bar(baz (asdf'fdsa(123)), qux (1 to 3)))
