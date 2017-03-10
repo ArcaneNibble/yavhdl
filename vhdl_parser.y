@@ -19,10 +19,10 @@ struct VhdlParseTreeNode *parse_output;
 
 %name-prefix "frontend_vhdl_yy"
 
-%glr-parser
+// %glr-parser
 
 %define parse.error verbose
-// %define parse.lac full
+%define parse.lac full
 %debug
 
 // Reserved words, section 15.10
@@ -225,7 +225,7 @@ slice_name:
 
 // Rather chopped up for use in name
 _almost_discrete_range:
-    _almost_subtype_indication
+    _almost_discrete_subtype_indication
     | _almost_range
 
 // Section 8.6
@@ -273,28 +273,15 @@ _one_or_more_expressions:
     }
 
 // Does not handle the case of only a type_mark because that can cause
-// ambiguities
-_almost_subtype_indication:
-    resolution_indication identifier    {
-        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
-        $$->piece_count = 3;
-        $$->pieces[0] = $2;
-        $$->pieces[1] = $1;
-        $$->pieces[2] = nullptr;
-    }
-    | identifier constraint     {
+// ambiguities. Does not allow a resolution indication because that isn't
+// actually permitted (see 5.3.2.1)
+_almost_discrete_subtype_indication:
+    identifier constraint     {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
         $$->piece_count = 3;
         $$->pieces[0] = $1;
         $$->pieces[1] = nullptr;
         $$->pieces[2] = $2;
-    }
-    | resolution_indication identifier constraint   {
-        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
-        $$->piece_count = 3;
-        $$->pieces[0] = $2;
-        $$->pieces[1] = $1;
-        $$->pieces[2] = $3;
     }
 
 // We get 2 R/R conflicts in this rule

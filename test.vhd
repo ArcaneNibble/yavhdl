@@ -1,1 +1,1 @@
-5 ns
+foo(bar range 0 to 2)
