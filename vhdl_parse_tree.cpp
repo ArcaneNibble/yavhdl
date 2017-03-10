@@ -248,14 +248,10 @@ void VhdlParseTreeNode::debug_print() {
             }
             break;
 
-        case PT_INDEX_CONSTRAINT:
-            cout << ", \"discrete_ranges\": ";
-            this->pieces[0]->debug_print();
-            break;
-
         case PT_EXPRESSION_LIST:
         case PT_ID_LIST:
         case PT_RECORD_RESOLUTION:
+        case PT_INDEX_CONSTRAINT:
             cout << ", \"rest\": ";
             this->pieces[0]->debug_print();
             cout << ", \"this_piece\": ";

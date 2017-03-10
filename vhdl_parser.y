@@ -230,8 +230,7 @@ _almost_discrete_range:
 
 // Re-allow the forbidden attribute name and single type_mark
 discrete_range:
-    _almost_discrete_subtype_indication
-    | identifier
+    discrete_subtype_indication
     | range
 
 // Section 8.6
@@ -280,15 +279,27 @@ _one_or_more_expressions:
 
 // Does not handle the case of only a type_mark because that can cause
 // ambiguities. Does not allow a resolution indication because that isn't
-// actually permitted (see 5.3.2.1)
+// actually permitted (see 5.3.2.1). Asking for the constraint causes a S/R
+// conflict.
 _almost_discrete_subtype_indication:
-    identifier constraint     {
+    identifier _almost_constraint     {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
         $$->piece_count = 3;
         $$->pieces[0] = $1;
         $$->pieces[1] = nullptr;
         $$->pieces[2] = $2;
     }
+
+discrete_subtype_indication:
+    identifier
+    | identifier constraint {
+        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = nullptr;
+        $$->pieces[2] = $2;
+    }
+
 
 resolution_indication:
     // The following two are for function names
@@ -324,11 +335,43 @@ record_element_resolution:
 constraint:
     range_constraint
     | array_constraint
+
+_almost_constraint:
+    range_constraint
+    | _almost_array_constraint
     // TODO
 
 element_constraint:
     array_constraint
     // TODO
+
+// This does not allow only a single index constraint because that becomes
+// ambiguous with name and parentheses.
+_almost_array_constraint:
+    '(' KW_OPEN ')' {
+        $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = nullptr;
+    }
+    | '(' KW_OPEN ')' element_constraint {
+        $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = $4;
+    }
+    | _almost_index_constraint  {
+        $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = nullptr;
+    }
+    | _almost_index_constraint element_constraint   {
+        $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
 
 array_constraint:
     '(' KW_OPEN ')' {
@@ -361,9 +404,28 @@ index_constraint:
         $$ = $2;
     }
 
+_almost_index_constraint:
+    '(' _two_or_more_discrete_range ')' {
+        $$ = $2;
+    }
+
 _one_or_more_discrete_range:
     discrete_range
     | _one_or_more_discrete_range ',' discrete_range   {
+        $$ = new VhdlParseTreeNode(PT_INDEX_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+_two_or_more_discrete_range:
+    discrete_range ',' discrete_range   {
+        $$ = new VhdlParseTreeNode(PT_INDEX_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    | _two_or_more_discrete_range ',' discrete_range   {
         $$ = new VhdlParseTreeNode(PT_INDEX_CONSTRAINT);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
