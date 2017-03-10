@@ -54,6 +54,9 @@ enum ParseTreeNodeType
     // Expressions, section 9
     PT_UNARY_OPERATOR,
     PT_BINARY_OPERATOR,
+
+    PT_AGGREGATE,
+    PT_ELEMENT_ASSOCIATION,
 };
 
 // Operators, section 9.2

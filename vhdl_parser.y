@@ -19,10 +19,10 @@ struct VhdlParseTreeNode *parse_output;
 
 %name-prefix "frontend_vhdl_yy"
 
-// %glr-parser
+%glr-parser
 
 %define parse.error verbose
-%define parse.lac full
+// %define parse.lac full
 %debug
 
 // Reserved words, section 15.10
@@ -890,13 +890,41 @@ primary:
     | numeric_literal
     // enumeration and string literals already happen because of name
     | bit_string_literal
+    | aggregate
     | KW_NULL   { $$ = new VhdlParseTreeNode(PT_LIT_NULL); }
 
     | '(' expression ')'    {
-        // Will probably be removed, probably conflicts with aggregate
         $$ = $2;
     }
     //TODO
+
+aggregate:
+    '(' _two_or_more_element_association ')'    {
+        $$ = $2;
+    }
+    // TODO
+
+_two_or_more_element_association:
+    element_association ',' element_association {
+        $$ = new VhdlParseTreeNode(PT_AGGREGATE);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    | _two_or_more_element_association ',' element_association  {
+        $$ = new VhdlParseTreeNode(PT_AGGREGATE);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+element_association:
+    expression  {
+        $$ = new VhdlParseTreeNode(PT_ELEMENT_ASSOCIATION);
+        $$->piece_count = 1;
+        $$->pieces[0] = $1;
+    }
+    // TODO
 
 numeric_literal:
     abstract_literal

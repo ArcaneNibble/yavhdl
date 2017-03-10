@@ -48,12 +48,14 @@ const char *parse_tree_types[] = {
     "PT_EXPRESSION_LIST",
     "PT_ID_LIST",
     "PT_RECORD_RESOLUTION",
-    "PT_RECORD_ELEMENT_CONSTRAINT",
 
     "PT_TOK_ALL",
 
     "PT_UNARY_OPERATOR",
     "PT_BINARY_OPERATOR",
+
+    "PT_AGGREGATE",
+    "PT_ELEMENT_ASSOCIATION",
 };
 
 const char *parse_operators[] = {
@@ -315,12 +317,22 @@ void VhdlParseTreeNode::debug_print() {
             this->pieces[1]->debug_print();
             break;
 
+        case PT_ELEMENT_ASSOCIATION:
+            cout << ", \"expression\": ";
+            this->pieces[0]->debug_print();
+            if (this->pieces[1]) {
+                cout << ", \"choices\": ";
+                this->pieces[1]->debug_print();
+            }
+            break;
+
         case PT_EXPRESSION_LIST:
         case PT_ID_LIST:
         case PT_RECORD_RESOLUTION:
         case PT_INDEX_CONSTRAINT:
         case PT_RECORD_CONSTRAINT:
         case PT_PATHNAME_ELEMENT:
+        case PT_AGGREGATE:
             cout << ", \"rest\": ";
             this->pieces[0]->debug_print();
             cout << ", \"this_piece\": ";
