@@ -203,7 +203,24 @@ name:
     }
     | slice_name
     | _almost_attribute_name
-    //TODO
+    | external_name
+
+// Section 8.7
+external_name:
+    external_constant_name
+    // TODO
+
+external_constant_name:
+    DL_LL KW_CONSTANT external_pathname ':' subtype_indication DL_RR    {
+        $$ = new VhdlParseTreeNode(PT_NAME_EXT_CONST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $3;
+        $$->pieces[1] = $5;
+    }
+
+external_pathname:
+    identifier
+    // TODO
 
 // Section 8.3
 selected_name:
@@ -299,6 +316,9 @@ discrete_subtype_indication:
         $$->pieces[2] = $2;
     }
 
+subtype_indication:
+    identifier
+    // TODO
 
 resolution_indication:
     // The following two are for function names

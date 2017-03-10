@@ -22,6 +22,7 @@ enum ParseTreeNodeType
     PT_NAME_AMBIG_PARENS,
     PT_NAME_SLICE,
     PT_NAME_ATTRIBUTE,
+    PT_NAME_EXT_CONST,
 
     PT_SIGNATURE,
 

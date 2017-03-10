@@ -1,1 +1,1 @@
-foo(bar(baz (asdf'fdsa(123)), qux (1 to 3)))
+<<constant foo : bar>>

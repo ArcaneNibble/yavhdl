@@ -22,6 +22,7 @@ const char *parse_tree_types[] = {
     "PT_NAME_AMBIG_PARENS",
     "PT_NAME_SLICE",
     "PT_NAME_ATTRIBUTE",
+    "PT_NAME_EXT_CONST",
 
     "PT_SIGNATURE",
 
@@ -197,6 +198,13 @@ void VhdlParseTreeNode::debug_print() {
                 cout << ", \"expression\": ";
                 this->pieces[3]->debug_print();
             }
+            break;
+
+        case PT_NAME_EXT_CONST:
+            cout << ", \"pathname\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"subtype_indication\": ";
+            this->pieces[1]->debug_print();
             break;
 
         case PT_SIGNATURE:
