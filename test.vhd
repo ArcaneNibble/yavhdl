@@ -1,1 +1,1 @@
-<<constant foo : baz bar>>
+<<constant foo : bar baz (qux (0 to 2), asdf (fdsa (open)(0 to 2)))>>

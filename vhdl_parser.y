@@ -306,15 +306,10 @@ _almost_discrete_subtype_indication:
         $$->pieces[2] = $2;
     }
 
+// Reallow identifiers (a plain type_mark)
 discrete_subtype_indication:
     identifier
-    | identifier constraint {
-        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
-        $$->piece_count = 3;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = nullptr;
-        $$->pieces[2] = $2;
-    }
+    | _almost_discrete_subtype_indication
 
 subtype_indication:
     identifier
@@ -325,7 +320,20 @@ subtype_indication:
         $$->pieces[1] = $1;
         $$->pieces[2] = nullptr;
     }
-    // TODO
+    | identifier constraint {
+        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = nullptr;
+        $$->pieces[2] = $2;
+    }
+    | resolution_indication identifier constraint {
+        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $1;
+        $$->pieces[2] = $3;
+    }
 
 resolution_indication:
     // The following two are for function names
@@ -350,7 +358,6 @@ record_resolution:
     }
 
 record_element_resolution:
-    // S/R conflict here
     identifier resolution_indication    {
         $$ = new VhdlParseTreeNode(PT_RECORD_ELEMENT_RESOLUTION);
         $$->piece_count = 2;
@@ -364,22 +371,17 @@ record_element_resolution:
 _discrete_constraint:
     range_constraint
 
+// FIXME: explain why there is a S/R conflict here
 constraint:
     range_constraint
     | array_constraint
-    // TODO
-
-_almost_constraint:
-    range_constraint
-    | _almost_array_constraint
-    // | _almost_record_constraint
+    | record_constraint
 
 element_constraint:
     array_constraint
-    // TODO
+    | record_constraint
 
-// Must have two things otherwise ambiguous
-_almost_record_constraint:
+record_constraint:
     '(' _one_or_more_record_element_constraint ')'  {
         $$ = $2;
     }
@@ -393,51 +395,9 @@ _one_or_more_record_element_constraint:
         $$->pieces[1] = $3;
     }
 
-_two_or_more_record_element_constraint:
-    record_element_constraint ',' record_element_constraint {
-        $$ = new VhdlParseTreeNode(PT_RECORD_CONSTRAINT);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $3;
-    }
-    | _two_or_more_record_element_constraint ',' record_element_constraint  {
-        $$ = new VhdlParseTreeNode(PT_RECORD_CONSTRAINT);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $3;
-    }
-
 record_element_constraint:
     identifier element_constraint   {
         $$ = new VhdlParseTreeNode(PT_RECORD_ELEMENT_CONSTRAINT);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $2;
-    }
-
-// This does not allow only a single index constraint because that becomes
-// ambiguous with name and parentheses.
-_almost_array_constraint:
-    '(' KW_OPEN ')' {
-        $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
-        $$->piece_count = 2;
-        $$->pieces[0] = nullptr;
-        $$->pieces[1] = nullptr;
-    }
-    | '(' KW_OPEN ')' element_constraint {
-        $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
-        $$->piece_count = 2;
-        $$->pieces[0] = nullptr;
-        $$->pieces[1] = $4;
-    }
-    | _almost_index_constraint  {
-        $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = nullptr;
-    }
-    | _almost_index_constraint element_constraint   {
-        $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
@@ -474,28 +434,9 @@ index_constraint:
         $$ = $2;
     }
 
-_almost_index_constraint:
-    '(' _two_or_more_discrete_range ')' {
-        $$ = $2;
-    }
-
 _one_or_more_discrete_range:
     discrete_range
     | _one_or_more_discrete_range ',' discrete_range   {
-        $$ = new VhdlParseTreeNode(PT_INDEX_CONSTRAINT);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $3;
-    }
-
-_two_or_more_discrete_range:
-    discrete_range ',' discrete_range   {
-        $$ = new VhdlParseTreeNode(PT_INDEX_CONSTRAINT);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $3;
-    }
-    | _two_or_more_discrete_range ',' discrete_range   {
         $$ = new VhdlParseTreeNode(PT_INDEX_CONSTRAINT);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
