@@ -1,1 +1,1 @@
-foo(bar range 0 to 2)
+foo(bar (0 to 2))

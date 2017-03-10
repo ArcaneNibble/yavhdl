@@ -19,10 +19,10 @@ struct VhdlParseTreeNode *parse_output;
 
 %name-prefix "frontend_vhdl_yy"
 
-// %glr-parser
+%glr-parser
 
 %define parse.error verbose
-%define parse.lac full
+// %define parse.lac full
 %debug
 
 // Reserved words, section 15.10
@@ -228,6 +228,12 @@ _almost_discrete_range:
     _almost_discrete_subtype_indication
     | _almost_range
 
+// Re-allow the forbidden attribute name and single type_mark
+discrete_range:
+    _almost_discrete_subtype_indication
+    | identifier
+    | range
+
 // Section 8.6
 // Note that we do not handle the possible occurrence of (expression) at the
 // end because it is ambiguous with function calls. _ambig_name_parens should
@@ -284,7 +290,6 @@ _almost_discrete_subtype_indication:
         $$->pieces[2] = $2;
     }
 
-// We get 2 R/R conflicts in this rule
 resolution_indication:
     // The following two are for function names
     identifier
@@ -318,7 +323,52 @@ record_element_resolution:
 
 constraint:
     range_constraint
+    | array_constraint
     // TODO
+
+element_constraint:
+    array_constraint
+    // TODO
+
+array_constraint:
+    '(' KW_OPEN ')' {
+        $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = nullptr;
+    }
+    | '(' KW_OPEN ')' element_constraint {
+        $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = $4;
+    }
+    | index_constraint  {
+        $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = nullptr;
+    }
+    | index_constraint element_constraint   {
+        $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
+
+index_constraint:
+    '(' _one_or_more_discrete_range ')' {
+        $$ = $2;
+    }
+
+_one_or_more_discrete_range:
+    discrete_range
+    | _one_or_more_discrete_range ',' discrete_range   {
+        $$ = new VhdlParseTreeNode(PT_INDEX_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
 
 range_constraint:
     KW_RANGE range  {

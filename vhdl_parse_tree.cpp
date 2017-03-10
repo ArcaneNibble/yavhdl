@@ -30,6 +30,9 @@ const char *parse_tree_types[] = {
 
     "PT_RANGE",
 
+    "PT_ARRAY_CONSTRAINT",
+    "PT_INDEX_CONSTRAINT",
+
     "PT_EXPRESSION_LIST",
     "PT_ID_LIST",
     "PT_RECORD_RESOLUTION",
@@ -230,6 +233,24 @@ void VhdlParseTreeNode::debug_print() {
             this->pieces[0]->debug_print();
             cout << ", \"y\": ";
             this->pieces[1]->debug_print();
+            break;
+
+        case PT_ARRAY_CONSTRAINT:
+            cout << ", \"index_constraint\": ";
+            if (this->pieces[0]) {
+                this->pieces[0]->debug_print();
+            } else {
+                cout << "\"open\"";
+            }
+            if (this->pieces[1]) {
+                cout << ", \"element_constraint\": ";
+                this->pieces[1]->debug_print();
+            }
+            break;
+
+        case PT_INDEX_CONSTRAINT:
+            cout << ", \"discrete_ranges\": ";
+            this->pieces[0]->debug_print();
             break;
 
         case PT_EXPRESSION_LIST:
