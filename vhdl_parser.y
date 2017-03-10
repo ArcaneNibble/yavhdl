@@ -208,7 +208,8 @@ name:
 // Section 8.7
 external_name:
     external_constant_name
-    // TODO
+    | external_signal_name
+    | external_variable_name
 
 external_constant_name:
     DL_LL KW_CONSTANT external_pathname ':' subtype_indication DL_RR    {
@@ -218,9 +219,94 @@ external_constant_name:
         $$->pieces[1] = $5;
     }
 
+external_signal_name:
+    DL_LL KW_SIGNAL external_pathname ':' subtype_indication DL_RR    {
+        $$ = new VhdlParseTreeNode(PT_NAME_EXT_SIG);
+        $$->piece_count = 2;
+        $$->pieces[0] = $3;
+        $$->pieces[1] = $5;
+    }
+
+external_variable_name:
+    DL_LL KW_VARIABLE external_pathname ':' subtype_indication DL_RR    {
+        $$ = new VhdlParseTreeNode(PT_NAME_EXT_VAR);
+        $$->piece_count = 2;
+        $$->pieces[0] = $3;
+        $$->pieces[1] = $5;
+    }
+
 external_pathname:
+    package_pathname
+    | absolute_pathname
+    | relative_pathname
+
+relative_pathname:
+    partial_pathname    {
+        $$ = new VhdlParseTreeNode(PT_RELATIVE_PATHNAME);
+        $$->piece_count = 1;
+        $$->pieces[0] = $1;
+        $$->integer = 0;
+    }
+    | '^' '.' relative_pathname {
+        $$ = $3;
+        $$->integer++;
+    }
+
+absolute_pathname:
+    '.' partial_pathname    {
+        $$ = new VhdlParseTreeNode(PT_ABSOLUTE_PATHNAME);
+        $$->piece_count = 1;
+        $$->pieces[0] = $2;
+    }
+
+partial_pathname:
+    identifier  {
+        $$ = new VhdlParseTreeNode(PT_PARTIAL_PATHNAME);
+        $$->piece_count = 1;
+        $$->pieces[0] = $1;
+    }
+    | _one_or_more_pathname_elements '.' identifier {
+        $$ = new VhdlParseTreeNode(PT_PARTIAL_PATHNAME);
+        $$->piece_count = 2;
+        $$->pieces[0] = $3;
+        $$->pieces[1] = $1;
+    }
+
+_one_or_more_pathname_elements:
+    pathname_element
+    | _one_or_more_pathname_elements '.' pathname_element   {
+        $$ = new VhdlParseTreeNode(PT_PATHNAME_ELEMENT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+pathname_element:
     identifier
-    // TODO
+    | identifier '(' expression ')' {
+        $$ = new VhdlParseTreeNode(PT_PATHNAME_ELEMENT_GENERATE_LABEL);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+package_pathname:
+    '@' identifier '.' _one_or_more_ids_dots '.' identifier {
+        $$ = new VhdlParseTreeNode(PT_PACKAGE_PATHNAME);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $6;
+    }
+
+_one_or_more_ids_dots:
+    identifier
+    | _one_or_more_ids_dots '.' identifier  {
+        $$ = new VhdlParseTreeNode(PT_ID_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
 
 // Section 8.3
 selected_name:

@@ -23,6 +23,15 @@ enum ParseTreeNodeType
     PT_NAME_SLICE,
     PT_NAME_ATTRIBUTE,
     PT_NAME_EXT_CONST,
+    PT_NAME_EXT_SIG,
+    PT_NAME_EXT_VAR,
+
+    PT_PACKAGE_PATHNAME,
+    PT_ABSOLUTE_PATHNAME,
+    PT_RELATIVE_PATHNAME,
+    PT_PARTIAL_PATHNAME,
+    PT_PATHNAME_ELEMENT,
+    PT_PATHNAME_ELEMENT_GENERATE_LABEL,
 
     PT_SIGNATURE,
 
@@ -103,6 +112,7 @@ struct VhdlParseTreeNode {
     std::string *str;
     std::string *str2;
     char chr;
+    int integer;
     struct VhdlParseTreeNode *pieces[NUM_FIXED_PIECES];
     int piece_count;
 

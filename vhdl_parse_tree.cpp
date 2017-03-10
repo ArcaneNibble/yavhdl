@@ -23,6 +23,15 @@ const char *parse_tree_types[] = {
     "PT_NAME_SLICE",
     "PT_NAME_ATTRIBUTE",
     "PT_NAME_EXT_CONST",
+    "PT_NAME_EXT_SIG",
+    "PT_NAME_EXT_VAR",
+
+    "PT_PACKAGE_PATHNAME",
+    "PT_ABSOLUTE_PATHNAME",
+    "PT_RELATIVE_PATHNAME",
+    "PT_PARTIAL_PATHNAME",
+    "PT_PATHNAME_ELEMENT",
+    "PT_PATHNAME_ELEMENT_GENERATE_LABEL",
 
     "PT_SIGNATURE",
 
@@ -114,6 +123,7 @@ VhdlParseTreeNode::VhdlParseTreeNode(enum ParseTreeNodeType type) {
     this->str = nullptr;
     this->str2 = nullptr;
     this->chr = 0;
+    this->integer = 0;
     this->piece_count = 0;
     memset(this->pieces, 0, sizeof(this->pieces));
 }
@@ -201,9 +211,48 @@ void VhdlParseTreeNode::debug_print() {
             break;
 
         case PT_NAME_EXT_CONST:
+        case PT_NAME_EXT_SIG:
+        case PT_NAME_EXT_VAR:
             cout << ", \"pathname\": ";
             this->pieces[0]->debug_print();
             cout << ", \"subtype_indication\": ";
+            this->pieces[1]->debug_print();
+            break;
+
+        case PT_PACKAGE_PATHNAME:
+            cout << ", \"library\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"package\": ";
+            this->pieces[1]->debug_print();
+            cout << ", \"object\": ";
+            this->pieces[2]->debug_print();
+            break;
+
+        case PT_ABSOLUTE_PATHNAME:
+            cout << ", \"pathname\": ";
+            this->pieces[0]->debug_print();
+            break;
+
+        case PT_RELATIVE_PATHNAME:
+            cout << ", \"pathname\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"up_count\": ";
+            cout << this->integer;
+            break;
+
+        case PT_PARTIAL_PATHNAME:
+            cout << ", \"object\": ";
+            this->pieces[0]->debug_print();
+            if (this->pieces[1]) {
+                cout << ", \"pathname_element\": ";
+                this->pieces[1]->debug_print();
+            }
+            break;
+
+        case PT_PATHNAME_ELEMENT_GENERATE_LABEL:
+            cout << ", \"label\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"expression\": ";
             this->pieces[1]->debug_print();
             break;
 
@@ -271,6 +320,7 @@ void VhdlParseTreeNode::debug_print() {
         case PT_RECORD_RESOLUTION:
         case PT_INDEX_CONSTRAINT:
         case PT_RECORD_CONSTRAINT:
+        case PT_PATHNAME_ELEMENT:
             cout << ", \"rest\": ";
             this->pieces[0]->debug_print();
             cout << ", \"this_piece\": ";
