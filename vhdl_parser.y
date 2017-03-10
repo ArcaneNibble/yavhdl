@@ -19,10 +19,10 @@ struct VhdlParseTreeNode *parse_output;
 
 %name-prefix "frontend_vhdl_yy"
 
-%glr-parser
+// %glr-parser
 
 %define parse.error verbose
-// %define parse.lac full
+%define parse.lac full
 %debug
 
 // Reserved words, section 15.10
@@ -187,10 +187,9 @@ not_actualy_design_file:
 // It accepts far more than it should. This will be disambiguated in a second
 // pass that is not part of the (generated) parser.
 name:
-    identifier              // was simple_name
+    _simple_or_selected_name
     | string_literal        // was operator_symbol
     | character_literal
-    | selected_name
     // This handles anything that involves parentheses, including some things
     // that are actually a "primary." It needs to be disambiguated later in
     // second-stage parsing. However, it notably includes indexed and slice
@@ -204,6 +203,11 @@ name:
     | slice_name
     | _almost_attribute_name
     | external_name
+
+// This causes a whole bunch of shift/reduce conflicts
+_simple_or_selected_name:
+    identifier              // was simple_name
+    | selected_name
 
 // Section 8.7
 external_name:
@@ -384,7 +388,7 @@ _one_or_more_expressions:
 // ambiguities. Does not allow a resolution indication because that isn't
 // actually permitted (see 5.3.2.1).
 _almost_discrete_subtype_indication:
-    identifier _discrete_constraint     {
+    _simple_or_selected_name _discrete_constraint     {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
         $$->piece_count = 3;
         $$->pieces[0] = $1;
@@ -394,26 +398,26 @@ _almost_discrete_subtype_indication:
 
 // Reallow identifiers (a plain type_mark)
 discrete_subtype_indication:
-    identifier
+    _simple_or_selected_name
     | _almost_discrete_subtype_indication
 
 subtype_indication:
-    identifier
-    | resolution_indication identifier  {
+    _simple_or_selected_name
+    | resolution_indication _simple_or_selected_name  {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
         $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $1;
         $$->pieces[2] = nullptr;
     }
-    | identifier constraint {
+    | _simple_or_selected_name constraint {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
         $$->piece_count = 3;
         $$->pieces[0] = $1;
         $$->pieces[1] = nullptr;
         $$->pieces[2] = $2;
     }
-    | resolution_indication identifier constraint {
+    | resolution_indication _simple_or_selected_name constraint {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
         $$->piece_count = 3;
         $$->pieces[0] = $2;
@@ -423,7 +427,7 @@ subtype_indication:
 
 resolution_indication:
     // The following two are for function names
-    identifier
+    _simple_or_selected_name
     | string_literal
     | '(' element_resolution ')'    {
         // FIXME: Do I need to store more information here?
@@ -566,13 +570,13 @@ signature:
         $$->pieces[0] = $2;
         $$->pieces[1] = nullptr;
     }
-    | '[' KW_RETURN identifier ']' {
+    | '[' KW_RETURN _simple_or_selected_name ']' {
         $$ = new VhdlParseTreeNode(PT_SIGNATURE);
         $$->piece_count = 2;
         $$->pieces[0] = nullptr;
         $$->pieces[1] = $3;
     }
-    | '[' _one_or_more_ids KW_RETURN identifier ']' {
+    | '[' _one_or_more_ids KW_RETURN _simple_or_selected_name ']' {
         $$ = new VhdlParseTreeNode(PT_SIGNATURE);
         $$->piece_count = 2;
         $$->pieces[0] = $2;
@@ -580,8 +584,8 @@ signature:
     }
 
 _one_or_more_ids:
-    identifier
-    | _one_or_more_ids ',' identifier   {
+    _simple_or_selected_name
+    | _one_or_more_ids ',' _simple_or_selected_name   {
         $$ = new VhdlParseTreeNode(PT_ID_LIST);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
@@ -905,7 +909,7 @@ abstract_literal:
 // This requires the abstract_literal otherwise it becomes ambiguous with just
 // name.
 _almost_physical_literal:
-    abstract_literal identifier     {
+    abstract_literal _simple_or_selected_name     {
         $$ = new VhdlParseTreeNode(PT_LIT_PHYS);
         $$->piece_count = 2;
         $$->pieces[0] = $2;

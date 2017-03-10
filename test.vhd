@@ -1,1 +1,1 @@
-<<variable ^.^.foo.bar(5).baz(6).qux : bar baz (qux (0 to 2), asdf (fdsa (open)(0 to 2)))>>
+<<variable ^.^.foo.bar(5).baz(6).qux : bar.fdsa baz (qux (0 to 2), asdf (fdsa (open)(0 to 2)))>>
