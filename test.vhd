@@ -1,1 +1,1 @@
-(foo, bar, baz, qux)
+(foo, aaa|bbb|ccc'ddd(eee) => bar)

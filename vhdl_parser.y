@@ -330,7 +330,7 @@ slice_name:
         $$->pieces[1] = $3;
     }
 
-// Rather chopped up for use in name
+// Rather chopped up for use in name and aggregates
 _almost_discrete_range:
     _almost_discrete_subtype_indication
     | _almost_range
@@ -902,7 +902,12 @@ aggregate:
     '(' _two_or_more_element_association ')'    {
         $$ = $2;
     }
-    // TODO
+    | '(' _must_have_choice_element_association ')' {
+        $$ = new VhdlParseTreeNode(PT_AGGREGATE);
+        $$->piece_count = 2;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = $2;
+    }
 
 _two_or_more_element_association:
     element_association ',' element_association {
@@ -924,7 +929,32 @@ element_association:
         $$->piece_count = 1;
         $$->pieces[0] = $1;
     }
-    // TODO
+    | _must_have_choice_element_association
+
+_must_have_choice_element_association:
+    choices DL_ARR expression   {
+        $$ = new VhdlParseTreeNode(PT_ELEMENT_ASSOCIATION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $3;
+        $$->pieces[1] = $1;
+    }
+
+choices:
+    choice
+    | choices '|' choice    {
+        $$ = new VhdlParseTreeNode(PT_CHOICES);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+choice:
+    simple_expression
+    | _almost_discrete_range
+    // simple_name is included in simple_expression
+    | KW_OTHERS   {
+        $$ = new VhdlParseTreeNode(PT_CHOICES_OTHER);
+    }
 
 numeric_literal:
     abstract_literal
