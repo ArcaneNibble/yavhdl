@@ -209,6 +209,10 @@ _simple_or_selected_name:
     identifier              // was simple_name
     | selected_name
 
+function_name:
+    _simple_or_selected_name
+    | string_literal
+
 // Section 8.7
 external_name:
     external_constant_name
@@ -438,8 +442,7 @@ _allocator_subtype_indication:
 
 resolution_indication:
     // The following two are for function names
-    _simple_or_selected_name
-    | string_literal
+    function_name
     | '(' element_resolution ')'    {
         // FIXME: Do I need to store more information here?
         $$ = $2;
