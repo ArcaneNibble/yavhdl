@@ -425,6 +425,17 @@ subtype_indication:
         $$->pieces[2] = $3;
     }
 
+_allocator_subtype_indication:
+    // Resolution indications not allowed
+    _simple_or_selected_name
+    | _simple_or_selected_name _allocator_constraint {
+        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = nullptr;
+        $$->pieces[2] = $2;
+    }
+
 resolution_indication:
     // The following two are for function names
     _simple_or_selected_name
@@ -465,6 +476,11 @@ _discrete_constraint:
 constraint:
     range_constraint
     | array_constraint
+    | record_constraint
+
+_allocator_constraint:
+    // Can only be an array or record constraint
+    array_constraint
     | record_constraint
 
 element_constraint:
@@ -892,11 +908,26 @@ primary:
     | bit_string_literal
     | KW_NULL   { $$ = new VhdlParseTreeNode(PT_LIT_NULL); }
     | aggregate
+    // Some function_calls are handled by name
     | qualified_expression
+    // type_conversion is caught by name
+    | allocator
     | '(' expression ')'    {
         $$ = $2;
     }
     //TODO
+
+allocator:
+    KW_NEW _allocator_subtype_indication   {
+        $$ = new VhdlParseTreeNode(PT_ALLOCATOR);
+        $$->piece_count = 1;
+        $$->pieces[0] = $2;
+    }
+    | KW_NEW qualified_expression {
+        $$ = new VhdlParseTreeNode(PT_ALLOCATOR);
+        $$->piece_count = 1;
+        $$->pieces[0] = $2;
+    }
 
 qualified_expression:
     _simple_or_selected_name '\'' '(' expression ')'    {

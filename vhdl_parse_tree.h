@@ -60,6 +60,7 @@ enum ParseTreeNodeType
     PT_CHOICES,
     PT_CHOICES_OTHER,
     PT_QUALIFIED_EXPRESSION,
+    PT_ALLOCATOR,
 };
 
 // Operators, section 9.2

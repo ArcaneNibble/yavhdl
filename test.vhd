@@ -1,1 +1,1 @@
-asdf.fdsa'(foo, aaa|bbb|ccc'ddd(eee) => bar)
+new STRING (1 to 10)(2 to 11)

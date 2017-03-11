@@ -59,6 +59,7 @@ const char *parse_tree_types[] = {
     "PT_CHOICES",
     "PT_CHOICES_OTHER",
     "PT_QUALIFIED_EXPRESSION",
+    "PT_ALLOCATOR",
 };
 
 const char *parse_operators[] = {
@@ -334,6 +335,11 @@ void VhdlParseTreeNode::debug_print() {
             this->pieces[0]->debug_print();
             cout << ", \"expression\": ";
             this->pieces[1]->debug_print();
+            break;
+
+        case PT_ALLOCATOR:
+            cout << ", \"alloc\": ";
+            this->pieces[0]->debug_print();
             break;
 
         case PT_EXPRESSION_LIST:
