@@ -59,6 +59,7 @@ enum ParseTreeNodeType
     PT_ELEMENT_ASSOCIATION,
     PT_CHOICES,
     PT_CHOICES_OTHER,
+    PT_QUALIFIED_EXPRESSION,
 };
 
 // Operators, section 9.2
