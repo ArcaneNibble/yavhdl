@@ -66,6 +66,7 @@ enum ParseTreeNodeType
     PT_FUNCTION_CALL,
     PT_PARAMETER_ASSOCIATION_LIST,
     PT_PARAMETER_ASSOCIATION_ELEMENT,
+    PT_FORMAL_PART_FN,
 };
 
 // Operators, section 9.2

@@ -973,11 +973,15 @@ _definitely_parameter_association_element:
         $$->pieces[0] = $3;
         $$->pieces[1] = $1;
     }
-    // TODO
 
 formal_part:
     formal_designator
-    // TODO
+    | function_name '(' formal_designator ')'   {
+        $$ = new VhdlParseTreeNode(PT_FORMAL_PART_FN);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
 
 formal_designator:
     identifier
@@ -985,7 +989,7 @@ formal_designator:
 
 // By accepting expression we already accept all the possible types of names.
 // We cannot accept a type (subtype_indication). We can additionally accept
-// "open" however.
+// "open" however. "inertial" is not allowed for functions.
 _function_actual_part:
     expression
     | KW_OPEN   {

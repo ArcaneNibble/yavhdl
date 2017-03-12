@@ -65,6 +65,7 @@ const char *parse_tree_types[] = {
     "PT_FUNCTION_CALL",
     "PT_PARAMETER_ASSOCIATION_LIST",
     "PT_PARAMETER_ASSOCIATION_ELEMENT",
+    "PT_FORMAL_PART_FN",
 };
 
 const char *parse_operators[] = {
@@ -361,6 +362,13 @@ void VhdlParseTreeNode::debug_print() {
                 cout << ", \"formal_part\": ";
                 this->pieces[1]->debug_print();
             }
+            break;
+
+        case PT_FORMAL_PART_FN:
+            cout << ", \"function\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"formal_designator\": ";
+            this->pieces[1]->debug_print();
             break;
 
         case PT_EXPRESSION_LIST:
