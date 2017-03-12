@@ -21,12 +21,12 @@ struct VhdlParseTreeNode *parse_output;
 
 %glr-parser
 
-// %define lr.type ielr
+%define lr.type ielr
 %define parse.error verbose
 // %define parse.lac full
 %debug
 
-// Reserved words, section 15.10
+//////////////////////// Reserved words, section 15.10 ////////////////////////
 %token KW_ABS
 %token KW_ACCESS
 %token KW_AFTER
@@ -143,7 +143,7 @@ struct VhdlParseTreeNode *parse_output;
 %token KW_XNOR
 %token KW_XOR
 
-// Multi-character delimiters, section 15.3
+////////////////// Multi-character delimiters, section 15.3 //////////////////
 %token DL_ARR
 %token DL_EXP
 %token DL_ASS
@@ -161,7 +161,7 @@ struct VhdlParseTreeNode *parse_output;
 %token DL_LL
 %token DL_RR
 
-// Miscellaneous tokens for lexer literals
+//////////////// Miscellaneous tokens for other lexer literals ////////////////
 %token TOK_STRING
 %token TOK_BITSTRING
 %token TOK_DECIMAL
@@ -183,7 +183,8 @@ _toplevel_token:
 not_actualy_design_file:
     expression;
 
-// Names, section 8
+////////////////////////////// Names, section 8 //////////////////////////////
+
 // This is a super hacked up version of the name grammar production
 // It accepts far more than it should. This will be disambiguated in a second
 // pass that is not part of the (generated) parser.
@@ -205,14 +206,72 @@ name:
     | _almost_attribute_name
     | external_name
 
-// This causes a whole bunch of shift/reduce conflicts
+// This is a specialization of "name" because a number of other rules do need
+// to refer to only function names and not all sorts of other ridiculous
+// maybe-a-names.
+function_name:
+    _simple_or_selected_name
+    | string_literal
+
+// This specialization is used for many <foo>_names in the grammar that refer
+// to some type/entity/similar thing but not any arbitrary type of name.
+// FIXME: This causes a whole bunch of shift/reduce conflicts
 _simple_or_selected_name:
     identifier              // was simple_name
     | selected_name
 
-function_name:
-    _simple_or_selected_name
-    | string_literal
+// Section 8.3
+selected_name:
+    name '.' suffix   {
+        $$ = new VhdlParseTreeNode(PT_NAME_SELECTED);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+suffix:
+    identifier              // was simple_name
+    | character_literal
+    | string_literal        // was operator_symbol
+    | KW_ALL    { $$ = new VhdlParseTreeNode(PT_TOK_ALL); }
+
+// Section 8.5
+slice_name:
+    name '(' _almost_discrete_range ')' {
+        $$ = new VhdlParseTreeNode(PT_NAME_SLICE);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+// Section 8.6
+// Note that we do not handle the possible occurrence of (expression) at the
+// end because it is ambiguous with function calls. _ambig_name_parens should
+// pick that up.
+_almost_attribute_name:
+    name '\'' identifier    {
+        $$ = new VhdlParseTreeNode(PT_NAME_ATTRIBUTE);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    | name signature '\'' identifier    {
+        $$ = new VhdlParseTreeNode(PT_NAME_ATTRIBUTE);
+        $$->piece_count = 3;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $2;
+    }
+
+// We need the actual attribute_name for range constraints. This introduces a
+// S/R conflict.
+attribute_name:
+    _almost_attribute_name
+    | _almost_attribute_name '(' expression ')'     {
+        $$ = $1;
+        $$->piece_count = 4;
+        $$->pieces[3] = $3;
+    }
 
 // Section 8.7
 external_name:
@@ -249,6 +308,31 @@ external_pathname:
     | absolute_pathname
     | relative_pathname
 
+package_pathname:
+    '@' identifier '.' _one_or_more_ids_dots '.' identifier {
+        $$ = new VhdlParseTreeNode(PT_PACKAGE_PATHNAME);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $6;
+    }
+
+_one_or_more_ids_dots:
+    identifier
+    | _one_or_more_ids_dots '.' identifier  {
+        $$ = new VhdlParseTreeNode(PT_ID_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+absolute_pathname:
+    '.' partial_pathname    {
+        $$ = new VhdlParseTreeNode(PT_ABSOLUTE_PATHNAME);
+        $$->piece_count = 1;
+        $$->pieces[0] = $2;
+    }
+
 relative_pathname:
     partial_pathname    {
         $$ = new VhdlParseTreeNode(PT_RELATIVE_PATHNAME);
@@ -259,13 +343,6 @@ relative_pathname:
     | '^' '.' relative_pathname {
         $$ = $3;
         $$->integer++;
-    }
-
-absolute_pathname:
-    '.' partial_pathname    {
-        $$ = new VhdlParseTreeNode(PT_ABSOLUTE_PATHNAME);
-        $$->piece_count = 1;
-        $$->pieces[0] = $2;
     }
 
 partial_pathname:
@@ -299,42 +376,6 @@ pathname_element:
         $$->pieces[1] = $3;
     }
 
-package_pathname:
-    '@' identifier '.' _one_or_more_ids_dots '.' identifier {
-        $$ = new VhdlParseTreeNode(PT_PACKAGE_PATHNAME);
-        $$->piece_count = 3;
-        $$->pieces[0] = $2;
-        $$->pieces[1] = $4;
-        $$->pieces[2] = $6;
-    }
-
-_one_or_more_ids_dots:
-    identifier
-    | _one_or_more_ids_dots '.' identifier  {
-        $$ = new VhdlParseTreeNode(PT_ID_LIST);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $3;
-    }
-
-// Section 8.3
-selected_name:
-    name '.' suffix   {
-        $$ = new VhdlParseTreeNode(PT_NAME_SELECTED);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $3;
-    }
-
-// Section 8.5
-slice_name:
-    name '(' _almost_discrete_range ')' {
-        $$ = new VhdlParseTreeNode(PT_NAME_SLICE);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $3;
-    }
-
 // Rather chopped up for use in name and aggregates
 _almost_discrete_range:
     _almost_discrete_subtype_indication
@@ -344,35 +385,6 @@ _almost_discrete_range:
 discrete_range:
     discrete_subtype_indication
     | range
-
-// Section 8.6
-// Note that we do not handle the possible occurrence of (expression) at the
-// end because it is ambiguous with function calls. _ambig_name_parens should
-// pick that up.
-_almost_attribute_name:
-    name '\'' identifier    {
-        $$ = new VhdlParseTreeNode(PT_NAME_ATTRIBUTE);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $3;
-    }
-    | name signature '\'' identifier    {
-        $$ = new VhdlParseTreeNode(PT_NAME_ATTRIBUTE);
-        $$->piece_count = 3;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $4;
-        $$->pieces[2] = $2;
-    }
-
-// We need the actual attribute_name for range constraints. This introduces a
-// S/R conflict.
-attribute_name:
-    _almost_attribute_name
-    | _almost_attribute_name '(' expression ')'     {
-        $$ = $1;
-        $$->piece_count = 4;
-        $$->pieces[3] = $3;
-    }
 
 _ambig_name_parens:
     // This should handle indexed names, type conversions, some cases of
@@ -611,12 +623,6 @@ _one_or_more_ids:
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
-
-suffix:
-    identifier              // was simple_name
-    | character_literal
-    | string_literal        // was operator_symbol
-    | KW_ALL    { $$ = new VhdlParseTreeNode(PT_TOK_ALL); }
 
 // Expressions, section 9
 expression:
