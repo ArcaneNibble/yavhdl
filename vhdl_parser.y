@@ -520,8 +520,9 @@ _function_actual_part:
 // It accepts far more than it should. This will be disambiguated in a second
 // pass that is not part of the (generated) parser.
 name:
-    _simple_or_selected_name
-    | string_literal        // was operator_symbol
+    // We need to use this specialization rather than duplicating the contents
+    // in order to make the grammar not have some reduce/reduce conflicts.
+    function_name     
     | character_literal
     // This handles anything that involves parentheses, including some things
     // that are actually a "primary." It needs to be disambiguated later in
@@ -542,7 +543,7 @@ name:
 // maybe-a-names.
 function_name:
     _simple_or_selected_name
-    | string_literal
+    | string_literal        // was operator_symbol
 
 // This specialization is used for many <foo>_names in the grammar that refer
 // to some type/entity/similar thing but not any arbitrary type of name.
