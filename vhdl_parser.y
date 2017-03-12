@@ -21,7 +21,7 @@ struct VhdlParseTreeNode *parse_output;
 
 %glr-parser
 
-%define lr.type ielr
+// %define lr.type ielr
 %define parse.error verbose
 // %define parse.lac full
 %debug
@@ -493,17 +493,13 @@ _definitely_parameter_association_element:
     }
 
 formal_part:
-    formal_designator
-    | function_name '(' formal_designator ')' {
+    identifier
+    | function_name '(' identifier ')' {
         $$ = new VhdlParseTreeNode(PT_FORMAL_PART_FN);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
-
-formal_designator:
-    identifier
-    // FIXME: I don't think a selected name can be used here?
 
 // By accepting expression we already accept all the possible types of names.
 // We cannot accept a type (subtype_indication). We can additionally accept
