@@ -67,6 +67,11 @@ enum ParseTreeNodeType
     PT_PARAMETER_ASSOCIATION_LIST,
     PT_PARAMETER_ASSOCIATION_ELEMENT,
     PT_FORMAL_PART_FN,
+
+    // Sequential statements, section 10
+    PT_STATEMENT_LABEL,
+    PT_RETURN_STATEMENT,
+    PT_NULL_STATEMENT,
 };
 
 // Operators, section 9.2

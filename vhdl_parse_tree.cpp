@@ -66,6 +66,10 @@ const char *parse_tree_types[] = {
     "PT_PARAMETER_ASSOCIATION_LIST",
     "PT_PARAMETER_ASSOCIATION_ELEMENT",
     "PT_FORMAL_PART_FN",
+
+    "PT_STATEMENT_LABEL",
+    "PT_RETURN_STATEMENT",
+    "PT_NULL_STATEMENT",
 };
 
 const char *parse_operators[] = {
@@ -369,6 +373,18 @@ void VhdlParseTreeNode::debug_print() {
             this->pieces[0]->debug_print();
             cout << ", \"formal_designator\": ";
             this->pieces[1]->debug_print();
+            break;
+
+        case PT_STATEMENT_LABEL:
+            cout << ", \"label\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"statement\": ";
+            this->pieces[1]->debug_print();
+            break;
+
+        case PT_RETURN_STATEMENT:
+            cout << ", \"expression\": ";
+            this->pieces[0]->debug_print();
             break;
 
         case PT_EXPRESSION_LIST:

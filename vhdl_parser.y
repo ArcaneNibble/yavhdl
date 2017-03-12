@@ -184,7 +184,7 @@ _toplevel_token:
 
 // Fake start token for testing
 not_actualy_design_file:
-    expression;
+    sequential_statement;
 
 ///////////////////// Subprograms and packages, section 4 /////////////////////
 
@@ -1132,6 +1132,34 @@ allocator:
         $$ = new VhdlParseTreeNode(PT_ALLOCATOR);
         $$->piece_count = 1;
         $$->pieces[0] = $2;
+    }
+
+////////////////////// Sequential statements, section 10 //////////////////////
+
+sequential_statement:
+    _real_sequential_statement
+    | identifier ':' _real_sequential_statement {
+        $$ = new VhdlParseTreeNode(PT_STATEMENT_LABEL);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+_real_sequential_statement:
+    return_statement
+    | null_statement
+    // TODO
+
+return_statement:
+    KW_RETURN expression ';' {
+        $$ = new VhdlParseTreeNode(PT_RETURN_STATEMENT);
+        $$->piece_count = 1;
+        $$->pieces[0] = $2;
+    }
+
+null_statement:
+    KW_NULL ';' {
+        $$ = new VhdlParseTreeNode(PT_NULL_STATEMENT);
     }
 
 //////////////////////// Lexical elements, section 15 ////////////////////////
