@@ -183,6 +183,267 @@ _toplevel_token:
 not_actualy_design_file:
     expression;
 
+///////////////////// Subprograms and packages, section 4 /////////////////////
+
+/// Section 4.5.3
+signature:
+    '[' ']' {
+        $$ = new VhdlParseTreeNode(PT_SIGNATURE);
+        $$->piece_count = 2;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = nullptr;
+    }
+    | '[' _one_or_more_ids ']' {
+        $$ = new VhdlParseTreeNode(PT_SIGNATURE);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = nullptr;
+    }
+    | '[' KW_RETURN _simple_or_selected_name ']' {
+        $$ = new VhdlParseTreeNode(PT_SIGNATURE);
+        $$->piece_count = 2;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = $3;
+    }
+    | '[' _one_or_more_ids KW_RETURN _simple_or_selected_name ']' {
+        $$ = new VhdlParseTreeNode(PT_SIGNATURE);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+    }
+
+_one_or_more_ids:
+    _simple_or_selected_name
+    | _one_or_more_ids ',' _simple_or_selected_name   {
+        $$ = new VhdlParseTreeNode(PT_ID_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+////////////////////////////// Types, section 5 //////////////////////////////
+
+/// Section 5.2.1
+range_constraint:
+    KW_RANGE range  {
+        $$ = $2;
+    }
+
+range:
+    _almost_range
+    | attribute_name
+
+// We need this because of the "name" rule that cannot have an attribute_name
+// here in order to avoid ambiguity.
+_almost_range:
+    simple_expression KW_DOWNTO simple_expression {
+        $$ = new VhdlParseTreeNode(PT_RANGE);
+        $$->range_dir = RANGE_DOWN;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    | simple_expression KW_TO simple_expression {
+        $$ = new VhdlParseTreeNode(PT_RANGE);
+        $$->range_dir = RANGE_UP;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+/// Section 5.2.2
+enumeration_literal:
+    identifier
+    | character_literal
+
+/// Section 5.2.4
+// This requires the abstract_literal otherwise it becomes ambiguous with just
+// name.
+_almost_physical_literal:
+    abstract_literal _simple_or_selected_name     {
+        $$ = new VhdlParseTreeNode(PT_LIT_PHYS);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $1;
+    }
+
+/// Section 5.3.2
+array_constraint:
+    '(' KW_OPEN ')' {
+        $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = nullptr;
+    }
+    | '(' KW_OPEN ')' element_constraint {
+        $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = $4;
+    }
+    | index_constraint  {
+        $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = nullptr;
+    }
+    | index_constraint element_constraint   {
+        $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
+
+index_constraint:
+    '(' _one_or_more_discrete_range ')' {
+        $$ = $2;
+    }
+
+_one_or_more_discrete_range:
+    discrete_range
+    | _one_or_more_discrete_range ',' discrete_range   {
+        $$ = new VhdlParseTreeNode(PT_INDEX_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+// Rather chopped up for use in name and aggregates
+_almost_discrete_range:
+    _almost_discrete_subtype_indication
+    | _almost_range
+
+// Re-allow the forbidden attribute name and single type_mark
+discrete_range:
+    discrete_subtype_indication
+    | range
+
+/// Section 5.3.3
+record_constraint:
+    '(' _one_or_more_record_element_constraint ')'  {
+        $$ = $2;
+    }
+
+_one_or_more_record_element_constraint:
+    record_element_constraint
+    | _one_or_more_record_element_constraint ',' record_element_constraint  {
+        $$ = new VhdlParseTreeNode(PT_RECORD_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+record_element_constraint:
+    identifier element_constraint   {
+        $$ = new VhdlParseTreeNode(PT_RECORD_ELEMENT_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
+
+/////////////////////////// Declarations, section 6 ///////////////////////////
+
+/// Section 6.3
+subtype_indication:
+    _simple_or_selected_name
+    | resolution_indication _simple_or_selected_name  {
+        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $1;
+        $$->pieces[2] = nullptr;
+    }
+    | _simple_or_selected_name constraint {
+        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = nullptr;
+        $$->pieces[2] = $2;
+    }
+    | resolution_indication _simple_or_selected_name constraint {
+        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $1;
+        $$->pieces[2] = $3;
+    }
+
+// Does not handle the case of only a type_mark because that can cause
+// ambiguities. Does not allow a resolution indication because that isn't
+// actually permitted (see 5.3.2.1).
+_almost_discrete_subtype_indication:
+    _simple_or_selected_name _discrete_constraint     {
+        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = nullptr;
+        $$->pieces[2] = $2;
+    }
+
+// Reallow identifiers (a plain type_mark)
+discrete_subtype_indication:
+    _simple_or_selected_name
+    | _almost_discrete_subtype_indication
+
+_allocator_subtype_indication:
+    // Resolution indications not allowed
+    _simple_or_selected_name
+    | _simple_or_selected_name _allocator_constraint {
+        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = nullptr;
+        $$->pieces[2] = $2;
+    }
+
+resolution_indication:
+    // The following two are for function names
+    function_name
+    | '(' element_resolution ')'    {
+        // FIXME: Do I need to store more information here?
+        $$ = $2;
+    }
+
+element_resolution:
+    resolution_indication   // was array_element_resolution
+    | record_resolution
+
+record_resolution:
+    record_element_resolution
+    | record_resolution ',' record_element_resolution {
+        $$ = new VhdlParseTreeNode(PT_RECORD_RESOLUTION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+record_element_resolution:
+    identifier resolution_indication    {
+        $$ = new VhdlParseTreeNode(PT_RECORD_ELEMENT_RESOLUTION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
+
+// FIXME: explain why there is a S/R conflict here
+constraint:
+    range_constraint
+    | array_constraint
+    | record_constraint
+
+// When a "discrete" subtype indication is needed, the _only_ type of
+// constraint we can have is a range constraint. Arrays and records aren't
+// discrete.
+_discrete_constraint:
+    range_constraint
+
+_allocator_constraint:
+    // Can only be an array or record constraint
+    array_constraint
+    | record_constraint
+
+element_constraint:
+    array_constraint
+    | record_constraint
+
 ////////////////////////////// Names, section 8 //////////////////////////////
 
 // This is a super hacked up version of the name grammar production
@@ -220,7 +481,7 @@ _simple_or_selected_name:
     identifier              // was simple_name
     | selected_name
 
-// Section 8.3
+/// Section 8.3
 selected_name:
     name '.' suffix   {
         $$ = new VhdlParseTreeNode(PT_NAME_SELECTED);
@@ -235,7 +496,7 @@ suffix:
     | string_literal        // was operator_symbol
     | KW_ALL    { $$ = new VhdlParseTreeNode(PT_TOK_ALL); }
 
-// Section 8.5
+/// Section 8.5
 slice_name:
     name '(' _almost_discrete_range ')' {
         $$ = new VhdlParseTreeNode(PT_NAME_SLICE);
@@ -244,7 +505,7 @@ slice_name:
         $$->pieces[1] = $3;
     }
 
-// Section 8.6
+/// Section 8.6
 // Note that we do not handle the possible occurrence of (expression) at the
 // end because it is ambiguous with function calls. _ambig_name_parens should
 // pick that up.
@@ -273,7 +534,7 @@ attribute_name:
         $$->pieces[3] = $3;
     }
 
-// Section 8.7
+/// Section 8.7
 external_name:
     external_constant_name
     | external_signal_name
@@ -376,16 +637,6 @@ pathname_element:
         $$->pieces[1] = $3;
     }
 
-// Rather chopped up for use in name and aggregates
-_almost_discrete_range:
-    _almost_discrete_subtype_indication
-    | _almost_range
-
-// Re-allow the forbidden attribute name and single type_mark
-discrete_range:
-    discrete_subtype_indication
-    | range
-
 _ambig_name_parens:
     // This should handle indexed names, type conversions, some cases of
     // function calls, and very few cases of slice names (subtype indications
@@ -401,242 +652,17 @@ _one_or_more_expressions:
         $$->pieces[1] = $3;
     }
 
-// Does not handle the case of only a type_mark because that can cause
-// ambiguities. Does not allow a resolution indication because that isn't
-// actually permitted (see 5.3.2.1).
-_almost_discrete_subtype_indication:
-    _simple_or_selected_name _discrete_constraint     {
-        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
-        $$->piece_count = 3;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = nullptr;
-        $$->pieces[2] = $2;
-    }
-
-// Reallow identifiers (a plain type_mark)
-discrete_subtype_indication:
-    _simple_or_selected_name
-    | _almost_discrete_subtype_indication
-
-subtype_indication:
-    _simple_or_selected_name
-    | resolution_indication _simple_or_selected_name  {
-        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
-        $$->piece_count = 3;
-        $$->pieces[0] = $2;
-        $$->pieces[1] = $1;
-        $$->pieces[2] = nullptr;
-    }
-    | _simple_or_selected_name constraint {
-        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
-        $$->piece_count = 3;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = nullptr;
-        $$->pieces[2] = $2;
-    }
-    | resolution_indication _simple_or_selected_name constraint {
-        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
-        $$->piece_count = 3;
-        $$->pieces[0] = $2;
-        $$->pieces[1] = $1;
-        $$->pieces[2] = $3;
-    }
-
-_allocator_subtype_indication:
-    // Resolution indications not allowed
-    _simple_or_selected_name
-    | _simple_or_selected_name _allocator_constraint {
-        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
-        $$->piece_count = 3;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = nullptr;
-        $$->pieces[2] = $2;
-    }
-
-resolution_indication:
-    // The following two are for function names
-    function_name
-    | '(' element_resolution ')'    {
-        // FIXME: Do I need to store more information here?
-        $$ = $2;
-    }
-
-element_resolution:
-    resolution_indication   // was array_element_resolution
-    | record_resolution
-
-record_resolution:
-    record_element_resolution
-    | record_resolution ',' record_element_resolution {
-        $$ = new VhdlParseTreeNode(PT_RECORD_RESOLUTION);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $3;
-    }
-
-record_element_resolution:
-    identifier resolution_indication    {
-        $$ = new VhdlParseTreeNode(PT_RECORD_ELEMENT_RESOLUTION);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $2;
-    }
-
-////////////////////////////// Types, section 5 //////////////////////////////
-
-// When a "discrete" subtype indication is needed, the _only_ type of
-// constraint we can have is a range constraint. Arrays and records aren't
-// discrete.
-_discrete_constraint:
-    range_constraint
-
-// FIXME: explain why there is a S/R conflict here
-constraint:
-    range_constraint
-    | array_constraint
-    | record_constraint
-
-_allocator_constraint:
-    // Can only be an array or record constraint
-    array_constraint
-    | record_constraint
-
-element_constraint:
-    array_constraint
-    | record_constraint
-
-record_constraint:
-    '(' _one_or_more_record_element_constraint ')'  {
-        $$ = $2;
-    }
-
-_one_or_more_record_element_constraint:
-    record_element_constraint
-    | _one_or_more_record_element_constraint ',' record_element_constraint  {
-        $$ = new VhdlParseTreeNode(PT_RECORD_CONSTRAINT);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $3;
-    }
-
-record_element_constraint:
-    identifier element_constraint   {
-        $$ = new VhdlParseTreeNode(PT_RECORD_ELEMENT_CONSTRAINT);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $2;
-    }
-
-array_constraint:
-    '(' KW_OPEN ')' {
-        $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
-        $$->piece_count = 2;
-        $$->pieces[0] = nullptr;
-        $$->pieces[1] = nullptr;
-    }
-    | '(' KW_OPEN ')' element_constraint {
-        $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
-        $$->piece_count = 2;
-        $$->pieces[0] = nullptr;
-        $$->pieces[1] = $4;
-    }
-    | index_constraint  {
-        $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = nullptr;
-    }
-    | index_constraint element_constraint   {
-        $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $2;
-    }
-
-index_constraint:
-    '(' _one_or_more_discrete_range ')' {
-        $$ = $2;
-    }
-
-_one_or_more_discrete_range:
-    discrete_range
-    | _one_or_more_discrete_range ',' discrete_range   {
-        $$ = new VhdlParseTreeNode(PT_INDEX_CONSTRAINT);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $3;
-    }
-
-range_constraint:
-    KW_RANGE range  {
-        $$ = $2;
-    }
-
-range:
-    _almost_range
-    | attribute_name
-
-_almost_range:
-    simple_expression KW_DOWNTO simple_expression {
-        $$ = new VhdlParseTreeNode(PT_RANGE);
-        $$->range_dir = RANGE_DOWN;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $3;
-    }
-    | simple_expression KW_TO simple_expression {
-        $$ = new VhdlParseTreeNode(PT_RANGE);
-        $$->range_dir = RANGE_UP;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $3;
-    }
-
-// Section 4.5.3
-signature:
-    '[' ']' {
-        $$ = new VhdlParseTreeNode(PT_SIGNATURE);
-        $$->piece_count = 2;
-        $$->pieces[0] = nullptr;
-        $$->pieces[1] = nullptr;
-    }
-    | '[' _one_or_more_ids ']' {
-        $$ = new VhdlParseTreeNode(PT_SIGNATURE);
-        $$->piece_count = 2;
-        $$->pieces[0] = $2;
-        $$->pieces[1] = nullptr;
-    }
-    | '[' KW_RETURN _simple_or_selected_name ']' {
-        $$ = new VhdlParseTreeNode(PT_SIGNATURE);
-        $$->piece_count = 2;
-        $$->pieces[0] = nullptr;
-        $$->pieces[1] = $3;
-    }
-    | '[' _one_or_more_ids KW_RETURN _simple_or_selected_name ']' {
-        $$ = new VhdlParseTreeNode(PT_SIGNATURE);
-        $$->piece_count = 2;
-        $$->pieces[0] = $2;
-        $$->pieces[1] = $4;
-    }
-
-_one_or_more_ids:
-    _simple_or_selected_name
-    | _one_or_more_ids ',' _simple_or_selected_name   {
-        $$ = new VhdlParseTreeNode(PT_ID_LIST);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $3;
-    }
-
 /////////////////////////// Expressions, section 9 ///////////////////////////
 expression:
     logical_expression
-    // Section 9.2.9
+    /// Section 9.2.9
     | DL_QQ primary     {
         $$ = new VhdlParseTreeNode(PT_UNARY_OPERATOR);
         $$->op_type = OP_COND;
         $$->pieces[0] = $2;
     }
 
-// Section 9.2.2
+/// Section 9.2.2
 logical_expression:
     relation
     | logical_expression KW_AND relation    {
@@ -676,7 +702,7 @@ logical_expression:
         $$->pieces[1] = $3;
     }
 
-// Section 9.2.3
+/// Section 9.2.3
 relation:
     shift_expression
     | shift_expression '=' shift_expression     {
@@ -762,7 +788,7 @@ relation:
         $$->pieces[1] = $3;
     }
 
-// Section 9.2.4
+/// Section 9.2.4
 shift_expression:
     simple_expression
     | simple_expression KW_SLL simple_expression    {
@@ -802,7 +828,7 @@ shift_expression:
         $$->pieces[1] = $3;
     }
 
-// Section 9.2.5
+/// Section 9.2.5
 simple_expression:
     _term_with_sign
     | simple_expression '+' term    {
@@ -824,7 +850,7 @@ simple_expression:
         $$->pieces[1] = $3;
     }
 
-// Section 9.2.6
+/// Section 9.2.6
 // FIXME: Check if this precedence is right
 _term_with_sign:
     term
@@ -839,7 +865,7 @@ _term_with_sign:
         $$->pieces[0] = $2;
     }
 
-// Section 9.2.7
+/// Section 9.2.7
 term:
     factor
     | term '*' factor       {
@@ -867,7 +893,7 @@ term:
         $$->pieces[1] = $3;
     }
 
-// Section 9.2.2, 9.2.8
+/// Section 9.2.2, 9.2.8
 factor:
     primary
     | primary DL_EXP primary {
@@ -917,7 +943,7 @@ factor:
         $$->pieces[0] = $2;
     }
 
-// Section 9.3
+/// Section 9.3
 // Here is a hacked "primary" rule that relies on "name" to parse a bunch of
 // stuff that will be disambiguated later
 primary:
@@ -937,12 +963,12 @@ primary:
         $$ = $2;
     }
 
-// Section 9.3.2
+/// Section 9.3.2
 numeric_literal:
     abstract_literal
     | _almost_physical_literal
 
-// Section 9.3.3
+/// Section 9.3.3
 aggregate:
     '(' _two_or_more_element_association ')'    {
         $$ = $2;
@@ -1001,7 +1027,7 @@ choice:
         $$ = new VhdlParseTreeNode(PT_CHOICES_OTHER);
     }
 
-// Section 9.3.4
+/// Section 9.3.4
 // Handles only function calls that contain "=>" in the parameters. Other ones
 // are caught by "name".
 _definitely_function_call:
@@ -1012,7 +1038,7 @@ _definitely_function_call:
         $$->pieces[1] = $3;
     }
 
-// Section 9.3.5
+/// Section 9.3.5
 qualified_expression:
     _simple_or_selected_name '\'' '(' expression ')'    {
         $$ = new VhdlParseTreeNode(PT_QUALIFIED_EXPRESSION);
@@ -1027,7 +1053,7 @@ qualified_expression:
         $$->pieces[1] = $3;
     }
 
-// Section 9.3.7
+/// Section 9.3.7
 allocator:
     KW_NEW _allocator_subtype_indication   {
         $$ = new VhdlParseTreeNode(PT_ALLOCATOR);
@@ -1105,23 +1131,9 @@ _function_actual_part:
         $$ = new VhdlParseTreeNode(PT_TOK_OPEN);
     }
 
-// This requires the abstract_literal otherwise it becomes ambiguous with just
-// name.
-_almost_physical_literal:
-    abstract_literal _simple_or_selected_name     {
-        $$ = new VhdlParseTreeNode(PT_LIT_PHYS);
-        $$->piece_count = 2;
-        $$->pieces[0] = $2;
-        $$->pieces[1] = $1;
-    }
-
-enumeration_literal:
-    identifier
-    | character_literal
-
 //////////////////////// Lexical elements, section 15 ////////////////////////
 
-// Section 15.4
+/// Section 15.4
 identifier:
     basic_identifier
     | extended_identifier
@@ -1129,7 +1141,7 @@ identifier:
 basic_identifier: TOK_BASIC_ID
 extended_identifier: TOK_EXT_ID
 
-// Section 15.5
+/// Section 15.5
 abstract_literal:
     decimal_literal
     | based_literal
@@ -1137,13 +1149,13 @@ abstract_literal:
 decimal_literal: TOK_DECIMAL
 based_literal: TOK_BASED
 
-// Section 15.6
+/// Section 15.6
 character_literal: TOK_CHAR
 
-// Section 15.7
+/// Section 15.7
 string_literal: TOK_STRING
 
-// Section 15.8
+/// Section 15.8
 bit_string_literal: TOK_BITSTRING
 
 %%
