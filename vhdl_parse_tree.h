@@ -78,6 +78,8 @@ enum ParseTreeNodeType
     PT_EXIT_STATEMENT,
     PT_SEQUENCE_OF_STATEMENTS,
     PT_IF_STATEMENT,
+    PT_ELSIF,
+    PT_ELSIF_LIST,
 };
 
 // Operators, section 9.2

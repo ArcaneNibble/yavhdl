@@ -1242,6 +1242,53 @@ _real_if_statement:
         $$->pieces[3] = nullptr;
         $$->pieces[4] = nullptr;
     }
+    | KW_IF expression KW_THEN sequence_of_statements _one_or_more_elsifs
+      KW_END KW_IF {
+        $$ = new VhdlParseTreeNode(PT_IF_STATEMENT);
+        $$->piece_count = 5;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $5;
+        $$->pieces[3] = nullptr;
+        $$->pieces[4] = nullptr;
+    }
+    | KW_IF expression KW_THEN sequence_of_statements
+      KW_ELSE sequence_of_statements KW_END KW_IF {
+        $$ = new VhdlParseTreeNode(PT_IF_STATEMENT);
+        $$->piece_count = 5;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = $6;
+        $$->pieces[4] = nullptr;
+    }
+    | KW_IF expression KW_THEN sequence_of_statements 
+      _one_or_more_elsifs KW_ELSE sequence_of_statements KW_END KW_IF {
+        $$ = new VhdlParseTreeNode(PT_IF_STATEMENT);
+        $$->piece_count = 5;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $5;
+        $$->pieces[3] = $7;
+        $$->pieces[4] = nullptr;
+    }
+
+_one_or_more_elsifs:
+    _elsif
+    | _one_or_more_elsifs _elsif {
+        $$ = new VhdlParseTreeNode(PT_ELSIF_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
+
+_elsif:
+    KW_ELSIF expression KW_THEN sequence_of_statements {
+        $$ = new VhdlParseTreeNode(PT_ELSIF);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+    }
 
 /// Section 10.11
 next_statement:
