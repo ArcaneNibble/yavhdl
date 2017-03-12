@@ -50,6 +50,7 @@ enum ParseTreeNodeType
     PT_RECORD_RESOLUTION,
 
     PT_TOK_ALL,
+    PT_TOK_OPEN,
 
     // Expressions, section 9
     PT_UNARY_OPERATOR,
@@ -61,6 +62,10 @@ enum ParseTreeNodeType
     PT_CHOICES_OTHER,
     PT_QUALIFIED_EXPRESSION,
     PT_ALLOCATOR,
+
+    PT_FUNCTION_CALL,
+    PT_PARAMETER_ASSOCIATION_LIST,
+    PT_PARAMETER_ASSOCIATION_ELEMENT,
 };
 
 // Operators, section 9.2

@@ -1,1 +1,1 @@
-new STRING (1 to 10)(2 to 11)
+foo(open, zzz, qux => asdf, bar => baz'aaa(bbb))

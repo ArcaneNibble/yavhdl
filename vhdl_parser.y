@@ -21,6 +21,7 @@ struct VhdlParseTreeNode *parse_output;
 
 %glr-parser
 
+// %define lr.type ielr
 %define parse.error verbose
 // %define parse.lac full
 %debug
@@ -912,13 +913,58 @@ primary:
     | KW_NULL   { $$ = new VhdlParseTreeNode(PT_LIT_NULL); }
     | aggregate
     // Some function_calls are handled by name
+    | _definitely_function_call
     | qualified_expression
     // type_conversion is caught by name
     | allocator
     | '(' expression ')'    {
         $$ = $2;
     }
-    //TODO
+
+// Handles only function calls that contain "=>" in the parameters. Other ones
+// are caught by "name".
+_definitely_function_call:
+    function_name '(' _definitely_parameter_association_list ')'    {
+        $$ = new VhdlParseTreeNode(PT_FUNCTION_CALL);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+_definitely_parameter_association_list:
+    // TODO
+    _definitely_association_element
+    | _one_or_more_expressions ',' _definitely_association_element  {
+        $$ = new VhdlParseTreeNode(PT_PARAMETER_ASSOCIATION_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    | _definitely_parameter_association_list ',' _definitely_association_element    {
+        $$ = new VhdlParseTreeNode(PT_PARAMETER_ASSOCIATION_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+// Must have => in it
+_definitely_association_element:
+    identifier DL_ARR _function_actual_part    {
+        $$ = new VhdlParseTreeNode(PT_PARAMETER_ASSOCIATION_ELEMENT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $3;
+        $$->pieces[1] = $1;
+    }
+    // TODO
+
+// By accepting expression we already accept all the possible types of names.
+// We cannot accept a type (subtype_indication). We can additionally accept
+// "open" however.
+_function_actual_part:
+    expression
+    | KW_OPEN   {
+        $$ = new VhdlParseTreeNode(PT_TOK_OPEN);
+    }
 
 allocator:
     KW_NEW _allocator_subtype_indication   {

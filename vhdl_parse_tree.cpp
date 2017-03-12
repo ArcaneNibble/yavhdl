@@ -50,6 +50,7 @@ const char *parse_tree_types[] = {
     "PT_RECORD_RESOLUTION",
 
     "PT_TOK_ALL",
+    "PT_TOK_OPEN",
 
     "PT_UNARY_OPERATOR",
     "PT_BINARY_OPERATOR",
@@ -60,6 +61,10 @@ const char *parse_tree_types[] = {
     "PT_CHOICES_OTHER",
     "PT_QUALIFIED_EXPRESSION",
     "PT_ALLOCATOR",
+
+    "PT_FUNCTION_CALL",
+    "PT_PARAMETER_ASSOCIATION_LIST",
+    "PT_PARAMETER_ASSOCIATION_ELEMENT",
 };
 
 const char *parse_operators[] = {
@@ -342,6 +347,22 @@ void VhdlParseTreeNode::debug_print() {
             this->pieces[0]->debug_print();
             break;
 
+        case PT_FUNCTION_CALL:
+            cout << ", \"name\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"params\": ";
+            this->pieces[1]->debug_print();
+            break;
+
+        case PT_PARAMETER_ASSOCIATION_ELEMENT:
+            cout << ", \"actual_part\": ";
+            this->pieces[0]->debug_print();
+            if (this->pieces[1]) {
+                cout << ", \"formal_part\": ";
+                this->pieces[1]->debug_print();
+            }
+            break;
+
         case PT_EXPRESSION_LIST:
         case PT_ID_LIST:
         case PT_RECORD_RESOLUTION:
@@ -350,6 +371,7 @@ void VhdlParseTreeNode::debug_print() {
         case PT_PATHNAME_ELEMENT:
         case PT_AGGREGATE:
         case PT_CHOICES:
+        case PT_PARAMETER_ASSOCIATION_LIST:
             if (this->pieces[0]) {
                 cout << ", \"rest\": ";
                 this->pieces[0]->debug_print();
