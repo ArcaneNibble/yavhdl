@@ -1148,6 +1148,7 @@ sequential_statement:
 _real_sequential_statement:
     assertion_statement
     | report_statement
+    | procedure_call
     | next_statement
     | exit_statement
     | return_statement
@@ -1199,6 +1200,14 @@ report_statement:
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
     }
+
+/// Section 10.7
+procedure_call:
+    // Fun, accepts lots of crap. Functions and procedures basically look
+    // about the same though, so the hacks we have for functions should be
+    // sufficient.
+    name
+    | _definitely_function_call
 
 /// Section 10.11
 next_statement:

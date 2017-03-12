@@ -1,1 +1,1 @@
-exit asdf;-- when foo(aaa, bbb, ccc, ddd, open, eee, fff => ggg, hhh, iii, open, bar.baz.qux."wat"(jjj) => open, kkk);
+foo(aaa, bbb, ccc, ddd, open, eee, fff => ggg, hhh, iii, open, bar.baz.qux."wat"(jjj) => open, kkk);
