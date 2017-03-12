@@ -217,7 +217,7 @@ signature:
 
 _one_or_more_ids:
     _simple_or_selected_name
-    | _one_or_more_ids ',' _simple_or_selected_name   {
+    | _one_or_more_ids ',' _simple_or_selected_name {
         $$ = new VhdlParseTreeNode(PT_ID_LIST);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
@@ -228,7 +228,7 @@ _one_or_more_ids:
 
 /// Section 5.2.1
 range_constraint:
-    KW_RANGE range  {
+    KW_RANGE range {
         $$ = $2;
     }
 
@@ -261,7 +261,7 @@ enumeration_literal:
 // This requires the abstract_literal otherwise it becomes ambiguous with just
 // name.
 _almost_physical_literal:
-    abstract_literal _simple_or_selected_name     {
+    abstract_literal _simple_or_selected_name {
         $$ = new VhdlParseTreeNode(PT_LIT_PHYS);
         $$->piece_count = 2;
         $$->pieces[0] = $2;
@@ -282,13 +282,13 @@ array_constraint:
         $$->pieces[0] = nullptr;
         $$->pieces[1] = $4;
     }
-    | index_constraint  {
+    | index_constraint {
         $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = nullptr;
     }
-    | index_constraint element_constraint   {
+    | index_constraint element_constraint {
         $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
@@ -302,7 +302,7 @@ index_constraint:
 
 _one_or_more_discrete_range:
     discrete_range
-    | _one_or_more_discrete_range ',' discrete_range   {
+    | _one_or_more_discrete_range ',' discrete_range {
         $$ = new VhdlParseTreeNode(PT_INDEX_CONSTRAINT);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
@@ -321,13 +321,13 @@ discrete_range:
 
 /// Section 5.3.3
 record_constraint:
-    '(' _one_or_more_record_element_constraint ')'  {
+    '(' _one_or_more_record_element_constraint ')' {
         $$ = $2;
     }
 
 _one_or_more_record_element_constraint:
     record_element_constraint
-    | _one_or_more_record_element_constraint ',' record_element_constraint  {
+    | _one_or_more_record_element_constraint ',' record_element_constraint {
         $$ = new VhdlParseTreeNode(PT_RECORD_CONSTRAINT);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
@@ -335,7 +335,7 @@ _one_or_more_record_element_constraint:
     }
 
 record_element_constraint:
-    identifier element_constraint   {
+    identifier element_constraint {
         $$ = new VhdlParseTreeNode(PT_RECORD_ELEMENT_CONSTRAINT);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
@@ -347,7 +347,7 @@ record_element_constraint:
 /// Section 6.3
 subtype_indication:
     _simple_or_selected_name
-    | resolution_indication _simple_or_selected_name  {
+    | resolution_indication _simple_or_selected_name {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
         $$->piece_count = 3;
         $$->pieces[0] = $2;
@@ -373,7 +373,7 @@ subtype_indication:
 // ambiguities. Does not allow a resolution indication because that isn't
 // actually permitted (see 5.3.2.1).
 _almost_discrete_subtype_indication:
-    _simple_or_selected_name _discrete_constraint     {
+    _simple_or_selected_name _discrete_constraint {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
         $$->piece_count = 3;
         $$->pieces[0] = $1;
@@ -400,7 +400,7 @@ _allocator_subtype_indication:
 resolution_indication:
     // The following two are for function names
     function_name
-    | '(' element_resolution ')'    {
+    | '(' element_resolution ')' {
         // FIXME: Do I need to store more information here?
         $$ = $2;
     }
@@ -419,7 +419,7 @@ record_resolution:
     }
 
 record_element_resolution:
-    identifier resolution_indication    {
+    identifier resolution_indication {
         $$ = new VhdlParseTreeNode(PT_RECORD_ELEMENT_RESOLUTION);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
@@ -455,27 +455,28 @@ _definitely_parameter_association_list:
     | KW_OPEN {
         $$ = new VhdlParseTreeNode(PT_TOK_OPEN);
     }
-    | _one_or_more_expressions ',' _definitely_parameter_association_element  {
+    | _one_or_more_expressions ',' _definitely_parameter_association_element {
         $$ = new VhdlParseTreeNode(PT_PARAMETER_ASSOCIATION_LIST);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
     // HACK
-    | _one_or_more_expressions ',' KW_OPEN  {
+    | _one_or_more_expressions ',' KW_OPEN {
         $$ = new VhdlParseTreeNode(PT_PARAMETER_ASSOCIATION_LIST);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = new VhdlParseTreeNode(PT_TOK_OPEN);
     }
-    | _definitely_parameter_association_list ',' _definitely_parameter_association_element    {
+    | _definitely_parameter_association_list ','
+      _definitely_parameter_association_element {
         $$ = new VhdlParseTreeNode(PT_PARAMETER_ASSOCIATION_LIST);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
     // HACK
-    | _definitely_parameter_association_list ',' _function_actual_part    {
+    | _definitely_parameter_association_list ',' _function_actual_part {
         $$ = new VhdlParseTreeNode(PT_PARAMETER_ASSOCIATION_LIST);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
@@ -484,7 +485,7 @@ _definitely_parameter_association_list:
 
 // Must have => in it
 _definitely_parameter_association_element:
-    formal_part DL_ARR _function_actual_part    {
+    formal_part DL_ARR _function_actual_part {
         $$ = new VhdlParseTreeNode(PT_PARAMETER_ASSOCIATION_ELEMENT);
         $$->piece_count = 2;
         $$->pieces[0] = $3;
@@ -493,7 +494,7 @@ _definitely_parameter_association_element:
 
 formal_part:
     formal_designator
-    | function_name '(' formal_designator ')'   {
+    | function_name '(' formal_designator ')' {
         $$ = new VhdlParseTreeNode(PT_FORMAL_PART_FN);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
@@ -509,7 +510,7 @@ formal_designator:
 // "open" however. "inertial" is not allowed for functions.
 _function_actual_part:
     expression
-    | KW_OPEN   {
+    | KW_OPEN {
         $$ = new VhdlParseTreeNode(PT_TOK_OPEN);
     }
 
@@ -526,7 +527,7 @@ name:
     // that are actually a "primary." It needs to be disambiguated later in
     // second-stage parsing. However, it notably includes indexed and slice
     // names.
-    | name '(' _ambig_name_parens ')'   {
+    | name '(' _ambig_name_parens ')' {
         $$ = new VhdlParseTreeNode(PT_NAME_AMBIG_PARENS);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
@@ -552,7 +553,7 @@ _simple_or_selected_name:
 
 /// Section 8.3
 selected_name:
-    name '.' suffix   {
+    name '.' suffix {
         $$ = new VhdlParseTreeNode(PT_NAME_SELECTED);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
@@ -579,13 +580,13 @@ slice_name:
 // end because it is ambiguous with function calls. _ambig_name_parens should
 // pick that up.
 _almost_attribute_name:
-    name '\'' identifier    {
+    name '\'' identifier {
         $$ = new VhdlParseTreeNode(PT_NAME_ATTRIBUTE);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
-    | name signature '\'' identifier    {
+    | name signature '\'' identifier {
         $$ = new VhdlParseTreeNode(PT_NAME_ATTRIBUTE);
         $$->piece_count = 3;
         $$->pieces[0] = $1;
@@ -597,7 +598,7 @@ _almost_attribute_name:
 // S/R conflict.
 attribute_name:
     _almost_attribute_name
-    | _almost_attribute_name '(' expression ')'     {
+    | _almost_attribute_name '(' expression ')' {
         $$ = $1;
         $$->piece_count = 4;
         $$->pieces[3] = $3;
@@ -610,7 +611,7 @@ external_name:
     | external_variable_name
 
 external_constant_name:
-    DL_LL KW_CONSTANT external_pathname ':' subtype_indication DL_RR    {
+    DL_LL KW_CONSTANT external_pathname ':' subtype_indication DL_RR {
         $$ = new VhdlParseTreeNode(PT_NAME_EXT_CONST);
         $$->piece_count = 2;
         $$->pieces[0] = $3;
@@ -618,7 +619,7 @@ external_constant_name:
     }
 
 external_signal_name:
-    DL_LL KW_SIGNAL external_pathname ':' subtype_indication DL_RR    {
+    DL_LL KW_SIGNAL external_pathname ':' subtype_indication DL_RR {
         $$ = new VhdlParseTreeNode(PT_NAME_EXT_SIG);
         $$->piece_count = 2;
         $$->pieces[0] = $3;
@@ -626,7 +627,7 @@ external_signal_name:
     }
 
 external_variable_name:
-    DL_LL KW_VARIABLE external_pathname ':' subtype_indication DL_RR    {
+    DL_LL KW_VARIABLE external_pathname ':' subtype_indication DL_RR {
         $$ = new VhdlParseTreeNode(PT_NAME_EXT_VAR);
         $$->piece_count = 2;
         $$->pieces[0] = $3;
@@ -649,7 +650,7 @@ package_pathname:
 
 _one_or_more_ids_dots:
     identifier
-    | _one_or_more_ids_dots '.' identifier  {
+    | _one_or_more_ids_dots '.' identifier {
         $$ = new VhdlParseTreeNode(PT_ID_LIST);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
@@ -657,14 +658,14 @@ _one_or_more_ids_dots:
     }
 
 absolute_pathname:
-    '.' partial_pathname    {
+    '.' partial_pathname {
         $$ = new VhdlParseTreeNode(PT_ABSOLUTE_PATHNAME);
         $$->piece_count = 1;
         $$->pieces[0] = $2;
     }
 
 relative_pathname:
-    partial_pathname    {
+    partial_pathname {
         $$ = new VhdlParseTreeNode(PT_RELATIVE_PATHNAME);
         $$->piece_count = 1;
         $$->pieces[0] = $1;
@@ -676,7 +677,7 @@ relative_pathname:
     }
 
 partial_pathname:
-    identifier  {
+    identifier {
         $$ = new VhdlParseTreeNode(PT_PARTIAL_PATHNAME);
         $$->piece_count = 1;
         $$->pieces[0] = $1;
@@ -690,7 +691,7 @@ partial_pathname:
 
 _one_or_more_pathname_elements:
     pathname_element
-    | _one_or_more_pathname_elements '.' pathname_element   {
+    | _one_or_more_pathname_elements '.' pathname_element {
         $$ = new VhdlParseTreeNode(PT_PATHNAME_ELEMENT);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
@@ -714,7 +715,7 @@ _ambig_name_parens:
 
 _one_or_more_expressions:
     expression
-    | _one_or_more_expressions ',' expression   {
+    | _one_or_more_expressions ',' expression {
         $$ = new VhdlParseTreeNode(PT_EXPRESSION_LIST);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
@@ -726,7 +727,7 @@ _one_or_more_expressions:
 expression:
     logical_expression
     /// Section 9.2.9
-    | DL_QQ primary     {
+    | DL_QQ primary {
         $$ = new VhdlParseTreeNode(PT_UNARY_OPERATOR);
         $$->op_type = OP_COND;
         $$->pieces[0] = $2;
@@ -735,37 +736,37 @@ expression:
 /// Section 9.2.2
 logical_expression:
     relation
-    | logical_expression KW_AND relation    {
+    | logical_expression KW_AND relation {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_AND;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
-    | logical_expression KW_OR relation     {
+    | logical_expression KW_OR relation {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_OR;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
-    | logical_expression KW_XOR relation    {
+    | logical_expression KW_XOR relation {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_XOR;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
-    | relation KW_NAND relation             {
+    | relation KW_NAND relation {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_NAND;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
-    | relation KW_NOR relation              {
+    | relation KW_NOR relation {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_NOR;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
-    | logical_expression KW_XNOR relation   {
+    | logical_expression KW_XNOR relation {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_XNOR;
         $$->pieces[0] = $1;
@@ -775,83 +776,83 @@ logical_expression:
 /// Section 9.2.3
 relation:
     shift_expression
-    | shift_expression '=' shift_expression     {
+    | shift_expression '=' shift_expression {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_EQ;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
-    | shift_expression DL_NEQ shift_expression  {
+    | shift_expression DL_NEQ shift_expression {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_NEQ;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
 
-    | shift_expression '<' shift_expression     {
+    | shift_expression '<' shift_expression {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_LT;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
 
-    | shift_expression DL_LEQ shift_expression  {
+    | shift_expression DL_LEQ shift_expression {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_LTE;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
 
-    | shift_expression '>' shift_expression     {
+    | shift_expression '>' shift_expression {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_GT;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
 
-    | shift_expression DL_GEQ shift_expression  {
+    | shift_expression DL_GEQ shift_expression {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_GTE;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
 
-    | shift_expression DL_MEQ shift_expression  {
+    | shift_expression DL_MEQ shift_expression {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_MEQ;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
 
-    | shift_expression DL_MNE shift_expression  {
+    | shift_expression DL_MNE shift_expression {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_MNE;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
 
-    | shift_expression DL_MLT shift_expression  {
+    | shift_expression DL_MLT shift_expression {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_MLT;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
 
-    | shift_expression DL_MLE shift_expression  {
+    | shift_expression DL_MLE shift_expression {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_MLE;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
 
-    | shift_expression DL_MGT shift_expression  {
+    | shift_expression DL_MGT shift_expression {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_MGT;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
 
-    | shift_expression DL_MGE shift_expression  {
+    | shift_expression DL_MGE shift_expression {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_MGE;
         $$->pieces[0] = $1;
@@ -861,37 +862,37 @@ relation:
 /// Section 9.2.4
 shift_expression:
     simple_expression
-    | simple_expression KW_SLL simple_expression    {
+    | simple_expression KW_SLL simple_expression {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_SLL;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
-    | simple_expression KW_SRL simple_expression    {
+    | simple_expression KW_SRL simple_expression {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_SRL;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
-    | simple_expression KW_SLA simple_expression    {
+    | simple_expression KW_SLA simple_expression {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_SLA;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
-    | simple_expression KW_SRA simple_expression    {
+    | simple_expression KW_SRA simple_expression {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_SRA;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
-    | simple_expression KW_ROL simple_expression    {
+    | simple_expression KW_ROL simple_expression {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_ROL;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
-    | simple_expression KW_ROR simple_expression    {
+    | simple_expression KW_ROR simple_expression {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_ROR;
         $$->pieces[0] = $1;
@@ -901,19 +902,19 @@ shift_expression:
 /// Section 9.2.5
 simple_expression:
     _term_with_sign
-    | simple_expression '+' term    {
+    | simple_expression '+' term {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_ADD;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
-    | simple_expression '-' term    {
+    | simple_expression '-' term {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_SUB;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
-    | simple_expression '&' term    {
+    | simple_expression '&' term {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_CONCAT;
         $$->pieces[0] = $1;
@@ -924,12 +925,12 @@ simple_expression:
 // FIXME: Check if this precedence is right
 _term_with_sign:
     term
-    | '+' term      {
+    | '+' term {
         $$ = new VhdlParseTreeNode(PT_UNARY_OPERATOR);
         $$->op_type = OP_ADD;
         $$->pieces[0] = $2;
     }
-    | '-' term      {
+    | '-' term {
         $$ = new VhdlParseTreeNode(PT_UNARY_OPERATOR);
         $$->op_type = OP_SUB;
         $$->pieces[0] = $2;
@@ -938,25 +939,25 @@ _term_with_sign:
 /// Section 9.2.7
 term:
     factor
-    | term '*' factor       {
+    | term '*' factor {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_MUL;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
-    | term '/' factor       {
+    | term '/' factor {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_DIV;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
-    | term KW_MOD factor    {
+    | term KW_MOD factor {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_MOD;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
-    | term KW_REM factor    {
+    | term KW_REM factor {
         $$ = new VhdlParseTreeNode(PT_BINARY_OPERATOR);
         $$->op_type = OP_REM;
         $$->pieces[0] = $1;
@@ -972,42 +973,42 @@ factor:
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
-    | KW_ABS primary    {
+    | KW_ABS primary {
         $$ = new VhdlParseTreeNode(PT_UNARY_OPERATOR);
         $$->op_type = OP_ABS;
         $$->pieces[0] = $2;
     }
-    | KW_NOT primary    {
+    | KW_NOT primary {
         $$ = new VhdlParseTreeNode(PT_UNARY_OPERATOR);
         $$->op_type = OP_NOT;
         $$->pieces[0] = $2;
     }
-    | KW_AND primary    {
+    | KW_AND primary {
         $$ = new VhdlParseTreeNode(PT_UNARY_OPERATOR);
         $$->op_type = OP_AND;
         $$->pieces[0] = $2;
     }
-    | KW_OR primary     {
+    | KW_OR primary {
         $$ = new VhdlParseTreeNode(PT_UNARY_OPERATOR);
         $$->op_type = OP_OR;
         $$->pieces[0] = $2;
     }
-    | KW_NAND primary   {
+    | KW_NAND primary {
         $$ = new VhdlParseTreeNode(PT_UNARY_OPERATOR);
         $$->op_type = OP_NAND;
         $$->pieces[0] = $2;
     }
-    | KW_NOR primary    {
+    | KW_NOR primary {
         $$ = new VhdlParseTreeNode(PT_UNARY_OPERATOR);
         $$->op_type = OP_NOR;
         $$->pieces[0] = $2;
     }
-    | KW_XOR primary    {
+    | KW_XOR primary {
         $$ = new VhdlParseTreeNode(PT_UNARY_OPERATOR);
         $$->op_type = OP_XOR;
         $$->pieces[0] = $2;
     }
-    | KW_XNOR primary   {
+    | KW_XNOR primary {
         $$ = new VhdlParseTreeNode(PT_UNARY_OPERATOR);
         $$->op_type = OP_XNOR;
         $$->pieces[0] = $2;
@@ -1029,7 +1030,7 @@ primary:
     | qualified_expression
     // type_conversion is caught by name
     | allocator
-    | '(' expression ')'    {
+    | '(' expression ')' {
         $$ = $2;
     }
 
@@ -1040,7 +1041,7 @@ numeric_literal:
 
 /// Section 9.3.3
 aggregate:
-    '(' _two_or_more_element_association ')'    {
+    '(' _two_or_more_element_association ')' {
         $$ = $2;
     }
     | '(' _must_have_choice_element_association ')' {
@@ -1057,7 +1058,7 @@ _two_or_more_element_association:
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
-    | _two_or_more_element_association ',' element_association  {
+    | _two_or_more_element_association ',' element_association {
         $$ = new VhdlParseTreeNode(PT_AGGREGATE);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
@@ -1065,7 +1066,7 @@ _two_or_more_element_association:
     }
 
 element_association:
-    expression  {
+    expression {
         $$ = new VhdlParseTreeNode(PT_ELEMENT_ASSOCIATION);
         $$->piece_count = 1;
         $$->pieces[0] = $1;
@@ -1073,7 +1074,7 @@ element_association:
     | _must_have_choice_element_association
 
 _must_have_choice_element_association:
-    choices DL_ARR expression   {
+    choices DL_ARR expression {
         $$ = new VhdlParseTreeNode(PT_ELEMENT_ASSOCIATION);
         $$->piece_count = 2;
         $$->pieces[0] = $3;
@@ -1082,7 +1083,7 @@ _must_have_choice_element_association:
 
 choices:
     choice
-    | choices '|' choice    {
+    | choices '|' choice {
         $$ = new VhdlParseTreeNode(PT_CHOICES);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
@@ -1093,7 +1094,7 @@ choice:
     simple_expression
     | _almost_discrete_range
     // simple_name is included in simple_expression
-    | KW_OTHERS   {
+    | KW_OTHERS {
         $$ = new VhdlParseTreeNode(PT_CHOICES_OTHER);
     }
 
@@ -1101,7 +1102,7 @@ choice:
 // Handles only function calls that contain "=>" in the parameters. Other ones
 // are caught by "name".
 _definitely_function_call:
-    function_name '(' _definitely_parameter_association_list ')'    {
+    function_name '(' _definitely_parameter_association_list ')' {
         $$ = new VhdlParseTreeNode(PT_FUNCTION_CALL);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
@@ -1110,13 +1111,13 @@ _definitely_function_call:
 
 /// Section 9.3.5
 qualified_expression:
-    _simple_or_selected_name '\'' '(' expression ')'    {
+    _simple_or_selected_name '\'' '(' expression ')' {
         $$ = new VhdlParseTreeNode(PT_QUALIFIED_EXPRESSION);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $4;
     }
-    | _simple_or_selected_name '\'' aggregate   {
+    | _simple_or_selected_name '\'' aggregate {
         $$ = new VhdlParseTreeNode(PT_QUALIFIED_EXPRESSION);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
@@ -1125,7 +1126,7 @@ qualified_expression:
 
 /// Section 9.3.7
 allocator:
-    KW_NEW _allocator_subtype_indication   {
+    KW_NEW _allocator_subtype_indication {
         $$ = new VhdlParseTreeNode(PT_ALLOCATOR);
         $$->piece_count = 1;
         $$->pieces[0] = $2;
