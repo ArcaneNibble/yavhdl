@@ -931,16 +931,34 @@ _definitely_function_call:
         $$->pieces[1] = $3;
     }
 
+// FIXME ugly: If we see a bare "open", we know we're going to be a
+// function call and cannot hit ambiguities with _ambig_name_parens.
 _definitely_parameter_association_list:
-    // TODO
-    _definitely_association_element
-    | _one_or_more_expressions ',' _definitely_association_element  {
+    _definitely_parameter_association_element
+    | KW_OPEN {
+        $$ = new VhdlParseTreeNode(PT_TOK_OPEN);
+    }
+    | _one_or_more_expressions ',' _definitely_parameter_association_element  {
         $$ = new VhdlParseTreeNode(PT_PARAMETER_ASSOCIATION_LIST);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
-    | _definitely_parameter_association_list ',' _definitely_association_element    {
+    // HACK
+    | _one_or_more_expressions ',' KW_OPEN  {
+        $$ = new VhdlParseTreeNode(PT_PARAMETER_ASSOCIATION_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = new VhdlParseTreeNode(PT_TOK_OPEN);
+    }
+    | _definitely_parameter_association_list ',' _definitely_parameter_association_element    {
+        $$ = new VhdlParseTreeNode(PT_PARAMETER_ASSOCIATION_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    // HACK
+    | _definitely_parameter_association_list ',' _function_actual_part    {
         $$ = new VhdlParseTreeNode(PT_PARAMETER_ASSOCIATION_LIST);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
@@ -948,14 +966,22 @@ _definitely_parameter_association_list:
     }
 
 // Must have => in it
-_definitely_association_element:
-    identifier DL_ARR _function_actual_part    {
+_definitely_parameter_association_element:
+    formal_part DL_ARR _function_actual_part    {
         $$ = new VhdlParseTreeNode(PT_PARAMETER_ASSOCIATION_ELEMENT);
         $$->piece_count = 2;
         $$->pieces[0] = $3;
         $$->pieces[1] = $1;
     }
     // TODO
+
+formal_part:
+    formal_designator
+    // TODO
+
+formal_designator:
+    identifier
+    // FIXME: I don't think a selected name can be used here?
 
 // By accepting expression we already accept all the possible types of names.
 // We cannot accept a type (subtype_indication). We can additionally accept

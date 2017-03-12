@@ -1,1 +1,1 @@
-foo(open, zzz, qux => asdf, bar => baz'aaa(bbb))
+foo(aaa, bbb, ccc, ddd, open, eee, fff => ggg, hhh, iii, open, jjj => open, kkk)
