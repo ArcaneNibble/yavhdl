@@ -74,6 +74,8 @@ enum ParseTreeNodeType
     PT_NULL_STATEMENT,
     PT_ASSERTION_STATEMENT,
     PT_REPORT_STATEMENT,
+    PT_NEXT_STATEMENT,
+    PT_EXIT_STATEMENT,
 };
 
 // Operators, section 9.2

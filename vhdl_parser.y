@@ -1148,6 +1148,8 @@ sequential_statement:
 _real_sequential_statement:
     assertion_statement
     | report_statement
+    | next_statement
+    | exit_statement
     | return_statement
     | null_statement
     // TODO
@@ -1193,6 +1195,60 @@ report_statement:
     }
     | KW_REPORT expression KW_SEVERITY expression {
         $$ = new VhdlParseTreeNode(PT_REPORT_STATEMENT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+    }
+
+/// Section 10.11
+next_statement:
+    KW_NEXT {
+        $$ = new VhdlParseTreeNode(PT_NEXT_STATEMENT);
+        $$->piece_count = 2;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = nullptr;
+    }
+    | KW_NEXT identifier {
+        $$ = new VhdlParseTreeNode(PT_NEXT_STATEMENT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = nullptr;
+    }
+    | KW_NEXT KW_WHEN expression {
+        $$ = new VhdlParseTreeNode(PT_NEXT_STATEMENT);
+        $$->piece_count = 2;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = $3;
+    }
+    | KW_NEXT identifier KW_WHEN expression {
+        $$ = new VhdlParseTreeNode(PT_NEXT_STATEMENT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+    }
+
+/// Section 10.12
+exit_statement:
+    KW_EXIT {
+        $$ = new VhdlParseTreeNode(PT_EXIT_STATEMENT);
+        $$->piece_count = 2;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = nullptr;
+    }
+    | KW_EXIT identifier {
+        $$ = new VhdlParseTreeNode(PT_EXIT_STATEMENT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = nullptr;
+    }
+    | KW_EXIT KW_WHEN expression {
+        $$ = new VhdlParseTreeNode(PT_EXIT_STATEMENT);
+        $$->piece_count = 2;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = $3;
+    }
+    | KW_EXIT identifier KW_WHEN expression {
+        $$ = new VhdlParseTreeNode(PT_EXIT_STATEMENT);
         $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
