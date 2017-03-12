@@ -27,6 +27,7 @@ struct VhdlParseTreeNode *parse_output;
 %debug
 
 //////////////////////// Reserved words, section 15.10 ////////////////////////
+
 %token KW_ABS
 %token KW_ACCESS
 %token KW_AFTER
@@ -144,6 +145,7 @@ struct VhdlParseTreeNode *parse_output;
 %token KW_XOR
 
 ////////////////// Multi-character delimiters, section 15.3 //////////////////
+
 %token DL_ARR
 %token DL_EXP
 %token DL_ASS
@@ -162,6 +164,7 @@ struct VhdlParseTreeNode *parse_output;
 %token DL_RR
 
 //////////////// Miscellaneous tokens for other lexer literals ////////////////
+
 %token TOK_STRING
 %token TOK_BITSTRING
 %token TOK_DECIMAL
@@ -444,6 +447,72 @@ element_constraint:
     array_constraint
     | record_constraint
 
+/// Section 6.5.7
+// FIXME ugly: If we see a bare "open", we know we're going to be a
+// function call and cannot hit ambiguities with _ambig_name_parens.
+_definitely_parameter_association_list:
+    _definitely_parameter_association_element
+    | KW_OPEN {
+        $$ = new VhdlParseTreeNode(PT_TOK_OPEN);
+    }
+    | _one_or_more_expressions ',' _definitely_parameter_association_element  {
+        $$ = new VhdlParseTreeNode(PT_PARAMETER_ASSOCIATION_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    // HACK
+    | _one_or_more_expressions ',' KW_OPEN  {
+        $$ = new VhdlParseTreeNode(PT_PARAMETER_ASSOCIATION_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = new VhdlParseTreeNode(PT_TOK_OPEN);
+    }
+    | _definitely_parameter_association_list ',' _definitely_parameter_association_element    {
+        $$ = new VhdlParseTreeNode(PT_PARAMETER_ASSOCIATION_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    // HACK
+    | _definitely_parameter_association_list ',' _function_actual_part    {
+        $$ = new VhdlParseTreeNode(PT_PARAMETER_ASSOCIATION_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+// Must have => in it
+_definitely_parameter_association_element:
+    formal_part DL_ARR _function_actual_part    {
+        $$ = new VhdlParseTreeNode(PT_PARAMETER_ASSOCIATION_ELEMENT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $3;
+        $$->pieces[1] = $1;
+    }
+
+formal_part:
+    formal_designator
+    | function_name '(' formal_designator ')'   {
+        $$ = new VhdlParseTreeNode(PT_FORMAL_PART_FN);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+formal_designator:
+    identifier
+    // FIXME: I don't think a selected name can be used here?
+
+// By accepting expression we already accept all the possible types of names.
+// We cannot accept a type (subtype_indication). We can additionally accept
+// "open" however. "inertial" is not allowed for functions.
+_function_actual_part:
+    expression
+    | KW_OPEN   {
+        $$ = new VhdlParseTreeNode(PT_TOK_OPEN);
+    }
+
 ////////////////////////////// Names, section 8 //////////////////////////////
 
 // This is a super hacked up version of the name grammar production
@@ -653,6 +722,7 @@ _one_or_more_expressions:
     }
 
 /////////////////////////// Expressions, section 9 ///////////////////////////
+
 expression:
     logical_expression
     /// Section 9.2.9
@@ -1064,71 +1134,6 @@ allocator:
         $$ = new VhdlParseTreeNode(PT_ALLOCATOR);
         $$->piece_count = 1;
         $$->pieces[0] = $2;
-    }
-
-// FIXME ugly: If we see a bare "open", we know we're going to be a
-// function call and cannot hit ambiguities with _ambig_name_parens.
-_definitely_parameter_association_list:
-    _definitely_parameter_association_element
-    | KW_OPEN {
-        $$ = new VhdlParseTreeNode(PT_TOK_OPEN);
-    }
-    | _one_or_more_expressions ',' _definitely_parameter_association_element  {
-        $$ = new VhdlParseTreeNode(PT_PARAMETER_ASSOCIATION_LIST);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $3;
-    }
-    // HACK
-    | _one_or_more_expressions ',' KW_OPEN  {
-        $$ = new VhdlParseTreeNode(PT_PARAMETER_ASSOCIATION_LIST);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = new VhdlParseTreeNode(PT_TOK_OPEN);
-    }
-    | _definitely_parameter_association_list ',' _definitely_parameter_association_element    {
-        $$ = new VhdlParseTreeNode(PT_PARAMETER_ASSOCIATION_LIST);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $3;
-    }
-    // HACK
-    | _definitely_parameter_association_list ',' _function_actual_part    {
-        $$ = new VhdlParseTreeNode(PT_PARAMETER_ASSOCIATION_LIST);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $3;
-    }
-
-// Must have => in it
-_definitely_parameter_association_element:
-    formal_part DL_ARR _function_actual_part    {
-        $$ = new VhdlParseTreeNode(PT_PARAMETER_ASSOCIATION_ELEMENT);
-        $$->piece_count = 2;
-        $$->pieces[0] = $3;
-        $$->pieces[1] = $1;
-    }
-
-formal_part:
-    formal_designator
-    | function_name '(' formal_designator ')'   {
-        $$ = new VhdlParseTreeNode(PT_FORMAL_PART_FN);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $3;
-    }
-
-formal_designator:
-    identifier
-    // FIXME: I don't think a selected name can be used here?
-
-// By accepting expression we already accept all the possible types of names.
-// We cannot accept a type (subtype_indication). We can additionally accept
-// "open" however. "inertial" is not allowed for functions.
-_function_actual_part:
-    expression
-    | KW_OPEN   {
-        $$ = new VhdlParseTreeNode(PT_TOK_OPEN);
     }
 
 //////////////////////// Lexical elements, section 15 ////////////////////////
