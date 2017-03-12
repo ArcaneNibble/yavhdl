@@ -184,7 +184,7 @@ _toplevel_token:
 
 // Fake start token for testing
 not_actualy_design_file:
-    sequential_statement;
+    sequence_of_statements;
 
 ///////////////////// Subprograms and packages, section 4 /////////////////////
 
@@ -1136,6 +1136,20 @@ allocator:
 
 ////////////////////// Sequential statements, section 10 //////////////////////
 
+sequence_of_statements:
+    %empty
+    | _real_sequence_of_statements
+
+// We need this or else the %empty can cause ambiguity.
+_real_sequence_of_statements:
+    sequential_statement
+    | _real_sequence_of_statements sequential_statement {
+        $$ = new VhdlParseTreeNode(PT_SEQUENCE_OF_STATEMENTS);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
+
 sequential_statement:
     _real_sequential_statement ';'
     | identifier ':' _real_sequential_statement ';' {
@@ -1148,7 +1162,8 @@ sequential_statement:
 _real_sequential_statement:
     assertion_statement
     | report_statement
-    | procedure_call
+    | procedure_call_statement
+    | if_statement
     | next_statement
     | exit_statement
     | return_statement
@@ -1202,12 +1217,31 @@ report_statement:
     }
 
 /// Section 10.7
-procedure_call:
+procedure_call_statement:
     // Fun, accepts lots of crap. Functions and procedures basically look
     // about the same though, so the hacks we have for functions should be
     // sufficient.
     name
     | _definitely_function_call
+
+/// Section 10.8
+if_statement:
+    _real_if_statement
+    | _real_if_statement identifier {
+        $$ = $1;
+        $$->pieces[4] = $2;
+    }
+
+_real_if_statement:
+    KW_IF expression KW_THEN sequence_of_statements KW_END KW_IF {
+        $$ = new VhdlParseTreeNode(PT_IF_STATEMENT);
+        $$->piece_count = 5;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = nullptr;
+        $$->pieces[4] = nullptr;
+    }
 
 /// Section 10.11
 next_statement:

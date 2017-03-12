@@ -74,6 +74,8 @@ const char *parse_tree_types[] = {
     "PT_REPORT_STATEMENT",
     "PT_NEXT_STATEMENT",
     "PT_EXIT_STATEMENT",
+    "PT_SEQUENCE_OF_STATEMENTS",
+    "PT_IF_STATEMENT",
 };
 
 const char *parse_operators[] = {
@@ -425,6 +427,27 @@ void VhdlParseTreeNode::debug_print() {
             }
             break;
 
+        case PT_IF_STATEMENT:
+            cout << ", \"condition\": ";
+            this->pieces[0]->debug_print();
+            if (this->pieces[1]) {
+                cout << ", \"if_arm\": ";
+                this->pieces[1]->debug_print();
+            }
+            if (this->pieces[2]) {
+                cout << ", \"elsif_arms\": ";
+                this->pieces[2]->debug_print();
+            }
+            if (this->pieces[3]) {
+                cout << ", \"else_arms\": ";
+                this->pieces[3]->debug_print();
+            }
+            if (this->pieces[4]) {
+                cout << ", \"end_label\": ";
+                this->pieces[4]->debug_print();
+            }
+            break;
+
         case PT_EXPRESSION_LIST:
         case PT_ID_LIST:
         case PT_RECORD_RESOLUTION:
@@ -434,6 +457,7 @@ void VhdlParseTreeNode::debug_print() {
         case PT_AGGREGATE:
         case PT_CHOICES:
         case PT_PARAMETER_ASSOCIATION_LIST:
+        case PT_SEQUENCE_OF_STATEMENTS:
             if (this->pieces[0]) {
                 cout << ", \"rest\": ";
                 this->pieces[0]->debug_print();
