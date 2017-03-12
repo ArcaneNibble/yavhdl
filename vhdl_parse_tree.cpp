@@ -70,6 +70,7 @@ const char *parse_tree_types[] = {
     "PT_STATEMENT_LABEL",
     "PT_RETURN_STATEMENT",
     "PT_NULL_STATEMENT",
+    "PT_ASSERTION_STATEMENT",
 };
 
 const char *parse_operators[] = {
@@ -385,6 +386,19 @@ void VhdlParseTreeNode::debug_print() {
         case PT_RETURN_STATEMENT:
             cout << ", \"expression\": ";
             this->pieces[0]->debug_print();
+            break;
+
+        case PT_ASSERTION_STATEMENT:
+            cout << ", \"condition\": ";
+            this->pieces[0]->debug_print();
+            if (this->pieces[1]) {
+                cout << ", \"report\": ";
+                this->pieces[1]->debug_print();
+            }
+            if (this->pieces[2]) {
+                cout << ", \"severity\": ";
+                this->pieces[2]->debug_print();
+            }
             break;
 
         case PT_EXPRESSION_LIST:

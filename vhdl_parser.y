@@ -1146,10 +1146,43 @@ sequential_statement:
     }
 
 _real_sequential_statement:
-    return_statement
+    assertion_statement
+    | return_statement
     | null_statement
     // TODO
 
+/// Section 10.3
+assertion_statement:
+    KW_ASSERT expression ';' {
+        $$ = new VhdlParseTreeNode(PT_ASSERTION_STATEMENT);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = nullptr;
+        $$->pieces[2] = nullptr;
+    }
+    | KW_ASSERT expression KW_REPORT expression ';' {
+        $$ = new VhdlParseTreeNode(PT_ASSERTION_STATEMENT);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = nullptr;
+    }
+    | KW_ASSERT expression KW_SEVERITY expression ';' {
+        $$ = new VhdlParseTreeNode(PT_ASSERTION_STATEMENT);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = nullptr;
+        $$->pieces[2] = $4;
+    }
+    | KW_ASSERT expression KW_REPORT expression KW_SEVERITY expression ';' {
+        $$ = new VhdlParseTreeNode(PT_ASSERTION_STATEMENT);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $6;
+    }
+
+/// Section 10.13
 return_statement:
     KW_RETURN expression ';' {
         $$ = new VhdlParseTreeNode(PT_RETURN_STATEMENT);
@@ -1157,6 +1190,7 @@ return_statement:
         $$->pieces[0] = $2;
     }
 
+/// Section 10.14
 null_statement:
     KW_NULL ';' {
         $$ = new VhdlParseTreeNode(PT_NULL_STATEMENT);

@@ -1,1 +1,1 @@
-null;
+mylabel: assert foo(aaa, bbb, ccc, ddd, open, eee, fff => ggg, hhh, iii, open, bar.baz.qux."wat"(jjj) => open, kkk) report 123 severity 456;
