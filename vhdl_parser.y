@@ -1105,10 +1105,6 @@ _function_actual_part:
         $$ = new VhdlParseTreeNode(PT_TOK_OPEN);
     }
 
-abstract_literal:
-    decimal_literal
-    | based_literal
-
 // This requires the abstract_literal otherwise it becomes ambiguous with just
 // name.
 _almost_physical_literal:
@@ -1123,18 +1119,32 @@ enumeration_literal:
     identifier
     | character_literal
 
-based_literal: TOK_BASED
-bit_string_literal: TOK_BITSTRING
-character_literal: TOK_CHAR
-decimal_literal: TOK_DECIMAL
-string_literal: TOK_STRING
+//////////////////////// Lexical elements, section 15 ////////////////////////
 
+// Section 15.4
 identifier:
     basic_identifier
     | extended_identifier
 
 basic_identifier: TOK_BASIC_ID
 extended_identifier: TOK_EXT_ID
+
+// Section 15.5
+abstract_literal:
+    decimal_literal
+    | based_literal
+
+decimal_literal: TOK_DECIMAL
+based_literal: TOK_BASED
+
+// Section 15.6
+character_literal: TOK_CHAR
+
+// Section 15.7
+string_literal: TOK_STRING
+
+// Section 15.8
+bit_string_literal: TOK_BITSTRING
 
 %%
 
