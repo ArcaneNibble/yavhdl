@@ -482,6 +482,8 @@ record_element_resolution:
         $$->pieces[1] = $2;
     }
 
+////////////////////////////// Types, section 5 //////////////////////////////
+
 // When a "discrete" subtype indication is needed, the _only_ type of
 // constraint we can have is a range constraint. Arrays and records aren't
 // discrete.
@@ -624,15 +626,17 @@ _one_or_more_ids:
         $$->pieces[1] = $3;
     }
 
-// Expressions, section 9
+/////////////////////////// Expressions, section 9 ///////////////////////////
 expression:
     logical_expression
+    // Section 9.2.9
     | DL_QQ primary     {
         $$ = new VhdlParseTreeNode(PT_UNARY_OPERATOR);
         $$->op_type = OP_COND;
         $$->pieces[0] = $2;
     }
 
+// Section 9.2.2
 logical_expression:
     relation
     | logical_expression KW_AND relation    {
@@ -672,6 +676,7 @@ logical_expression:
         $$->pieces[1] = $3;
     }
 
+// Section 9.2.3
 relation:
     shift_expression
     | shift_expression '=' shift_expression     {
@@ -757,7 +762,7 @@ relation:
         $$->pieces[1] = $3;
     }
 
-
+// Section 9.2.4
 shift_expression:
     simple_expression
     | simple_expression KW_SLL simple_expression    {
@@ -797,6 +802,7 @@ shift_expression:
         $$->pieces[1] = $3;
     }
 
+// Section 9.2.5
 simple_expression:
     _term_with_sign
     | simple_expression '+' term    {
@@ -818,6 +824,7 @@ simple_expression:
         $$->pieces[1] = $3;
     }
 
+// Section 9.2.6
 // FIXME: Check if this precedence is right
 _term_with_sign:
     term
@@ -832,6 +839,7 @@ _term_with_sign:
         $$->pieces[0] = $2;
     }
 
+// Section 9.2.7
 term:
     factor
     | term '*' factor       {
@@ -859,6 +867,7 @@ term:
         $$->pieces[1] = $3;
     }
 
+// Section 9.2.2, 9.2.8
 factor:
     primary
     | primary DL_EXP primary {
@@ -908,6 +917,7 @@ factor:
         $$->pieces[0] = $2;
     }
 
+// Section 9.3
 // Here is a hacked "primary" rule that relies on "name" to parse a bunch of
 // stuff that will be disambiguated later
 primary:
@@ -927,6 +937,71 @@ primary:
         $$ = $2;
     }
 
+// Section 9.3.2
+numeric_literal:
+    abstract_literal
+    | _almost_physical_literal
+
+// Section 9.3.3
+aggregate:
+    '(' _two_or_more_element_association ')'    {
+        $$ = $2;
+    }
+    | '(' _must_have_choice_element_association ')' {
+        $$ = new VhdlParseTreeNode(PT_AGGREGATE);
+        $$->piece_count = 2;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = $2;
+    }
+
+_two_or_more_element_association:
+    element_association ',' element_association {
+        $$ = new VhdlParseTreeNode(PT_AGGREGATE);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    | _two_or_more_element_association ',' element_association  {
+        $$ = new VhdlParseTreeNode(PT_AGGREGATE);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+element_association:
+    expression  {
+        $$ = new VhdlParseTreeNode(PT_ELEMENT_ASSOCIATION);
+        $$->piece_count = 1;
+        $$->pieces[0] = $1;
+    }
+    | _must_have_choice_element_association
+
+_must_have_choice_element_association:
+    choices DL_ARR expression   {
+        $$ = new VhdlParseTreeNode(PT_ELEMENT_ASSOCIATION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $3;
+        $$->pieces[1] = $1;
+    }
+
+choices:
+    choice
+    | choices '|' choice    {
+        $$ = new VhdlParseTreeNode(PT_CHOICES);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+choice:
+    simple_expression
+    | _almost_discrete_range
+    // simple_name is included in simple_expression
+    | KW_OTHERS   {
+        $$ = new VhdlParseTreeNode(PT_CHOICES_OTHER);
+    }
+
+// Section 9.3.4
 // Handles only function calls that contain "=>" in the parameters. Other ones
 // are caught by "name".
 _definitely_function_call:
@@ -935,6 +1010,34 @@ _definitely_function_call:
         $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
+    }
+
+// Section 9.3.5
+qualified_expression:
+    _simple_or_selected_name '\'' '(' expression ')'    {
+        $$ = new VhdlParseTreeNode(PT_QUALIFIED_EXPRESSION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $4;
+    }
+    | _simple_or_selected_name '\'' aggregate   {
+        $$ = new VhdlParseTreeNode(PT_QUALIFIED_EXPRESSION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+// Section 9.3.7
+allocator:
+    KW_NEW _allocator_subtype_indication   {
+        $$ = new VhdlParseTreeNode(PT_ALLOCATOR);
+        $$->piece_count = 1;
+        $$->pieces[0] = $2;
+    }
+    | KW_NEW qualified_expression {
+        $$ = new VhdlParseTreeNode(PT_ALLOCATOR);
+        $$->piece_count = 1;
+        $$->pieces[0] = $2;
     }
 
 // FIXME ugly: If we see a bare "open", we know we're going to be a
@@ -1001,94 +1104,6 @@ _function_actual_part:
     | KW_OPEN   {
         $$ = new VhdlParseTreeNode(PT_TOK_OPEN);
     }
-
-allocator:
-    KW_NEW _allocator_subtype_indication   {
-        $$ = new VhdlParseTreeNode(PT_ALLOCATOR);
-        $$->piece_count = 1;
-        $$->pieces[0] = $2;
-    }
-    | KW_NEW qualified_expression {
-        $$ = new VhdlParseTreeNode(PT_ALLOCATOR);
-        $$->piece_count = 1;
-        $$->pieces[0] = $2;
-    }
-
-qualified_expression:
-    _simple_or_selected_name '\'' '(' expression ')'    {
-        $$ = new VhdlParseTreeNode(PT_QUALIFIED_EXPRESSION);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $4;
-    }
-    | _simple_or_selected_name '\'' aggregate   {
-        $$ = new VhdlParseTreeNode(PT_QUALIFIED_EXPRESSION);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $3;
-    }
-
-aggregate:
-    '(' _two_or_more_element_association ')'    {
-        $$ = $2;
-    }
-    | '(' _must_have_choice_element_association ')' {
-        $$ = new VhdlParseTreeNode(PT_AGGREGATE);
-        $$->piece_count = 2;
-        $$->pieces[0] = nullptr;
-        $$->pieces[1] = $2;
-    }
-
-_two_or_more_element_association:
-    element_association ',' element_association {
-        $$ = new VhdlParseTreeNode(PT_AGGREGATE);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $3;
-    }
-    | _two_or_more_element_association ',' element_association  {
-        $$ = new VhdlParseTreeNode(PT_AGGREGATE);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $3;
-    }
-
-element_association:
-    expression  {
-        $$ = new VhdlParseTreeNode(PT_ELEMENT_ASSOCIATION);
-        $$->piece_count = 1;
-        $$->pieces[0] = $1;
-    }
-    | _must_have_choice_element_association
-
-_must_have_choice_element_association:
-    choices DL_ARR expression   {
-        $$ = new VhdlParseTreeNode(PT_ELEMENT_ASSOCIATION);
-        $$->piece_count = 2;
-        $$->pieces[0] = $3;
-        $$->pieces[1] = $1;
-    }
-
-choices:
-    choice
-    | choices '|' choice    {
-        $$ = new VhdlParseTreeNode(PT_CHOICES);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $3;
-    }
-
-choice:
-    simple_expression
-    | _almost_discrete_range
-    // simple_name is included in simple_expression
-    | KW_OTHERS   {
-        $$ = new VhdlParseTreeNode(PT_CHOICES_OTHER);
-    }
-
-numeric_literal:
-    abstract_literal
-    | _almost_physical_literal
 
 abstract_literal:
     decimal_literal
