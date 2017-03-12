@@ -1137,8 +1137,8 @@ allocator:
 ////////////////////// Sequential statements, section 10 //////////////////////
 
 sequential_statement:
-    _real_sequential_statement
-    | identifier ':' _real_sequential_statement {
+    _real_sequential_statement ';'
+    | identifier ':' _real_sequential_statement ';' {
         $$ = new VhdlParseTreeNode(PT_STATEMENT_LABEL);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
@@ -1147,34 +1147,35 @@ sequential_statement:
 
 _real_sequential_statement:
     assertion_statement
+    | report_statement
     | return_statement
     | null_statement
     // TODO
 
 /// Section 10.3
 assertion_statement:
-    KW_ASSERT expression ';' {
+    KW_ASSERT expression {
         $$ = new VhdlParseTreeNode(PT_ASSERTION_STATEMENT);
         $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = nullptr;
         $$->pieces[2] = nullptr;
     }
-    | KW_ASSERT expression KW_REPORT expression ';' {
+    | KW_ASSERT expression KW_REPORT expression {
         $$ = new VhdlParseTreeNode(PT_ASSERTION_STATEMENT);
         $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = nullptr;
     }
-    | KW_ASSERT expression KW_SEVERITY expression ';' {
+    | KW_ASSERT expression KW_SEVERITY expression {
         $$ = new VhdlParseTreeNode(PT_ASSERTION_STATEMENT);
         $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = nullptr;
         $$->pieces[2] = $4;
     }
-    | KW_ASSERT expression KW_REPORT expression KW_SEVERITY expression ';' {
+    | KW_ASSERT expression KW_REPORT expression KW_SEVERITY expression {
         $$ = new VhdlParseTreeNode(PT_ASSERTION_STATEMENT);
         $$->piece_count = 3;
         $$->pieces[0] = $2;
@@ -1182,9 +1183,24 @@ assertion_statement:
         $$->pieces[2] = $6;
     }
 
+/// Section 10.4
+report_statement:
+    KW_REPORT expression {
+        $$ = new VhdlParseTreeNode(PT_REPORT_STATEMENT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = nullptr;
+    }
+    | KW_REPORT expression KW_SEVERITY expression {
+        $$ = new VhdlParseTreeNode(PT_REPORT_STATEMENT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+    }
+
 /// Section 10.13
 return_statement:
-    KW_RETURN expression ';' {
+    KW_RETURN expression {
         $$ = new VhdlParseTreeNode(PT_RETURN_STATEMENT);
         $$->piece_count = 1;
         $$->pieces[0] = $2;
@@ -1192,7 +1208,7 @@ return_statement:
 
 /// Section 10.14
 null_statement:
-    KW_NULL ';' {
+    KW_NULL {
         $$ = new VhdlParseTreeNode(PT_NULL_STATEMENT);
     }
 

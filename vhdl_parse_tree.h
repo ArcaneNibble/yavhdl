@@ -73,6 +73,7 @@ enum ParseTreeNodeType
     PT_RETURN_STATEMENT,
     PT_NULL_STATEMENT,
     PT_ASSERTION_STATEMENT,
+    PT_REPORT_STATEMENT,
 };
 
 // Operators, section 9.2
