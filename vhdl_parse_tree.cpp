@@ -81,6 +81,10 @@ const char *parse_tree_types[] = {
     "PT_CASE_STATEMENT",
     "PT_CASE_STATEMENT_ALTERNATIVE",
     "PT_CASE_STATEMENT_ALTERNATIVE_LIST",
+    "PT_LOOP_STATEMENT",
+    "PT_ITERATION_WHILE",
+    "PT_ITERATION_FOR",
+    "PT_PARAMETER_SPECIFICATION",
 };
 
 const char *parse_operators[] = {
@@ -483,6 +487,36 @@ void VhdlParseTreeNode::debug_print() {
                 cout << ", \"statements\": ";
                 this->pieces[1]->debug_print();
             }
+            break;
+
+        case PT_LOOP_STATEMENT:
+            cout << ", \"statements\": ";
+            this->pieces[0]->debug_print();
+            if (this->pieces[1]) {
+                cout << ", \"scheme\": ";
+                this->pieces[1]->debug_print();
+            }
+            if (this->pieces[2]) {
+                cout << ", \"end_label\": ";
+                this->pieces[2]->debug_print();
+            }
+            break;
+
+        case PT_ITERATION_WHILE:
+            cout << ", \"condition\": ";
+            this->pieces[0]->debug_print();
+            break;
+
+        case PT_ITERATION_FOR:
+            cout << ", \"parameter_specification\": ";
+            this->pieces[0]->debug_print();
+            break;
+
+        case PT_PARAMETER_SPECIFICATION:
+            cout << ", \"identifier\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"range\": ";
+            this->pieces[1]->debug_print();
             break;
 
         case PT_EXPRESSION_LIST:

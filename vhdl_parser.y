@@ -1165,6 +1165,7 @@ _real_sequential_statement:
     | procedure_call_statement
     | if_statement
     | case_statement
+    | loop_statement
     | next_statement
     | exit_statement
     | return_statement
@@ -1334,6 +1335,50 @@ case_statement_alternative:
         $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
+    }
+
+/// Section 10.10
+loop_statement:
+    _real_loop_statement
+    | _real_loop_statement identifier {
+        $$ = $1;
+        $$->pieces[2] = $2;
+    }
+
+_real_loop_statement:
+    KW_LOOP sequence_of_statements KW_END KW_LOOP {
+        $$ = new VhdlParseTreeNode(PT_LOOP_STATEMENT);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = nullptr;
+        $$->pieces[2] = nullptr;
+    }
+    | iteration_scheme KW_LOOP sequence_of_statements KW_END KW_LOOP {
+        $$ = new VhdlParseTreeNode(PT_LOOP_STATEMENT);
+        $$->piece_count = 3;
+        $$->pieces[0] = $3;
+        $$->pieces[1] = $1;
+        $$->pieces[2] = nullptr;
+    }
+
+iteration_scheme:
+    KW_WHILE expression {
+        $$ = new VhdlParseTreeNode(PT_ITERATION_WHILE);
+        $$->piece_count = 1;
+        $$->pieces[0] = $2;
+    }
+    | KW_FOR parameter_specification {
+        $$ = new VhdlParseTreeNode(PT_ITERATION_FOR);
+        $$->piece_count = 1;
+        $$->pieces[0] = $2;
+    }
+
+parameter_specification:
+    identifier KW_IN discrete_range {
+        $$ = new VhdlParseTreeNode(PT_PARAMETER_SPECIFICATION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
     }
 
 /// Section 10.11

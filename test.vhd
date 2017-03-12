@@ -1,8 +1,4 @@
-case? 123 is
-    when 1|2 =>
-        foo(bar);
-    when 4 to 10 =>
-        baz(qux);
-    when your'mom =>
-    when others =>
-end case? mylabel;
+for asdf in 0 to 2 loop
+    foo(bar);
+    baz(qux);
+end loop mylabel;
