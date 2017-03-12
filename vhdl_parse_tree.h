@@ -80,6 +80,9 @@ enum ParseTreeNodeType
     PT_IF_STATEMENT,
     PT_ELSIF,
     PT_ELSIF_LIST,
+    PT_CASE_STATEMENT,
+    PT_CASE_STATEMENT_ALTERNATIVE,
+    PT_CASE_STATEMENT_ALTERNATIVE_LIST,
 };
 
 // Operators, section 9.2
@@ -139,6 +142,7 @@ struct VhdlParseTreeNode {
     std::string *str2;
     char chr;
     int integer;
+    bool boolean;
     struct VhdlParseTreeNode *pieces[NUM_FIXED_PIECES];
     int piece_count;
 

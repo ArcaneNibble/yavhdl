@@ -1,8 +1,8 @@
-if 123 then
-    foo(aaa, bbb, ccc, ddd, open, eee, fff => ggg, hhh, iii, open, bar.baz.qux."wat"(jjj) => open, kkk);
-elsif 456 then
-    bar(111);
-elsif 789 then
-else
-    baz(222);
-end if mylabel;
+case? 123 is
+    when 1|2 =>
+        foo(bar);
+    when 4 to 10 =>
+        baz(qux);
+    when your'mom =>
+    when others =>
+end case? mylabel;

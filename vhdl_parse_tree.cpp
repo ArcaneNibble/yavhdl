@@ -78,6 +78,9 @@ const char *parse_tree_types[] = {
     "PT_IF_STATEMENT",
     "PT_ELSIF",
     "PT_ELSIF_LIST",
+    "PT_CASE_STATEMENT",
+    "PT_CASE_STATEMENT_ALTERNATIVE",
+    "PT_CASE_STATEMENT_ALTERNATIVE_LIST",
 };
 
 const char *parse_operators[] = {
@@ -148,6 +151,7 @@ VhdlParseTreeNode::VhdlParseTreeNode(enum ParseTreeNodeType type) {
     this->str2 = nullptr;
     this->chr = 0;
     this->integer = 0;
+    this->boolean = false;
     this->piece_count = 0;
     memset(this->pieces, 0, sizeof(this->pieces));
 }
@@ -459,6 +463,28 @@ void VhdlParseTreeNode::debug_print() {
             }
             break;
 
+        case PT_CASE_STATEMENT:
+            cout << ", \"expression\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"alternatives\": ";
+            this->pieces[1]->debug_print();
+            cout << ", \"matching\": ";
+            cout << (this->boolean ? "true" : "false");
+            if (this->pieces[2]) {
+                cout << ", \"end_label\": ";
+                this->pieces[2]->debug_print();
+            }
+            break;
+
+        case PT_CASE_STATEMENT_ALTERNATIVE:
+            cout << ", \"choices\": ";
+            this->pieces[0]->debug_print();
+            if (this->pieces[1]) {
+                cout << ", \"statements\": ";
+                this->pieces[1]->debug_print();
+            }
+            break;
+
         case PT_EXPRESSION_LIST:
         case PT_ID_LIST:
         case PT_RECORD_RESOLUTION:
@@ -470,6 +496,7 @@ void VhdlParseTreeNode::debug_print() {
         case PT_PARAMETER_ASSOCIATION_LIST:
         case PT_SEQUENCE_OF_STATEMENTS:
         case PT_ELSIF_LIST:
+        case PT_CASE_STATEMENT_ALTERNATIVE_LIST:
             if (this->pieces[0]) {
                 cout << ", \"rest\": ";
                 this->pieces[0]->debug_print();

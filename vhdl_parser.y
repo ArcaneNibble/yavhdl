@@ -1164,6 +1164,7 @@ _real_sequential_statement:
     | report_statement
     | procedure_call_statement
     | if_statement
+    | case_statement
     | next_statement
     | exit_statement
     | return_statement
@@ -1285,6 +1286,51 @@ _one_or_more_elsifs:
 _elsif:
     KW_ELSIF expression KW_THEN sequence_of_statements {
         $$ = new VhdlParseTreeNode(PT_ELSIF);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+    }
+
+/// Section 10.9
+case_statement:
+    _real_case_statement
+    | _real_case_statement identifier {
+        $$ = $1;
+        $$->pieces[2] = $2;
+    }
+
+_real_case_statement:
+    KW_CASE expression KW_IS _one_or_more_case_statement_alternatives
+    KW_END KW_CASE {
+        $$ = new VhdlParseTreeNode(PT_CASE_STATEMENT);
+        $$->piece_count = 3;
+        $$->boolean = false;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = nullptr;
+    }
+    | KW_CASE '?' expression KW_IS _one_or_more_case_statement_alternatives
+      KW_END KW_CASE '?' {
+        $$ = new VhdlParseTreeNode(PT_CASE_STATEMENT);
+        $$->piece_count = 3;
+        $$->boolean = true;
+        $$->pieces[0] = $3;
+        $$->pieces[1] = $5;
+        $$->pieces[2] = nullptr;
+    }
+
+_one_or_more_case_statement_alternatives:
+    case_statement_alternative
+    | _one_or_more_case_statement_alternatives case_statement_alternative {
+        $$ = new VhdlParseTreeNode(PT_CASE_STATEMENT_ALTERNATIVE_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
+
+case_statement_alternative:
+    KW_WHEN choices DL_ARR sequence_of_statements {
+        $$ = new VhdlParseTreeNode(PT_CASE_STATEMENT_ALTERNATIVE);
         $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
