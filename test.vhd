@@ -1,1 +1,1 @@
-wait on S(3), S, l, r until F(S(3)) and (S(l) or S(r)) for 10 ns;
+wait on S(3), S, l, r until F(S(3)) and S(l) or S(r) for 10 ns;

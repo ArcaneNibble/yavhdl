@@ -207,10 +207,10 @@ void VhdlParseTreeNode::debug_print() {
             break;
 
         case PT_LIT_PHYS:
-            cout << ", \"unit\": \"";
+            cout << ", \"unit\": ";
             this->pieces[0]->debug_print();
             if (this->pieces[1]) {
-                cout << ", \"val\": \"";
+                cout << ", \"val\": ";
                 this->pieces[1]->debug_print();
             }
             break;
