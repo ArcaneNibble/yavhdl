@@ -517,6 +517,15 @@ incomplete_type_declaration:
         $$->pieces[0] = $2;
     }
 
+/// Section 5.5
+file_type_definition:
+    KW_FILE KW_OF _simple_or_selected_name {
+        $$ = new VhdlParseTreeNode(PT_FILE_TYPE_DEFINITION);
+        $$->piece_count = 1;
+        $$->pieces[0] = $3;
+
+    }
+
 /////////////////////////// Declarations, section 6 ///////////////////////////
 
 /// Section 6.2
@@ -536,6 +545,7 @@ type_definition:
     scalar_type_definition
     | composite_type_definition
     | access_type_definition
+    | file_type_definition
     // TODO
 
 /// Section 6.3

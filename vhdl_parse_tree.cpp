@@ -131,6 +131,7 @@ const char *parse_tree_types[] = {
     "PT_ID_LIST_REAL",
     "PT_ACCESS_TYPE_DEFINITION",
     "PT_INCOMPLETE_TYPE_DECLARATION",
+    "PT_FILE_TYPE_DEFINITION",
 };
 
 const char *parse_operators[] = {
@@ -789,6 +790,11 @@ void VhdlParseTreeNode::debug_print() {
 
         case PT_INCOMPLETE_TYPE_DECLARATION:
             cout << ", \"identifier\": ";
+            this->pieces[0]->debug_print();
+            break;
+
+        case PT_FILE_TYPE_DEFINITION:
+            cout << ", \"type_mark\": ";
             this->pieces[0]->debug_print();
             break;
 

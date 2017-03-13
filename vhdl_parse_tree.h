@@ -135,6 +135,7 @@ enum ParseTreeNodeType
     PT_ID_LIST_REAL,
     PT_ACCESS_TYPE_DEFINITION,
     PT_INCOMPLETE_TYPE_DECLARATION,
+    PT_FILE_TYPE_DEFINITION,
 };
 
 // Operators, section 9.2

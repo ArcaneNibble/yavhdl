@@ -1,1 +1,1 @@
-type test is access bar foo (baz'range);
+type test is file of string;
