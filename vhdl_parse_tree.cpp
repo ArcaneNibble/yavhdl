@@ -97,6 +97,10 @@ const char *parse_tree_types[] = {
     "PT_DELAY_INERTIAL",
     "PT_SIMPLE_FORCE_ASSIGNMENT",
     "PT_SIMPLE_RELEASE_ASSIGNMENT",
+    "PT_CONDITIONAL_WAVEFORM_ASSIGNMENT",
+    "PT_CONDITIONAL_WAVEFORMS",
+    "PT_CONDITIONAL_WAVEFORM_ELSE",
+    "PT_CONDITIONAL_WAVEFORM_ELSE_LIST",
 };
 
 const char *parse_operators[] = {
@@ -553,6 +557,7 @@ void VhdlParseTreeNode::debug_print() {
             break;
 
         case PT_SIMPLE_WAVEFORM_ASSIGNMENT:
+        case PT_CONDITIONAL_WAVEFORM_ASSIGNMENT:
             cout << ", \"target\": ";
             this->pieces[0]->debug_print();
             cout << ", \"waveform\": ";
@@ -601,6 +606,28 @@ void VhdlParseTreeNode::debug_print() {
             }
             break;
 
+        case PT_CONDITIONAL_WAVEFORMS:
+            cout << ", \"main_value\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"main_condition\": ";
+            this->pieces[1]->debug_print();
+            if (this->pieces[2]) {
+                cout << ", \"elses\": ";
+                this->pieces[2]->debug_print();
+            }
+            if (this->pieces[3]) {
+                cout << ", \"else_value\": ";
+                this->pieces[3]->debug_print();
+            }
+            break;
+
+        case PT_CONDITIONAL_WAVEFORM_ELSE:
+            cout << ", \"value\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"condition\": ";
+            this->pieces[1]->debug_print();
+            break;
+
         case PT_EXPRESSION_LIST:
         case PT_ID_LIST:
         case PT_RECORD_RESOLUTION:
@@ -615,6 +642,7 @@ void VhdlParseTreeNode::debug_print() {
         case PT_CASE_STATEMENT_ALTERNATIVE_LIST:
         case PT_NAME_LIST:
         case PT_WAVEFORM:
+        case PT_CONDITIONAL_WAVEFORM_ELSE_LIST:
             if (this->pieces[0]) {
                 cout << ", \"rest\": ";
                 this->pieces[0]->debug_print();

@@ -1261,6 +1261,7 @@ report_statement:
 /// Section 10.5
 signal_assignment_statement:
     simple_signal_assignment
+    | conditional_signal_assignment
     // TODO
 
 /// Section 10.5.2
@@ -1376,6 +1377,71 @@ waveform_element:
         $$->pieces[1] = $3;
     }
     // null gets included in expression
+
+/// Section 10.5.3
+conditional_signal_assignment:
+    conditional_waveform_assignment
+    // TODO
+
+conditional_waveform_assignment:
+    target DL_LEQ conditional_waveforms {
+        $$ = new VhdlParseTreeNode(PT_CONDITIONAL_WAVEFORM_ASSIGNMENT);
+        $$->piece_count = 3;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = nullptr;
+    }
+    | target DL_LEQ delay_mechanism conditional_waveforms {
+        $$ = new VhdlParseTreeNode(PT_CONDITIONAL_WAVEFORM_ASSIGNMENT);
+        $$->piece_count = 3;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $3;
+    }
+
+conditional_waveforms:
+    waveform KW_WHEN expression {
+        $$ = new VhdlParseTreeNode(PT_CONDITIONAL_WAVEFORMS);
+        $$->piece_count = 4;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = nullptr;
+    }
+    | waveform KW_WHEN expression KW_ELSE waveform {
+        $$ = new VhdlParseTreeNode(PT_CONDITIONAL_WAVEFORMS);
+        $$->piece_count = 4;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = $5;
+    }
+    | waveform KW_WHEN expression _one_or_more_conditional_waveform_elses
+      KW_ELSE waveform {
+        $$ = new VhdlParseTreeNode(PT_CONDITIONAL_WAVEFORMS);
+        $$->piece_count = 4;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = $4;
+        $$->pieces[3] = $6;
+    }
+
+_one_or_more_conditional_waveform_elses:
+    _conditional_waveform_else
+    | _one_or_more_conditional_waveform_elses _conditional_waveform_else {
+        $$ = new VhdlParseTreeNode(PT_CONDITIONAL_WAVEFORM_ELSE_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
+
+_conditional_waveform_else:
+    KW_ELSE waveform KW_WHEN expression {
+        $$ = new VhdlParseTreeNode(PT_CONDITIONAL_WAVEFORM_ELSE);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+    }
 
 /// Section 10.7
 procedure_call_statement:
