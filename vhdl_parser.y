@@ -188,6 +188,34 @@ not_actualy_design_file:
 
 ///////////////////// Subprograms and packages, section 4 /////////////////////
 
+/// Section 4.2
+subprogram_declaration:
+    subprogram_specification ';' {
+        $$ = new VhdlParseTreeNode(PT_SUBPROGRAM_DECLARATION);
+        $$->piece_count = 1;
+        $$->pieces[0] = $1;
+    }
+
+subprogram_specification:
+    procedure_specification
+    // TODO
+
+procedure_specification:
+    KW_PROCEDURE designator subprogram_header {
+        $$ = new VhdlParseTreeNode(PT_PROCEDURE_SPECIFICATION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $3;
+    }
+
+subprogram_header:
+    %empty
+    // TODO
+
+designator:
+    identifier
+    | string_literal    // was operator_symbol
+
 /// Section 4.5.3
 signature:
     '[' ']' {
@@ -2356,7 +2384,8 @@ _real_process_declarative_part:
     }
 
 process_declarative_item:
-    type_declaration
+    subprogram_declaration
+    | type_declaration
     | subtype_declaration
     | constant_declaration
     | variable_declaration

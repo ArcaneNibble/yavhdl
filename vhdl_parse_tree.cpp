@@ -143,6 +143,10 @@ const char *parse_tree_types[] = {
     "PT_ALIAS_DECLARATION",
     "PT_FILE_OPEN_INFORMATION",
     "PT_ATTRIBUTE_DECLARATION",
+    "PT_SUBPROGRAM_DECLARATION",
+    "PT_PROCEDURE_SPECIFICATION",
+    "PT_FUNCTION_SPECIFICATION",
+    "PT_SUBPROGRAM_HEADER",
 };
 
 const char *parse_operators[] = {
@@ -192,6 +196,12 @@ const char *force_modes[] = {
     nullptr,
     "in",
     "out",
+};
+
+const char *func_purity[] = {
+    nullptr,
+    "pure",
+    "impure",
 };
 
 // Escape values for JSON output
@@ -904,6 +914,49 @@ void VhdlParseTreeNode::debug_print() {
             cout << ", \"identifier\": ";
             this->pieces[0]->debug_print();
             cout << ", \"type_mark\": ";
+            this->pieces[1]->debug_print();
+            break;
+
+        case PT_SUBPROGRAM_DECLARATION:
+            cout << ", \"specification\": ";
+            this->pieces[0]->debug_print();
+            break;
+
+        case PT_PROCEDURE_SPECIFICATION:
+            cout << ", \"designator\": ";
+            this->pieces[0]->debug_print();
+            if (this->pieces[1]) {
+                cout << ", \"header\": ";
+                this->pieces[1]->debug_print();
+            }
+            if (this->pieces[2]) {
+                cout << ", \"parameters\": ";
+                this->pieces[2]->debug_print();
+            }
+            break;
+
+        case PT_FUNCTION_SPECIFICATION:
+            cout << ", \"designator\": ";
+            this->pieces[0]->debug_print();
+            if (this->pieces[1]) {
+                cout << ", \"header\": ";
+                this->pieces[1]->debug_print();
+            }
+            if (this->pieces[2]) {
+                cout << ", \"parameters\": ";
+                this->pieces[2]->debug_print();
+            }
+            if (this->purity != PURITY_UNSPEC) {
+                cout << ", \"purity\": \"";
+                cout << func_purity[this->purity];
+                cout << "\"";
+            }
+            break;
+
+        case PT_SUBPROGRAM_HEADER:
+            cout << ", \"generic\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"generic_map\": ";
             this->pieces[1]->debug_print();
             break;
 

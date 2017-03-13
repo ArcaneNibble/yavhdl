@@ -147,6 +147,10 @@ enum ParseTreeNodeType
     PT_ALIAS_DECLARATION,
     PT_FILE_OPEN_INFORMATION,
     PT_ATTRIBUTE_DECLARATION,
+    PT_SUBPROGRAM_DECLARATION,
+    PT_PROCEDURE_SPECIFICATION,
+    PT_FUNCTION_SPECIFICATION,
+    PT_SUBPROGRAM_HEADER,
 };
 
 // Operators, section 9.2
@@ -202,6 +206,13 @@ enum ParseTreeForceMode
     FORCE_OUT,
 };
 
+enum ParseTreeFunctionPurity
+{
+    PURITY_UNSPEC,
+    PURITY_PURE,
+    PURITY_IMPURE,
+};
+
 // Definition of a parse tree node
 #define NUM_FIXED_PIECES 8
 
@@ -220,6 +231,7 @@ struct VhdlParseTreeNode {
     ParseTreeOperatorType op_type;
     ParseTreeRangeDirection range_dir;
     ParseTreeForceMode force_mode;
+    ParseTreeFunctionPurity purity;
 
     VhdlParseTreeNode(enum ParseTreeNodeType type);
     ~VhdlParseTreeNode();

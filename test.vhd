@@ -1,4 +1,4 @@
 process
-    attribute aaa : bbb;
+    procedure foo;
 begin
 end process;
