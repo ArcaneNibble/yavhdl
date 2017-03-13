@@ -534,6 +534,16 @@ name:
     | _almost_attribute_name
     | external_name
 
+// A number of things require a list of names
+_list_of_names:
+    name
+    | _list_of_names ',' name {
+        $$ = new VhdlParseTreeNode(PT_NAME_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
 // This is a specialization of "name" because a number of other rules do need
 // to refer to only function names and not all sorts of other ridiculous
 // maybe-a-names.
@@ -1160,7 +1170,8 @@ sequential_statement:
     }
 
 _real_sequential_statement:
-    assertion_statement
+    wait_statement
+    | assertion_statement
     | report_statement
     | procedure_call_statement
     | if_statement
@@ -1171,6 +1182,34 @@ _real_sequential_statement:
     | return_statement
     | null_statement
     // TODO
+
+/// Section 10.2
+wait_statement:
+    KW_WAIT sensitivity_clause condition_clause timeout_clause {
+        $$ = new VhdlParseTreeNode(PT_WAIT_STATEMENT);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = $4;
+    }
+
+sensitivity_clause:
+    %empty
+    | KW_ON _list_of_names {
+        $$ = $2;
+    }
+
+condition_clause:
+    %empty
+    | KW_UNTIL expression {
+        $$ = $2;
+    }
+
+timeout_clause:
+    %empty
+    | KW_FOR expression {
+        $$ = $2;
+    }
 
 /// Section 10.3
 assertion_statement:

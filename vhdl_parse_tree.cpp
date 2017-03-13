@@ -85,6 +85,9 @@ const char *parse_tree_types[] = {
     "PT_ITERATION_WHILE",
     "PT_ITERATION_FOR",
     "PT_PARAMETER_SPECIFICATION",
+    "PT_WAIT_STATEMENT",
+
+    "PT_NAME_LIST",
 };
 
 const char *parse_operators[] = {
@@ -519,6 +522,21 @@ void VhdlParseTreeNode::debug_print() {
             this->pieces[1]->debug_print();
             break;
 
+        case PT_WAIT_STATEMENT:
+            if (this->pieces[0]) {
+                cout << ", \"sensitivity\": ";
+                this->pieces[0]->debug_print();
+            }
+            if (this->pieces[1]) {
+                cout << ", \"condition\": ";
+                this->pieces[1]->debug_print();
+            }
+            if (this->pieces[2]) {
+                cout << ", \"timeout\": ";
+                this->pieces[2]->debug_print();
+            }
+            break;
+
         case PT_EXPRESSION_LIST:
         case PT_ID_LIST:
         case PT_RECORD_RESOLUTION:
@@ -531,6 +549,7 @@ void VhdlParseTreeNode::debug_print() {
         case PT_SEQUENCE_OF_STATEMENTS:
         case PT_ELSIF_LIST:
         case PT_CASE_STATEMENT_ALTERNATIVE_LIST:
+        case PT_NAME_LIST:
             if (this->pieces[0]) {
                 cout << ", \"rest\": ";
                 this->pieces[0]->debug_print();

@@ -87,6 +87,9 @@ enum ParseTreeNodeType
     PT_ITERATION_WHILE,
     PT_ITERATION_FOR,
     PT_PARAMETER_SPECIFICATION,
+    PT_WAIT_STATEMENT,
+
+    PT_NAME_LIST,
 };
 
 // Operators, section 9.2

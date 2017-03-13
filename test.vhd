@@ -1,4 +1,1 @@
-for asdf in 0 to 2 loop
-    foo(bar);
-    baz(qux);
-end loop mylabel;
+wait on S(3), S, l, r until F(S(3)) and (S(l) or S(r)) for 10 ns;
