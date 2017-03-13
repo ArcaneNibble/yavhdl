@@ -232,7 +232,7 @@ scalar_type_definition:
     enumeration_type_definition
     // We cannot tell these apart at this stage
     | _integer_or_floating_type_definition
-    // TODO
+    | physical_type_definition
 
 range_constraint:
     KW_RANGE range {
@@ -289,6 +289,53 @@ _integer_or_floating_type_definition:
     }
 
 /// Section 5.2.4
+physical_type_definition:
+    _real_physical_type_definition
+    | _real_physical_type_definition identifier {
+        $$ = $1;
+        $$->pieces[3] = $2;
+    }
+
+_real_physical_type_definition:
+    range_constraint KW_UNITS identifier ';' KW_END KW_UNITS {
+        $$ = new VhdlParseTreeNode(PT_PHYSICAL_TYPE_DEFINITION);
+        $$->piece_count = 4;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = nullptr;
+    }
+    | range_constraint KW_UNITS identifier ';'
+      _one_or_more_secondary_unit_declarations KW_END KW_UNITS {
+        $$ = new VhdlParseTreeNode(PT_PHYSICAL_TYPE_DEFINITION);
+        $$->piece_count = 4;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = $5;
+        $$->pieces[3] = nullptr;
+    }
+
+_one_or_more_secondary_unit_declarations:
+    secondary_unit_declaration
+    | _one_or_more_secondary_unit_declarations secondary_unit_declaration {
+        $$ = new VhdlParseTreeNode(PT_SECONDARY_UNIT_DECLARATION_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
+
+secondary_unit_declaration:
+    identifier '=' physical_literal ';' {
+        $$ = new VhdlParseTreeNode(PT_SECONDARY_UNIT_DECLARATION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+physical_literal:
+    _almost_physical_literal
+    | _simple_or_selected_name
+
 // This requires the abstract_literal otherwise it becomes ambiguous with just
 // name.
 _almost_physical_literal:

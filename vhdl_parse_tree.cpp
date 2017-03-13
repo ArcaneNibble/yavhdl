@@ -119,6 +119,9 @@ const char *parse_tree_types[] = {
     "PT_ENUMERATION_TYPE_DEFINITION",
     "PT_ENUM_LITERAL_LIST",
     "PT_INTEGER_FLOAT_TYPE_DEFINITION",
+    "PT_PHYSICAL_TYPE_DEFINITION",
+    "PT_SECONDARY_UNIT_DECLARATION",
+    "PT_SECONDARY_UNIT_DECLARATION_LIST",
 };
 
 const char *parse_operators[] = {
@@ -724,6 +727,28 @@ void VhdlParseTreeNode::debug_print() {
             this->pieces[0]->debug_print();
             break;
 
+        case PT_PHYSICAL_TYPE_DEFINITION:
+            cout << ", \"range\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"primary\": ";
+            this->pieces[1]->debug_print();
+            if (this->pieces[2]) {
+                cout << ", \"secondaries\": ";
+                this->pieces[2]->debug_print();
+            }
+            if (this->pieces[3]) {
+                cout << ", \"end_label\": ";
+                this->pieces[3]->debug_print();
+            }
+            break;
+
+        case PT_SECONDARY_UNIT_DECLARATION:
+            cout << ", \"identifier\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"literal\": ";
+            this->pieces[1]->debug_print();
+            break;
+
         case PT_EXPRESSION_LIST:
         case PT_ID_LIST:
         case PT_RECORD_RESOLUTION:
@@ -743,6 +768,7 @@ void VhdlParseTreeNode::debug_print() {
         case PT_SELECTED_WAVEFORMS:
         case PT_SELECTED_EXPRESSIONS:
         case PT_ENUM_LITERAL_LIST:
+        case PT_SECONDARY_UNIT_DECLARATION_LIST:
             if (this->pieces[0]) {
                 cout << ", \"rest\": ";
                 this->pieces[0]->debug_print();
