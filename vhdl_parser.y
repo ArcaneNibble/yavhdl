@@ -548,6 +548,14 @@ type_definition:
     // TODO
 
 /// Section 6.3
+subtype_declaration:
+    KW_SUBTYPE identifier KW_IS subtype_indication ';' {
+        $$ = new VhdlParseTreeNode(PT_SUBTYPE_DECLARATION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+    }
+
 subtype_indication:
     _simple_or_selected_name
     | resolution_indication _simple_or_selected_name {
@@ -649,6 +657,49 @@ _allocator_constraint:
 element_constraint:
     array_constraint
     | record_constraint
+
+/// Section 6.4.2.2
+constant_declaration:
+    KW_CONSTANT identifier_list ':' subtype_indication ';' {
+        $$ = new VhdlParseTreeNode(PT_CONSTANT_DECLARATION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+    }
+    | KW_CONSTANT identifier_list ':' subtype_indication
+      DL_ASS expression ';' {
+        $$ = new VhdlParseTreeNode(PT_CONSTANT_DECLARATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $6;
+    }
+
+/// Section 6.4.2.4
+variable_declaration:
+    _real_variable_declaration
+    | KW_SHARED _real_variable_declaration {
+        $$ = $2;
+        $$->boolean = true;
+    }
+
+_real_variable_declaration:
+    KW_VARIABLE identifier_list ':' subtype_indication ';' {
+        $$ = new VhdlParseTreeNode(PT_VARIABLE_DECLARATION);
+        $$->piece_count = 2;
+        $$->boolean = false;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+    }
+    | KW_VARIABLE identifier_list ':' subtype_indication
+      DL_ASS expression ';' {
+        $$ = new VhdlParseTreeNode(PT_VARIABLE_DECLARATION);
+        $$->piece_count = 3;
+        $$->boolean = false;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $6;
+    }
 
 /// Section 6.5.7
 // FIXME ugly: If we see a bare "open", we know we're going to be a
@@ -2226,6 +2277,9 @@ _real_process_declarative_part:
 
 process_declarative_item:
     type_declaration
+    | subtype_declaration
+    | constant_declaration
+    | variable_declaration
     // TODO
 
 //////////////////////// Lexical elements, section 15 ////////////////////////

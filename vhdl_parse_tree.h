@@ -139,6 +139,10 @@ enum ParseTreeNodeType
 
     PT_PROCESS,
     PT_DECLARATION_LIST,
+
+    PT_SUBTYPE_DECLARATION,
+    PT_CONSTANT_DECLARATION,
+    PT_VARIABLE_DECLARATION,
 };
 
 // Operators, section 9.2

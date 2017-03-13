@@ -135,6 +135,10 @@ const char *parse_tree_types[] = {
 
     "PT_PROCESS",
     "PT_DECLARATION_LIST",
+
+    "PT_SUBTYPE_DECLARATION",
+    "PT_CONSTANT_DECLARATION",
+    "PT_VARIABLE_DECLARATION",
 };
 
 const char *parse_operators[] = {
@@ -823,6 +827,37 @@ void VhdlParseTreeNode::debug_print() {
                 this->pieces[4]->debug_print();
             }
             cout << ", \"postponed\": ";
+            cout << (this->boolean ? "true" : "false");
+            break;
+
+        case PT_SUBTYPE_DECLARATION:
+            cout << ", \"identifier\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"subtype\": ";
+            this->pieces[1]->debug_print();
+            break;
+
+        case PT_CONSTANT_DECLARATION:
+            cout << ", \"identifier\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"subtype\": ";
+            this->pieces[1]->debug_print();
+            if (this->pieces[2]) {
+                cout << ", \"expression\": ";
+                this->pieces[2]->debug_print();
+            }
+            break;
+
+        case PT_VARIABLE_DECLARATION:
+            cout << ", \"identifier\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"subtype\": ";
+            this->pieces[1]->debug_print();
+            if (this->pieces[2]) {
+                cout << ", \"expression\": ";
+                this->pieces[2]->debug_print();
+            }
+            cout << ", \"shared\": ";
             cout << (this->boolean ? "true" : "false");
             break;
 
