@@ -349,7 +349,7 @@ _almost_physical_literal:
 /// Section 5.3.1
 composite_type_definition:
     array_type_definition
-    // TODO
+    | record_type_definition
 
 /// Section 5.3.2
 // The way we've defined this causes a shift/reduce conflict.
@@ -439,6 +439,48 @@ discrete_range:
     | range
 
 /// Section 5.3.3
+record_type_definition:
+    _real_record_type_definition
+    | _real_record_type_definition identifier {
+        $$ = $1;
+        $$->pieces[1] = $2;
+    }
+
+_real_record_type_definition:
+    KW_RECORD _one_or_more_element_declarations KW_END KW_RECORD {
+        $$ = new VhdlParseTreeNode(PT_RECORD_TYPE_DEFINITION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = nullptr;
+    }
+
+_one_or_more_element_declarations:
+    element_declaration
+    | _one_or_more_element_declarations element_declaration {
+        $$ = new VhdlParseTreeNode(PT_ELEMENT_DECLARATION_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
+
+element_declaration:
+    // FIXME
+    identifier_list ':' subtype_indication ';' {
+        $$ = new VhdlParseTreeNode(PT_ELEMENT_DECLARATION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+identifier_list:
+    identifier
+    | identifier_list ',' identifier {
+        $$ = new VhdlParseTreeNode(PT_ID_LIST_REAL);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
 record_constraint:
     '(' _one_or_more_record_element_constraint ')' {
         $$ = $2;

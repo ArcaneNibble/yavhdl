@@ -127,6 +127,12 @@ enum ParseTreeNodeType
     PT_CONSTRAINED_ARRAY_DEFINITION,
     PT_INDEX_SUBTYPE_DEFINITION_LIST,
     PT_UNBOUNDED_ARRAY_DEFINITION,
+    PT_RECORD_TYPE_DEFINITION,
+    PT_ELEMENT_DECLARATION,
+    PT_ELEMENT_DECLARATION_LIST,
+    // Real identifiers, not identifiers or selected names
+    // FIXME
+    PT_ID_LIST_REAL,
 };
 
 // Operators, section 9.2

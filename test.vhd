@@ -1,1 +1,4 @@
-type asdf is array (aaa range <>, bbb range <>) of bar foo (baz'range);
+type test is record
+    aaa,bbb,ccc : bar foo (baz'range);
+    ddd: eee;
+end record;
