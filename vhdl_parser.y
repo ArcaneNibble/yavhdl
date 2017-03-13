@@ -701,6 +701,36 @@ _real_variable_declaration:
         $$->pieces[2] = $6;
     }
 
+/// Section 6.4.2.5
+file_declaration:
+    KW_FILE identifier_list ':' subtype_indication ';' {
+        $$ = new VhdlParseTreeNode(PT_FILE_DECLARATION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+    }
+    | KW_FILE identifier_list ':' subtype_indication
+      file_open_information ';' {
+        $$ = new VhdlParseTreeNode(PT_FILE_DECLARATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $5;
+    }
+
+file_open_information:
+    KW_IS expression {
+        $$ = new VhdlParseTreeNode(PT_FILE_OPEN_INFORMATION);
+        $$->piece_count = 1;
+        $$->pieces[0] = $2;
+    }
+    | KW_OPEN expression KW_IS expression {
+        $$ = new VhdlParseTreeNode(PT_FILE_OPEN_INFORMATION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $4;
+        $$->pieces[1] = $2;
+    }
+
 /// Section 6.5.7
 // FIXME ugly: If we see a bare "open", we know we're going to be a
 // function call and cannot hit ambiguities with _ambig_name_parens.
@@ -763,6 +793,47 @@ _function_actual_part:
     | KW_OPEN {
         $$ = new VhdlParseTreeNode(PT_TOK_OPEN);
     }
+
+/// Section 6.6
+alias_declaration:
+    KW_ALIAS alias_designator KW_IS name ';' {
+        $$ = new VhdlParseTreeNode(PT_ALIAS_DECLARATION);
+        $$->piece_count = 4;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = nullptr;
+    }
+    | KW_ALIAS alias_designator ':' subtype_indication KW_IS name ';' {
+        $$ = new VhdlParseTreeNode(PT_ALIAS_DECLARATION);
+        $$->piece_count = 4;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $6;
+        $$->pieces[2] = $4;
+        $$->pieces[3] = nullptr;
+    }
+    | KW_ALIAS alias_designator KW_IS name signature ';' {
+        $$ = new VhdlParseTreeNode(PT_ALIAS_DECLARATION);
+        $$->piece_count = 4;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = $5;
+    }
+    | KW_ALIAS alias_designator ':' subtype_indication
+      KW_IS name signature ';' {
+        $$ = new VhdlParseTreeNode(PT_ALIAS_DECLARATION);
+        $$->piece_count = 4;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $6;
+        $$->pieces[2] = $4;
+        $$->pieces[3] = $7;
+    }
+
+alias_designator:
+    identifier
+    | character_literal
+    | string_literal        // was operator_symbol
 
 ////////////////////////////// Names, section 8 //////////////////////////////
 
@@ -2280,6 +2351,8 @@ process_declarative_item:
     | subtype_declaration
     | constant_declaration
     | variable_declaration
+    | file_declaration
+    | alias_declaration
     // TODO
 
 //////////////////////// Lexical elements, section 15 ////////////////////////

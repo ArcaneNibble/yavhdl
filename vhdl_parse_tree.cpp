@@ -139,6 +139,9 @@ const char *parse_tree_types[] = {
     "PT_SUBTYPE_DECLARATION",
     "PT_CONSTANT_DECLARATION",
     "PT_VARIABLE_DECLARATION",
+    "PT_FILE_DECLARATION",
+    "PT_ALIAS_DECLARATION",
+    "PT_FILE_OPEN_INFORMATION",
 };
 
 const char *parse_operators[] = {
@@ -838,7 +841,7 @@ void VhdlParseTreeNode::debug_print() {
             break;
 
         case PT_CONSTANT_DECLARATION:
-            cout << ", \"identifier\": ";
+            cout << ", \"identifiers\": ";
             this->pieces[0]->debug_print();
             cout << ", \"subtype\": ";
             this->pieces[1]->debug_print();
@@ -849,7 +852,7 @@ void VhdlParseTreeNode::debug_print() {
             break;
 
         case PT_VARIABLE_DECLARATION:
-            cout << ", \"identifier\": ";
+            cout << ", \"identifiers\": ";
             this->pieces[0]->debug_print();
             cout << ", \"subtype\": ";
             this->pieces[1]->debug_print();
@@ -859,6 +862,41 @@ void VhdlParseTreeNode::debug_print() {
             }
             cout << ", \"shared\": ";
             cout << (this->boolean ? "true" : "false");
+            break;
+
+        case PT_FILE_DECLARATION:
+            cout << ", \"identifiers\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"subtype\": ";
+            this->pieces[1]->debug_print();
+            if (this->pieces[2]) {
+                cout << ", \"open_information\": ";
+                this->pieces[2]->debug_print();
+            }
+            break;
+
+        case PT_FILE_OPEN_INFORMATION:
+            cout << ", \"logical_name\": ";
+            this->pieces[0]->debug_print();
+            if (this->pieces[1]) {
+                cout << ", \"open_kind\": ";
+                this->pieces[1]->debug_print();
+            }
+            break;
+
+        case PT_ALIAS_DECLARATION:
+            cout << ", \"designator\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"name\": ";
+            this->pieces[1]->debug_print();
+            if (this->pieces[2]) {
+                cout << ", \"subtype\": ";
+                this->pieces[2]->debug_print();
+            }
+            if (this->pieces[3]) {
+                cout << ", \"signature\": ";
+                this->pieces[3]->debug_print();
+            }
             break;
 
         case PT_EXPRESSION_LIST:

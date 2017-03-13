@@ -1,14 +1,10 @@
-label1: postponed process--(xxx, yyy, zzz)
-    type aaa is range 0 to 5;
-    type bbb is range 5 to 10;
-    subtype ccc is ddd;
-    constant eee : fff;
-    constant ggg : hhh := iii;
-    variable jjj : kkk;
-    shared variable lll : mmm;
-    variable nnn : ooo := ppp;
-    shared variable qqq : rrr := sss;
+process
+    file aaa,bbb : ccc;
+    file ddd,eee : fff is ggg;
+    file hhh,iii : jjj open kkk is lll;
+
+    alias mmm is nnn;
+    alias ooo : ppp is qqq;
+    alias "rrr" : sss is ttt [uuu, vvv return www];
 begin
-    foo <= bar;
-    baz <= qux;
-end postponed process label2;
+end process;
