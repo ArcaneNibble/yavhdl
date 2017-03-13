@@ -95,6 +95,8 @@ const char *parse_tree_types[] = {
     "PT_WAVEFORM_ELEMENT",
     "PT_DELAY_TRANSPORT",
     "PT_DELAY_INERTIAL",
+    "PT_SIMPLE_FORCE_ASSIGNMENT",
+    "PT_SIMPLE_RELEASE_ASSIGNMENT",
 };
 
 const char *parse_operators[] = {
@@ -138,6 +140,12 @@ const char *parse_operators[] = {
 const char *range_direction[] = {
     "downto",
     "to",
+};
+
+const char *force_modes[] = {
+    nullptr,
+    "in",
+    "out",
 };
 
 // Escape values for JSON output
@@ -568,6 +576,28 @@ void VhdlParseTreeNode::debug_print() {
             if (this->pieces[0]) {
                 cout << ", \"reject\": ";
                 this->pieces[0]->debug_print();
+            }
+            break;
+
+        case PT_SIMPLE_FORCE_ASSIGNMENT:
+            cout << ", \"target\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"expression\": ";
+            this->pieces[1]->debug_print();
+            if (this->force_mode != FORCE_UNSPEC) {
+                cout << ", \"force_mode\": \"";
+                cout << force_modes[this->force_mode];
+                cout << "\"";
+            }
+            break;
+
+        case PT_SIMPLE_RELEASE_ASSIGNMENT:
+            cout << ", \"target\": ";
+            this->pieces[0]->debug_print();
+            if (this->force_mode != FORCE_UNSPEC) {
+                cout << ", \"force_mode\": \"";
+                cout << force_modes[this->force_mode];
+                cout << "\"";
             }
             break;
 

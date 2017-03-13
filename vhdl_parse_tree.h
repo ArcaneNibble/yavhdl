@@ -97,6 +97,8 @@ enum ParseTreeNodeType
     PT_WAVEFORM_ELEMENT,
     PT_DELAY_TRANSPORT,
     PT_DELAY_INERTIAL,
+    PT_SIMPLE_FORCE_ASSIGNMENT,
+    PT_SIMPLE_RELEASE_ASSIGNMENT,
 };
 
 // Operators, section 9.2
@@ -145,6 +147,13 @@ enum ParseTreeRangeDirection
     RANGE_UP,
 };
 
+enum ParseTreeForceMode
+{
+    FORCE_UNSPEC,
+    FORCE_IN,
+    FORCE_OUT,
+};
+
 // Definition of a parse tree node
 #define NUM_FIXED_PIECES 8
 
@@ -162,6 +171,7 @@ struct VhdlParseTreeNode {
 
     ParseTreeOperatorType op_type;
     ParseTreeRangeDirection range_dir;
+    ParseTreeForceMode force_mode;
 
     VhdlParseTreeNode(enum ParseTreeNodeType type);
     ~VhdlParseTreeNode();

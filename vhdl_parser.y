@@ -1266,7 +1266,8 @@ signal_assignment_statement:
 /// Section 10.5.2
 simple_signal_assignment:
     simple_waveform_assignment
-    // TODO
+    | simple_force_assignment
+    | simple_release_assignment
 
 simple_waveform_assignment:
     target DL_LEQ waveform {
@@ -1282,6 +1283,49 @@ simple_waveform_assignment:
         $$->pieces[0] = $1;
         $$->pieces[1] = $4;
         $$->pieces[2] = $3;
+    }
+
+simple_force_assignment:
+    target DL_LEQ KW_FORCE expression {
+        $$ = new VhdlParseTreeNode(PT_SIMPLE_FORCE_ASSIGNMENT);
+        $$->force_mode = FORCE_UNSPEC;
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $4;
+    }
+    | target DL_LEQ KW_FORCE KW_IN expression {
+        $$ = new VhdlParseTreeNode(PT_SIMPLE_FORCE_ASSIGNMENT);
+        $$->force_mode = FORCE_IN;
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $5;
+    }
+    | target DL_LEQ KW_FORCE KW_OUT expression {
+        $$ = new VhdlParseTreeNode(PT_SIMPLE_FORCE_ASSIGNMENT);
+        $$->force_mode = FORCE_OUT;
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $5;
+    }
+
+simple_release_assignment:
+    target DL_LEQ KW_RELEASE {
+        $$ = new VhdlParseTreeNode(PT_SIMPLE_RELEASE_ASSIGNMENT);
+        $$->force_mode = FORCE_UNSPEC;
+        $$->piece_count = 1;
+        $$->pieces[0] = $1;
+    }
+    | target DL_LEQ KW_RELEASE KW_IN {
+        $$ = new VhdlParseTreeNode(PT_SIMPLE_RELEASE_ASSIGNMENT);
+        $$->force_mode = FORCE_IN;
+        $$->piece_count = 1;
+        $$->pieces[0] = $1;
+    }
+    | target DL_LEQ KW_RELEASE KW_OUT {
+        $$ = new VhdlParseTreeNode(PT_SIMPLE_RELEASE_ASSIGNMENT);
+        $$->force_mode = FORCE_OUT;
+        $$->piece_count = 1;
+        $$->pieces[0] = $1;
     }
 
 delay_mechanism:
