@@ -227,12 +227,13 @@ _one_or_more_ids:
 
 ////////////////////////////// Types, section 5 //////////////////////////////
 
-/// Section 5.2
+/// Section 5.2.1
 scalar_type_definition:
     enumeration_type_definition
+    // We cannot tell these apart at this stage
+    | _integer_or_floating_type_definition
     // TODO
 
-/// Section 5.2.1
 range_constraint:
     KW_RANGE range {
         $$ = $2;
@@ -278,6 +279,14 @@ _one_or_more_enumeration_literals:
 enumeration_literal:
     identifier
     | character_literal
+
+/// Section 5.2.3, 5.2.5
+_integer_or_floating_type_definition:
+    range_constraint {
+        $$ = new VhdlParseTreeNode(PT_INTEGER_FLOAT_TYPE_DEFINITION);
+        $$->piece_count = 1;
+        $$->pieces[0] = $1;
+    }
 
 /// Section 5.2.4
 // This requires the abstract_literal otherwise it becomes ambiguous with just

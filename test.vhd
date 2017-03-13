@@ -1,1 +1,1 @@
-type foo is (a, b, c, d);
+type foo is range 0 to 5;

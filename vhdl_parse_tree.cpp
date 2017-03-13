@@ -118,6 +118,7 @@ const char *parse_tree_types[] = {
     "PT_FULL_TYPE_DECLARATION",
     "PT_ENUMERATION_TYPE_DEFINITION",
     "PT_ENUM_LITERAL_LIST",
+    "PT_INTEGER_FLOAT_TYPE_DEFINITION",
 };
 
 const char *parse_operators[] = {
@@ -715,6 +716,11 @@ void VhdlParseTreeNode::debug_print() {
 
         case PT_ENUMERATION_TYPE_DEFINITION:
             cout << ", \"literals\": ";
+            this->pieces[0]->debug_print();
+            break;
+
+        case PT_INTEGER_FLOAT_TYPE_DEFINITION:
+            cout << ", \"range\": ";
             this->pieces[0]->debug_print();
             break;
 
