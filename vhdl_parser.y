@@ -1276,7 +1276,28 @@ simple_waveform_assignment:
         $$->pieces[1] = $3;
         $$->pieces[2] = nullptr;
     }
-    // TODO
+    | target DL_LEQ delay_mechanism waveform {
+        $$ = new VhdlParseTreeNode(PT_SIMPLE_WAVEFORM_ASSIGNMENT);
+        $$->piece_count = 3;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $3;
+    }
+
+delay_mechanism:
+    KW_TRANSPORT {
+        $$ = new VhdlParseTreeNode(PT_DELAY_TRANSPORT);
+    }
+    | KW_INERTIAL {
+        $$ = new VhdlParseTreeNode(PT_DELAY_INERTIAL);
+        $$->piece_count = 1;
+        $$->pieces[0] = nullptr;
+    }
+    | KW_REJECT expression KW_INERTIAL {
+        $$ = new VhdlParseTreeNode(PT_DELAY_INERTIAL);
+        $$->piece_count = 1;
+        $$->pieces[0] = $2;
+    }
 
 target:
     name 

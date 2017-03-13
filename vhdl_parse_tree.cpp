@@ -93,6 +93,8 @@ const char *parse_tree_types[] = {
     "PT_WAVEFORM",
     "PT_WAVEFORM_UNAFFECTED",
     "PT_WAVEFORM_ELEMENT",
+    "PT_DELAY_TRANSPORT",
+    "PT_DELAY_INERTIAL",
 };
 
 const char *parse_operators[] = {
@@ -559,6 +561,13 @@ void VhdlParseTreeNode::debug_print() {
             if (this->pieces[1]) {
                 cout << ", \"time\": ";
                 this->pieces[1]->debug_print();
+            }
+            break;
+
+        case PT_DELAY_INERTIAL:
+            if (this->pieces[0]) {
+                cout << ", \"reject\": ";
+                this->pieces[0]->debug_print();
             }
             break;
 
