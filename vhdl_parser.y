@@ -1174,6 +1174,7 @@ _real_sequential_statement:
     | assertion_statement
     | report_statement
     | signal_assignment_statement
+    | variable_assignment_statement
     | procedure_call_statement
     | if_statement
     | case_statement
@@ -1182,7 +1183,6 @@ _real_sequential_statement:
     | exit_statement
     | return_statement
     | null_statement
-    // TODO
 
 /// Section 10.2
 wait_statement:
@@ -1648,6 +1648,46 @@ _selected_expression:
         $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
+    }
+
+/// Section 10.6
+variable_assignment_statement:
+    simple_variable_assignment
+    | conditional_variable_assignment
+    | selected_variable_assignment
+
+simple_variable_assignment:
+    target DL_ASS expression {
+        $$ = new VhdlParseTreeNode(PT_SIMPLE_VARIABLE_ASSIGNMENT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+conditional_variable_assignment:
+    target DL_ASS conditional_expressions {
+        $$ = new VhdlParseTreeNode(PT_CONDITIONAL_VARIABLE_ASSIGNMENT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+selected_variable_assignment:
+    KW_WITH expression KW_SELECT target DL_ASS selected_expressions {
+        $$ = new VhdlParseTreeNode(PT_SELECTED_VARIABLE_ASSIGNMENT);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $6;
+        $$->boolean = false;
+    }
+    | KW_WITH expression KW_SELECT '?' target DL_ASS selected_expressions {
+        $$ = new VhdlParseTreeNode(PT_SELECTED_VARIABLE_ASSIGNMENT);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $5;
+        $$->pieces[2] = $7;
+        $$->boolean = true;
     }
 
 /// Section 10.7

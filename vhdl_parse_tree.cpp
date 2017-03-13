@@ -111,6 +111,9 @@ const char *parse_tree_types[] = {
     "PT_SELECTED_FORCE_ASSIGNMENT",
     "PT_SELECTED_EXPRESSIONS",
     "PT_SELECTED_EXPRESSION",
+    "PT_SIMPLE_VARIABLE_ASSIGNMENT",
+    "PT_CONDITIONAL_VARIABLE_ASSIGNMENT",
+    "PT_SELECTED_VARIABLE_ASSIGNMENT",
 };
 
 const char *parse_operators[] = {
@@ -678,6 +681,25 @@ void VhdlParseTreeNode::debug_print() {
             this->pieces[0]->debug_print();
             cout << ", \"choices\": ";
             this->pieces[1]->debug_print();
+            break;
+
+        case PT_SIMPLE_VARIABLE_ASSIGNMENT:
+        case PT_CONDITIONAL_VARIABLE_ASSIGNMENT:
+            cout << ", \"target\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"expression\": ";
+            this->pieces[1]->debug_print();
+            break;
+
+        case PT_SELECTED_VARIABLE_ASSIGNMENT:
+            cout << ", \"expression\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"target\": ";
+            this->pieces[1]->debug_print();
+            cout << ", \"selected_expression\": ";
+            this->pieces[2]->debug_print();
+            cout << ", \"matching\": ";
+            cout << (this->boolean ? "true" : "false");
             break;
 
         case PT_EXPRESSION_LIST:

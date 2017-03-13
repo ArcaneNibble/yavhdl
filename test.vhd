@@ -1,3 +1,4 @@
-with asdf select? (foo, bar, baz, a|b|c|d => qux) <= force out
+with asdf select? foo :=
     aaa when 111,
-    bbb when 222;
+    bbb when 222,
+    zzz when others;
