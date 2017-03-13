@@ -184,7 +184,8 @@ _toplevel_token:
 
 // Fake start token for testing
 not_actualy_design_file:
-    sequence_of_statements;
+    sequence_of_statements
+    | type_declaration
 
 ///////////////////// Subprograms and packages, section 4 /////////////////////
 
@@ -226,6 +227,11 @@ _one_or_more_ids:
 
 ////////////////////////////// Types, section 5 //////////////////////////////
 
+/// Section 5.2
+scalar_type_definition:
+    enumeration_type_definition
+    // TODO
+
 /// Section 5.2.1
 range_constraint:
     KW_RANGE range {
@@ -253,6 +259,22 @@ _almost_range:
     }
 
 /// Section 5.2.2
+enumeration_type_definition:
+    '(' _one_or_more_enumeration_literals ')' {
+        $$ = new VhdlParseTreeNode(PT_ENUMERATION_TYPE_DEFINITION);
+        $$->piece_count = 1;
+        $$->pieces[0] = $2;
+    }
+
+_one_or_more_enumeration_literals:
+    enumeration_literal
+    | _one_or_more_enumeration_literals ',' enumeration_literal {
+        $$ = new VhdlParseTreeNode(PT_ENUM_LITERAL_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
 enumeration_literal:
     identifier
     | character_literal
@@ -343,6 +365,23 @@ record_element_constraint:
     }
 
 /////////////////////////// Declarations, section 6 ///////////////////////////
+
+/// Section 6.2
+type_declaration:
+    full_type_declaration
+    // TODO
+
+full_type_declaration:
+    KW_TYPE identifier KW_IS type_definition ';' {
+        $$ = new VhdlParseTreeNode(PT_FULL_TYPE_DECLARATION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+    }
+
+type_definition:
+    scalar_type_definition
+    // TODO
 
 /// Section 6.3
 subtype_indication:

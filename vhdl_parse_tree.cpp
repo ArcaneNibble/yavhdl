@@ -114,6 +114,10 @@ const char *parse_tree_types[] = {
     "PT_SIMPLE_VARIABLE_ASSIGNMENT",
     "PT_CONDITIONAL_VARIABLE_ASSIGNMENT",
     "PT_SELECTED_VARIABLE_ASSIGNMENT",
+
+    "PT_FULL_TYPE_DECLARATION",
+    "PT_ENUMERATION_TYPE_DEFINITION",
+    "PT_ENUM_LITERAL_LIST",
 };
 
 const char *parse_operators[] = {
@@ -702,6 +706,18 @@ void VhdlParseTreeNode::debug_print() {
             cout << (this->boolean ? "true" : "false");
             break;
 
+        case PT_FULL_TYPE_DECLARATION:
+            cout << ", \"identifier\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"definition\": ";
+            this->pieces[1]->debug_print();
+            break;
+
+        case PT_ENUMERATION_TYPE_DEFINITION:
+            cout << ", \"literals\": ";
+            this->pieces[0]->debug_print();
+            break;
+
         case PT_EXPRESSION_LIST:
         case PT_ID_LIST:
         case PT_RECORD_RESOLUTION:
@@ -720,6 +736,7 @@ void VhdlParseTreeNode::debug_print() {
         case PT_CONDITIONAL_EXPRESSION_ELSE_LIST:
         case PT_SELECTED_WAVEFORMS:
         case PT_SELECTED_EXPRESSIONS:
+        case PT_ENUM_LITERAL_LIST:
             if (this->pieces[0]) {
                 cout << ", \"rest\": ";
                 this->pieces[0]->debug_print();
