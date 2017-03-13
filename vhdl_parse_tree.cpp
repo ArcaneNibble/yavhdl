@@ -129,6 +129,8 @@ const char *parse_tree_types[] = {
     "PT_ELEMENT_DECLARATION",
     "PT_ELEMENT_DECLARATION_LIST",
     "PT_ID_LIST_REAL",
+    "PT_ACCESS_TYPE_DEFINITION",
+    "PT_INCOMPLETE_TYPE_DECLARATION",
 };
 
 const char *parse_operators[] = {
@@ -778,6 +780,16 @@ void VhdlParseTreeNode::debug_print() {
             this->pieces[0]->debug_print();
             cout << ", \"subtype\": ";
             this->pieces[1]->debug_print();
+            break;
+
+        case PT_ACCESS_TYPE_DEFINITION:
+            cout << ", \"subtype\": ";
+            this->pieces[0]->debug_print();
+            break;
+
+        case PT_INCOMPLETE_TYPE_DECLARATION:
+            cout << ", \"identifier\": ";
+            this->pieces[0]->debug_print();
             break;
 
         case PT_EXPRESSION_LIST:

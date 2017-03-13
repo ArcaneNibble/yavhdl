@@ -1,4 +1,1 @@
-type test is record
-    aaa,bbb,ccc : bar foo (baz'range);
-    ddd: eee;
-end record;
+type test is access bar foo (baz'range);

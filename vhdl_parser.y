@@ -464,7 +464,6 @@ _one_or_more_element_declarations:
     }
 
 element_declaration:
-    // FIXME
     identifier_list ':' subtype_indication ';' {
         $$ = new VhdlParseTreeNode(PT_ELEMENT_DECLARATION);
         $$->piece_count = 2;
@@ -503,12 +502,27 @@ record_element_constraint:
         $$->pieces[1] = $2;
     }
 
+/// Section 5.4
+access_type_definition:
+    KW_ACCESS subtype_indication {
+        $$ = new VhdlParseTreeNode(PT_ACCESS_TYPE_DEFINITION);
+        $$->piece_count = 1;
+        $$->pieces[0] = $2;
+    }
+
+incomplete_type_declaration:
+    KW_TYPE identifier ';' {
+        $$ = new VhdlParseTreeNode(PT_INCOMPLETE_TYPE_DECLARATION);
+        $$->piece_count = 1;
+        $$->pieces[0] = $2;
+    }
+
 /////////////////////////// Declarations, section 6 ///////////////////////////
 
 /// Section 6.2
 type_declaration:
     full_type_declaration
-    // TODO
+    | incomplete_type_declaration
 
 full_type_declaration:
     KW_TYPE identifier KW_IS type_definition ';' {
@@ -521,6 +535,7 @@ full_type_declaration:
 type_definition:
     scalar_type_definition
     | composite_type_definition
+    | access_type_definition
     // TODO
 
 /// Section 6.3

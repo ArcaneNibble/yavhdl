@@ -133,6 +133,8 @@ enum ParseTreeNodeType
     // Real identifiers, not identifiers or selected names
     // FIXME
     PT_ID_LIST_REAL,
+    PT_ACCESS_TYPE_DEFINITION,
+    PT_INCOMPLETE_TYPE_DECLARATION,
 };
 
 // Operators, section 9.2
