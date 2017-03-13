@@ -198,7 +198,7 @@ subprogram_declaration:
 
 subprogram_specification:
     procedure_specification
-    // TODO
+    | function_specification
 
 procedure_specification:
     KW_PROCEDURE designator subprogram_header {
@@ -207,9 +207,76 @@ procedure_specification:
         $$->pieces[0] = $2;
         $$->pieces[1] = $3;
     }
+    | KW_PROCEDURE designator subprogram_header '(' interface_list ')' {
+        $$ = new VhdlParseTreeNode(PT_PROCEDURE_SPECIFICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = $5;
+    }
+    | KW_PROCEDURE designator subprogram_header
+      KW_PARAMETER '(' interface_list ')' {
+        $$ = new VhdlParseTreeNode(PT_PROCEDURE_SPECIFICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = $6;
+    }
+
+function_specification:
+    _real_function_specification
+    | KW_PURE _real_function_specification {
+        $$ = $2;
+        $$->purity = PURITY_PURE;
+    }
+    | KW_IMPURE _real_function_specification {
+        $$ = $2;
+        $$->purity = PURITY_IMPURE;
+    }
+
+_real_function_specification:
+    KW_FUNCTION designator subprogram_header
+    KW_RETURN _simple_or_selected_name {
+        $$ = new VhdlParseTreeNode(PT_FUNCTION_SPECIFICATION);
+        $$->purity = PURITY_UNSPEC;
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $5;
+        $$->pieces[2] = $3;
+    }
+    | KW_FUNCTION designator subprogram_header '(' interface_list ')'
+      KW_RETURN _simple_or_selected_name {
+        $$ = new VhdlParseTreeNode(PT_FUNCTION_SPECIFICATION);
+        $$->purity = PURITY_UNSPEC;
+        $$->piece_count = 4;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $8;
+        $$->pieces[2] = $3;
+        $$->pieces[3] = $5;
+    }
+    | KW_FUNCTION designator subprogram_header
+      KW_PARAMETER '(' interface_list ')'
+      KW_RETURN _simple_or_selected_name {
+        $$ = new VhdlParseTreeNode(PT_FUNCTION_SPECIFICATION);
+        $$->purity = PURITY_UNSPEC;
+        $$->piece_count = 4;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $9;
+        $$->pieces[2] = $3;
+        $$->pieces[3] = $6;
+    }
+
+interface_list:
+    // TODO
 
 subprogram_header:
     %empty
+    | KW_GENERIC '(' interface_list ')' {
+        $$ = new VhdlParseTreeNode(PT_SUBPROGRAM_HEADER);
+        $$->piece_count = 2;
+        $$->pieces[0] = $3;
+        $$->pieces[1] = nullptr;
+    }
     // TODO
 
 designator:

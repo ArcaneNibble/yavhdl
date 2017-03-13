@@ -938,13 +938,15 @@ void VhdlParseTreeNode::debug_print() {
         case PT_FUNCTION_SPECIFICATION:
             cout << ", \"designator\": ";
             this->pieces[0]->debug_print();
-            if (this->pieces[1]) {
-                cout << ", \"header\": ";
-                this->pieces[1]->debug_print();
-            }
+            cout << ", \"return\": ";
+            this->pieces[1]->debug_print();
             if (this->pieces[2]) {
-                cout << ", \"parameters\": ";
+                cout << ", \"header\": ";
                 this->pieces[2]->debug_print();
+            }
+            if (this->pieces[3]) {
+                cout << ", \"parameters\": ";
+                this->pieces[3]->debug_print();
             }
             if (this->purity != PURITY_UNSPEC) {
                 cout << ", \"purity\": \"";
@@ -954,10 +956,14 @@ void VhdlParseTreeNode::debug_print() {
             break;
 
         case PT_SUBPROGRAM_HEADER:
-            cout << ", \"generic\": ";
-            this->pieces[0]->debug_print();
-            cout << ", \"generic_map\": ";
-            this->pieces[1]->debug_print();
+            if (this->pieces[0]) {
+                cout << ", \"generic\": ";
+                this->pieces[0]->debug_print();
+            }
+            if (this->pieces[1]) {
+                cout << ", \"generic_map\": ";
+                this->pieces[1]->debug_print();
+            }
             break;
 
         case PT_EXPRESSION_LIST:
