@@ -346,7 +346,48 @@ _almost_physical_literal:
         $$->pieces[1] = $1;
     }
 
+/// Section 5.3.1
+composite_type_definition:
+    array_type_definition
+    // TODO
+
 /// Section 5.3.2
+// The way we've defined this causes a shift/reduce conflict.
+array_type_definition:
+    unbounded_array_definition
+    | constrained_array_definition
+
+unbounded_array_definition:
+    KW_ARRAY '(' _one_or_more_index_subtype_definition ')'
+    KW_OF subtype_indication {
+        $$ = new VhdlParseTreeNode(PT_UNBOUNDED_ARRAY_DEFINITION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $3;
+        $$->pieces[1] = $6;
+    }
+
+constrained_array_definition:
+    KW_ARRAY index_constraint KW_OF subtype_indication {
+        $$ = new VhdlParseTreeNode(PT_CONSTRAINED_ARRAY_DEFINITION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+    }
+
+_one_or_more_index_subtype_definition:
+    index_subtype_definition
+    | _one_or_more_index_subtype_definition ',' index_subtype_definition {
+        $$ = new VhdlParseTreeNode(PT_INDEX_SUBTYPE_DEFINITION_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+index_subtype_definition:
+    _simple_or_selected_name KW_RANGE DL_BOX {
+        $$ = $1;
+    }
+
 array_constraint:
     '(' KW_OPEN ')' {
         $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
@@ -437,6 +478,7 @@ full_type_declaration:
 
 type_definition:
     scalar_type_definition
+    | composite_type_definition
     // TODO
 
 /// Section 6.3

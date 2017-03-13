@@ -122,6 +122,9 @@ const char *parse_tree_types[] = {
     "PT_PHYSICAL_TYPE_DEFINITION",
     "PT_SECONDARY_UNIT_DECLARATION",
     "PT_SECONDARY_UNIT_DECLARATION_LIST",
+    "PT_CONSTRAINED_ARRAY_DEFINITION",
+    "PT_INDEX_SUBTYPE_DEFINITION_LIST",
+    "PT_UNBOUNDED_ARRAY_DEFINITION",
 };
 
 const char *parse_operators[] = {
@@ -749,6 +752,14 @@ void VhdlParseTreeNode::debug_print() {
             this->pieces[1]->debug_print();
             break;
 
+        case PT_CONSTRAINED_ARRAY_DEFINITION:
+        case PT_UNBOUNDED_ARRAY_DEFINITION:
+            cout << ", \"index_constraint\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"element\": ";
+            this->pieces[1]->debug_print();
+            break;
+
         case PT_EXPRESSION_LIST:
         case PT_ID_LIST:
         case PT_RECORD_RESOLUTION:
@@ -769,6 +780,7 @@ void VhdlParseTreeNode::debug_print() {
         case PT_SELECTED_EXPRESSIONS:
         case PT_ENUM_LITERAL_LIST:
         case PT_SECONDARY_UNIT_DECLARATION_LIST:
+        case PT_INDEX_SUBTYPE_DEFINITION_LIST:
             if (this->pieces[0]) {
                 cout << ", \"rest\": ";
                 this->pieces[0]->debug_print();
