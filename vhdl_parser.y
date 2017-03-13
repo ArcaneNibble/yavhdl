@@ -2156,23 +2156,76 @@ process_statement:
     }
 
 _real_process_statement:
-    // TODO
     KW_PROCESS __maybe_is process_declarative_part KW_BEGIN
-    sequence_of_statements KW_END {
+    sequence_of_statements KW_END KW_PROCESS {
         $$ = new VhdlParseTreeNode(PT_PROCESS);
-        $$->piece_count = 4;
+        $$->piece_count = 5;
         $$->boolean = false;
         $$->pieces[0] = nullptr;
         $$->pieces[1] = $3;
         $$->pieces[2] = $5;
         $$->pieces[3] = nullptr;
+        $$->pieces[4] = nullptr;
+    }
+    | KW_PROCESS '(' process_sensitivity_list ')' __maybe_is
+      process_declarative_part KW_BEGIN
+      sequence_of_statements KW_END KW_PROCESS {
+        $$ = new VhdlParseTreeNode(PT_PROCESS);
+        $$->piece_count = 5;
+        $$->boolean = false;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = $6;
+        $$->pieces[2] = $8;
+        $$->pieces[3] = nullptr;
+        $$->pieces[4] = $3;
+    }
+    | KW_POSTPONED KW_PROCESS __maybe_is process_declarative_part KW_BEGIN
+      sequence_of_statements KW_END KW_POSTPONED KW_PROCESS {
+        $$ = new VhdlParseTreeNode(PT_PROCESS);
+        $$->piece_count = 5;
+        $$->boolean = true;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $6;
+        $$->pieces[3] = nullptr;
+        $$->pieces[4] = nullptr;
+    }
+    | KW_POSTPONED KW_PROCESS '(' process_sensitivity_list ')' __maybe_is
+      process_declarative_part KW_BEGIN
+      sequence_of_statements KW_END KW_POSTPONED KW_PROCESS {
+        $$ = new VhdlParseTreeNode(PT_PROCESS);
+        $$->piece_count = 5;
+        $$->boolean = true;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = $7;
+        $$->pieces[2] = $9;
+        $$->pieces[3] = nullptr;
+        $$->pieces[4] = $4;
     }
 
 __maybe_is:
     %empty
     | KW_IS
 
+process_sensitivity_list:
+    KW_ALL  { $$ = new VhdlParseTreeNode(PT_TOK_ALL); }
+    | _list_of_names
+
 process_declarative_part:
+    %empty
+    | _real_process_declarative_part
+
+_real_process_declarative_part:
+    process_declarative_item
+    | _real_process_declarative_part process_declarative_item {
+        $$ = new VhdlParseTreeNode(PT_DECLARATION_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
+
+process_declarative_item:
+    type_declaration
     // TODO
 
 //////////////////////// Lexical elements, section 15 ////////////////////////

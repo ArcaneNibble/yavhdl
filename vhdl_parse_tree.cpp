@@ -818,6 +818,10 @@ void VhdlParseTreeNode::debug_print() {
                 cout << ", \"end_label\": ";
                 this->pieces[3]->debug_print();
             }
+            if (this->pieces[4]) {
+                cout << ", \"sensitivity_list\": ";
+                this->pieces[4]->debug_print();
+            }
             cout << ", \"postponed\": ";
             cout << (this->boolean ? "true" : "false");
             break;
