@@ -146,6 +146,7 @@ enum ParseTreeNodeType
     PT_FILE_DECLARATION,
     PT_ALIAS_DECLARATION,
     PT_FILE_OPEN_INFORMATION,
+    PT_ATTRIBUTE_DECLARATION,
 };
 
 // Operators, section 9.2

@@ -835,6 +835,15 @@ alias_designator:
     | character_literal
     | string_literal        // was operator_symbol
 
+/// Section 6.7
+attribute_declaration:
+    KW_ATTRIBUTE identifier ':' _simple_or_selected_name ';' {
+        $$ = new VhdlParseTreeNode(PT_ATTRIBUTE_DECLARATION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+    }
+
 ////////////////////////////// Names, section 8 //////////////////////////////
 
 // This is a super hacked up version of the name grammar production
@@ -2353,6 +2362,7 @@ process_declarative_item:
     | variable_declaration
     | file_declaration
     | alias_declaration
+    | attribute_declaration
     // TODO
 
 //////////////////////// Lexical elements, section 15 ////////////////////////
