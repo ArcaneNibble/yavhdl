@@ -90,6 +90,11 @@ enum ParseTreeNodeType
     PT_WAIT_STATEMENT,
 
     PT_NAME_LIST,
+
+    PT_SIMPLE_WAVEFORM_ASSIGNMENT,
+    PT_WAVEFORM,
+    PT_WAVEFORM_UNAFFECTED,
+    PT_WAVEFORM_ELEMENT,
 };
 
 // Operators, section 9.2

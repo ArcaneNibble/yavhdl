@@ -1173,6 +1173,7 @@ _real_sequential_statement:
     wait_statement
     | assertion_statement
     | report_statement
+    | signal_assignment_statement
     | procedure_call_statement
     | if_statement
     | case_statement
@@ -1256,6 +1257,60 @@ report_statement:
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
     }
+
+/// Section 10.5
+signal_assignment_statement:
+    simple_signal_assignment
+    // TODO
+
+/// Section 10.5.2
+simple_signal_assignment:
+    simple_waveform_assignment
+    // TODO
+
+simple_waveform_assignment:
+    target DL_LEQ waveform {
+        $$ = new VhdlParseTreeNode(PT_SIMPLE_WAVEFORM_ASSIGNMENT);
+        $$->piece_count = 3;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = nullptr;
+    }
+    // TODO
+
+target:
+    name 
+    | aggregate
+
+waveform:
+    KW_UNAFFECTED {
+        $$ = new VhdlParseTreeNode(PT_WAVEFORM_UNAFFECTED);
+    }
+    | _one_or_more_waveform_elements
+
+_one_or_more_waveform_elements:
+    waveform_element
+    | _one_or_more_waveform_elements ',' waveform_element {
+        $$ = new VhdlParseTreeNode(PT_WAVEFORM);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+waveform_element:
+    expression {
+        $$ = new VhdlParseTreeNode(PT_WAVEFORM_ELEMENT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = nullptr;
+    }
+    | expression KW_AFTER expression {
+        $$ = new VhdlParseTreeNode(PT_WAVEFORM_ELEMENT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    // null gets included in expression
 
 /// Section 10.7
 procedure_call_statement:

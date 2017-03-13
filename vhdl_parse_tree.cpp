@@ -88,6 +88,11 @@ const char *parse_tree_types[] = {
     "PT_WAIT_STATEMENT",
 
     "PT_NAME_LIST",
+
+    "PT_SIMPLE_WAVEFORM_ASSIGNMENT",
+    "PT_WAVEFORM",
+    "PT_WAVEFORM_UNAFFECTED",
+    "PT_WAVEFORM_ELEMENT",
 };
 
 const char *parse_operators[] = {
@@ -537,6 +542,26 @@ void VhdlParseTreeNode::debug_print() {
             }
             break;
 
+        case PT_SIMPLE_WAVEFORM_ASSIGNMENT:
+            cout << ", \"target\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"waveform\": ";
+            this->pieces[1]->debug_print();
+            if (this->pieces[2]) {
+                cout << ", \"delay_mechanism\": ";
+                this->pieces[2]->debug_print();
+            }
+            break;
+
+        case PT_WAVEFORM_ELEMENT:
+            cout << ", \"value\": ";
+            this->pieces[0]->debug_print();
+            if (this->pieces[1]) {
+                cout << ", \"time\": ";
+                this->pieces[1]->debug_print();
+            }
+            break;
+
         case PT_EXPRESSION_LIST:
         case PT_ID_LIST:
         case PT_RECORD_RESOLUTION:
@@ -550,6 +575,7 @@ void VhdlParseTreeNode::debug_print() {
         case PT_ELSIF_LIST:
         case PT_CASE_STATEMENT_ALTERNATIVE_LIST:
         case PT_NAME_LIST:
+        case PT_WAVEFORM:
             if (this->pieces[0]) {
                 cout << ", \"rest\": ";
                 this->pieces[0]->debug_print();
