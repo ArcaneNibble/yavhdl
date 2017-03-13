@@ -108,6 +108,9 @@ const char *parse_tree_types[] = {
     "PT_SELECTED_WAVEFORM_ASSIGNMENT",
     "PT_SELECTED_WAVEFORMS",
     "PT_SELECTED_WAVEFORM",
+    "PT_SELECTED_FORCE_ASSIGNMENT",
+    "PT_SELECTED_EXPRESSIONS",
+    "PT_SELECTED_EXPRESSION",
 };
 
 const char *parse_operators[] = {
@@ -653,7 +656,24 @@ void VhdlParseTreeNode::debug_print() {
             cout << (this->boolean ? "true" : "false");
             break;
 
+        case PT_SELECTED_FORCE_ASSIGNMENT:
+            cout << ", \"expression\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"target\": ";
+            this->pieces[1]->debug_print();
+            cout << ", \"selected_expression\": ";
+            this->pieces[2]->debug_print();
+            if (this->force_mode != FORCE_UNSPEC) {
+                cout << ", \"force_mode\": \"";
+                cout << force_modes[this->force_mode];
+                cout << "\"";
+            }
+            cout << ", \"matching\": ";
+            cout << (this->boolean ? "true" : "false");
+            break;
+
         case PT_SELECTED_WAVEFORM:
+        case PT_SELECTED_EXPRESSION:
             cout << ", \"waveform\": ";
             this->pieces[0]->debug_print();
             cout << ", \"choices\": ";
@@ -677,6 +697,7 @@ void VhdlParseTreeNode::debug_print() {
         case PT_CONDITIONAL_WAVEFORM_ELSE_LIST:
         case PT_CONDITIONAL_EXPRESSION_ELSE_LIST:
         case PT_SELECTED_WAVEFORMS:
+        case PT_SELECTED_EXPRESSIONS:
             if (this->pieces[0]) {
                 cout << ", \"rest\": ";
                 this->pieces[0]->debug_print();

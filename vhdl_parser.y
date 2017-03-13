@@ -1513,7 +1513,7 @@ _conditional_expression_else:
 /// Section 10.5.4
 selected_signal_assignment:
     selected_waveform_assignment
-    // TODO
+    | selected_force_assignment
 
 selected_waveform_assignment:
     KW_WITH expression KW_SELECT target DL_LEQ selected_waveforms {
@@ -1567,6 +1567,84 @@ selected_waveforms:
 _selected_waveform:
     waveform KW_WHEN choices {
         $$ = new VhdlParseTreeNode(PT_SELECTED_WAVEFORM);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+selected_force_assignment:
+    KW_WITH expression KW_SELECT target DL_LEQ KW_FORCE selected_expressions {
+        $$ = new VhdlParseTreeNode(PT_SELECTED_FORCE_ASSIGNMENT);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $7;
+        $$->force_mode = FORCE_UNSPEC;
+        $$->boolean = false;
+    }
+    | KW_WITH expression KW_SELECT target
+      DL_LEQ KW_FORCE KW_IN selected_expressions {
+        $$ = new VhdlParseTreeNode(PT_SELECTED_FORCE_ASSIGNMENT);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $8;
+        $$->force_mode = FORCE_IN;
+        $$->boolean = false;
+    }
+    | KW_WITH expression KW_SELECT target
+      DL_LEQ KW_FORCE KW_OUT selected_expressions {
+        $$ = new VhdlParseTreeNode(PT_SELECTED_FORCE_ASSIGNMENT);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $8;
+        $$->force_mode = FORCE_OUT;
+        $$->boolean = false;
+    }
+    | KW_WITH expression KW_SELECT '?' target
+      DL_LEQ KW_FORCE selected_expressions {
+        $$ = new VhdlParseTreeNode(PT_SELECTED_FORCE_ASSIGNMENT);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $5;
+        $$->pieces[2] = $8;
+        $$->force_mode = FORCE_UNSPEC;
+        $$->boolean = true;
+    }
+    | KW_WITH expression KW_SELECT '?' target
+      DL_LEQ KW_FORCE KW_IN selected_expressions {
+        $$ = new VhdlParseTreeNode(PT_SELECTED_FORCE_ASSIGNMENT);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $5;
+        $$->pieces[2] = $9;
+        $$->force_mode = FORCE_IN;
+        $$->boolean = true;
+    }
+    | KW_WITH expression KW_SELECT '?' target
+      DL_LEQ KW_FORCE KW_OUT selected_expressions {
+        $$ = new VhdlParseTreeNode(PT_SELECTED_FORCE_ASSIGNMENT);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $5;
+        $$->pieces[2] = $9;
+        $$->force_mode = FORCE_OUT;
+        $$->boolean = true;
+    }
+
+selected_expressions:
+    _selected_expression
+    | selected_expressions ',' _selected_expression {
+        $$ = new VhdlParseTreeNode(PT_SELECTED_EXPRESSIONS);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+_selected_expression:
+    expression KW_WHEN choices {
+        $$ = new VhdlParseTreeNode(PT_SELECTED_EXPRESSION);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
