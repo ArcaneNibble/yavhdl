@@ -132,6 +132,9 @@ const char *parse_tree_types[] = {
     "PT_ACCESS_TYPE_DEFINITION",
     "PT_INCOMPLETE_TYPE_DECLARATION",
     "PT_FILE_TYPE_DEFINITION",
+
+    "PT_PROCESS",
+    "PT_DECLARATION_LIST",
 };
 
 const char *parse_operators[] = {
@@ -798,6 +801,27 @@ void VhdlParseTreeNode::debug_print() {
             this->pieces[0]->debug_print();
             break;
 
+        case PT_PROCESS:
+            if (this->pieces[0]) {
+                cout << ", \"label\": ";
+                this->pieces[0]->debug_print();
+            }
+            if (this->pieces[1]) {
+                cout << ", \"declarations\": ";
+                this->pieces[1]->debug_print();
+            }
+            if (this->pieces[2]) {
+                cout << ", \"statements\": ";
+                this->pieces[2]->debug_print();
+            }
+            if (this->pieces[3]) {
+                cout << ", \"end_label\": ";
+                this->pieces[3]->debug_print();
+            }
+            cout << ", \"postponed\": ";
+            cout << (this->boolean ? "true" : "false");
+            break;
+
         case PT_EXPRESSION_LIST:
         case PT_ID_LIST:
         case PT_RECORD_RESOLUTION:
@@ -821,6 +845,7 @@ void VhdlParseTreeNode::debug_print() {
         case PT_INDEX_SUBTYPE_DEFINITION_LIST:
         case PT_ELEMENT_DECLARATION_LIST:
         case PT_ID_LIST_REAL:
+        case PT_DECLARATION_LIST:
             if (this->pieces[0]) {
                 cout << ", \"rest\": ";
                 this->pieces[0]->debug_print();

@@ -1,1 +1,5 @@
-type test is file of string;
+process
+begin
+    foo <= bar;
+    baz <= qux;
+end;

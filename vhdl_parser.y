@@ -184,8 +184,7 @@ _toplevel_token:
 
 // Fake start token for testing
 not_actualy_design_file:
-    sequence_of_statements
-    | type_declaration
+    process_statement
 
 ///////////////////// Subprograms and packages, section 4 /////////////////////
 
@@ -2136,6 +2135,45 @@ null_statement:
     KW_NULL {
         $$ = new VhdlParseTreeNode(PT_NULL_STATEMENT);
     }
+
+////////////////////// Concurrent statements, section 11 //////////////////////
+
+/// Section 11.3
+process_statement:
+    _real_process_statement ';'
+    | identifier ':' _real_process_statement ';' {
+        $$ = $3;
+        $$->pieces[0] = $1;
+    }
+    | _real_process_statement identifier ';' {
+        $$ = $1;
+        $$->pieces[3] = $2;
+    }
+    | identifier ':' _real_process_statement identifier ';' {
+        $$ = $3;
+        $$->pieces[0] = $1;
+        $$->pieces[3] = $4;
+    }
+
+_real_process_statement:
+    // TODO
+    KW_PROCESS __maybe_is process_declarative_part KW_BEGIN
+    sequence_of_statements KW_END {
+        $$ = new VhdlParseTreeNode(PT_PROCESS);
+        $$->piece_count = 4;
+        $$->boolean = false;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = $5;
+        $$->pieces[3] = nullptr;
+    }
+
+__maybe_is:
+    %empty
+    | KW_IS
+
+process_declarative_part:
+    // TODO
 
 //////////////////////// Lexical elements, section 15 ////////////////////////
 
