@@ -1,4 +1,4 @@
 with asdf select? foo :=
-    aaa when 111,
-    bbb when 222,
+    aaa'range when 111,
+    bbb'subtype when 222,
     zzz when others;

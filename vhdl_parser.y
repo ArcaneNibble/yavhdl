@@ -587,18 +587,30 @@ slice_name:
 // end because it is ambiguous with function calls. _ambig_name_parens should
 // pick that up.
 _almost_attribute_name:
-    name '\'' identifier {
+    name '\'' __attribute_kw_identifier_hack {
         $$ = new VhdlParseTreeNode(PT_NAME_ATTRIBUTE);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
-    | name signature '\'' identifier {
+    | name signature '\'' __attribute_kw_identifier_hack {
         $$ = new VhdlParseTreeNode(PT_NAME_ATTRIBUTE);
         $$->piece_count = 3;
         $$->pieces[0] = $1;
         $$->pieces[1] = $4;
         $$->pieces[2] = $2;
+    }
+
+// Apparently these keywords are possible names of attributes
+__attribute_kw_identifier_hack:
+    identifier
+    | KW_RANGE {
+        $$ = new VhdlParseTreeNode(PT_BASIC_ID);
+        $$->str = new std::string("range");
+    }
+    | KW_SUBTYPE{
+        $$ = new VhdlParseTreeNode(PT_BASIC_ID);
+        $$->str = new std::string("subtype");
     }
 
 // We need the actual attribute_name for range constraints. This introduces a
