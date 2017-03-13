@@ -1262,7 +1262,7 @@ report_statement:
 signal_assignment_statement:
     simple_signal_assignment
     | conditional_signal_assignment
-    // TODO
+    | selected_signal_assignment
 
 /// Section 10.5.2
 simple_signal_assignment:
@@ -1381,7 +1381,7 @@ waveform_element:
 /// Section 10.5.3
 conditional_signal_assignment:
     conditional_waveform_assignment
-    // TODO
+    | conditional_force_assignment
 
 conditional_waveform_assignment:
     target DL_LEQ conditional_waveforms {
@@ -1441,6 +1441,135 @@ _conditional_waveform_else:
         $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
+    }
+
+conditional_force_assignment:
+    target DL_LEQ KW_FORCE conditional_expressions {
+        $$ = new VhdlParseTreeNode(PT_CONDITIONAL_FORCE_ASSIGNMENT);
+        $$->force_mode = FORCE_UNSPEC;
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $4;
+    }
+    | target DL_LEQ KW_FORCE KW_IN conditional_expressions {
+        $$ = new VhdlParseTreeNode(PT_CONDITIONAL_FORCE_ASSIGNMENT);
+        $$->force_mode = FORCE_IN;
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $5;
+    }
+    | target DL_LEQ KW_FORCE KW_OUT conditional_expressions {
+        $$ = new VhdlParseTreeNode(PT_CONDITIONAL_FORCE_ASSIGNMENT);
+        $$->force_mode = FORCE_OUT;
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $5;
+    }
+
+conditional_expressions:
+    expression KW_WHEN expression {
+        $$ = new VhdlParseTreeNode(PT_CONDITIONAL_EXPRESSIONS);
+        $$->piece_count = 4;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = nullptr;
+    }
+    | expression KW_WHEN expression KW_ELSE expression {
+        $$ = new VhdlParseTreeNode(PT_CONDITIONAL_EXPRESSIONS);
+        $$->piece_count = 4;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = $5;
+    }
+    | expression KW_WHEN expression _one_or_more_conditional_expression_elses
+      KW_ELSE expression {
+        $$ = new VhdlParseTreeNode(PT_CONDITIONAL_EXPRESSIONS);
+        $$->piece_count = 4;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = $4;
+        $$->pieces[3] = $6;
+    }
+
+_one_or_more_conditional_expression_elses:
+    _conditional_expression_else
+    | _one_or_more_conditional_expression_elses _conditional_expression_else {
+        $$ = new VhdlParseTreeNode(PT_CONDITIONAL_EXPRESSION_ELSE_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
+
+_conditional_expression_else:
+    KW_ELSE expression KW_WHEN expression {
+        $$ = new VhdlParseTreeNode(PT_CONDITIONAL_EXPRESSION_ELSE);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+    }
+
+/// Section 10.5.4
+selected_signal_assignment:
+    selected_waveform_assignment
+    // TODO
+
+selected_waveform_assignment:
+    KW_WITH expression KW_SELECT target DL_LEQ selected_waveforms {
+        $$ = new VhdlParseTreeNode(PT_SELECTED_WAVEFORM_ASSIGNMENT);
+        $$->piece_count = 4;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $6;
+        $$->pieces[3] = nullptr;
+        $$->boolean = false;
+    }
+    | KW_WITH expression KW_SELECT '?' target DL_LEQ selected_waveforms {
+        $$ = new VhdlParseTreeNode(PT_SELECTED_WAVEFORM_ASSIGNMENT);
+        $$->piece_count = 4;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $5;
+        $$->pieces[2] = $7;
+        $$->pieces[3] = nullptr;
+        $$->boolean = true;
+    }
+    | KW_WITH expression KW_SELECT
+      target DL_LEQ delay_mechanism selected_waveforms {
+        $$ = new VhdlParseTreeNode(PT_SELECTED_WAVEFORM_ASSIGNMENT);
+        $$->piece_count = 4;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $7;
+        $$->pieces[3] = $6;
+        $$->boolean = false;
+    }
+    | KW_WITH expression KW_SELECT '?'
+      target DL_LEQ delay_mechanism selected_waveforms {
+        $$ = new VhdlParseTreeNode(PT_SELECTED_WAVEFORM_ASSIGNMENT);
+        $$->piece_count = 4;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $5;
+        $$->pieces[2] = $8;
+        $$->pieces[3] = $7;
+        $$->boolean = true;
+    }
+
+selected_waveforms:
+    _selected_waveform
+    | selected_waveforms ',' _selected_waveform {
+        $$ = new VhdlParseTreeNode(PT_SELECTED_WAVEFORMS);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+_selected_waveform:
+    waveform KW_WHEN choices {
+        $$ = new VhdlParseTreeNode(PT_SELECTED_WAVEFORM);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
     }
 
 /// Section 10.7
