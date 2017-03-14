@@ -160,6 +160,9 @@ const char *parse_tree_types[] = {
     "PT_INTERFACE_SUBPROGRAM_DEFAULT_BOX",
 
     "PT_GENERIC_MAP_ASPECT",
+    "PT_ASSOCIATION_LIST",
+    "PT_ASSOCIATION_ELEMENT",
+    "PT_INERTIAL_EXPRESSION",
 };
 
 const char *parse_operators[] = {
@@ -472,6 +475,7 @@ void VhdlParseTreeNode::debug_print() {
             break;
 
         case PT_PARAMETER_ASSOCIATION_ELEMENT:
+        case PT_ASSOCIATION_ELEMENT:
             cout << ", \"actual_part\": ";
             this->pieces[0]->debug_print();
             if (this->pieces[1]) {
@@ -1045,6 +1049,16 @@ void VhdlParseTreeNode::debug_print() {
             }
             break;
 
+        case PT_GENERIC_MAP_ASPECT:
+            cout << ", \"association_list\": ";
+            this->pieces[0]->debug_print();
+            break;
+
+        case PT_INERTIAL_EXPRESSION:
+            cout << ", \"expression\": ";
+            this->pieces[0]->debug_print();
+            break;
+
         case PT_EXPRESSION_LIST:
         case PT_ID_LIST:
         case PT_RECORD_RESOLUTION:
@@ -1070,6 +1084,7 @@ void VhdlParseTreeNode::debug_print() {
         case PT_ID_LIST_REAL:
         case PT_DECLARATION_LIST:
         case PT_INTERFACE_LIST:
+        case PT_ASSOCIATION_LIST:
             if (this->pieces[0]) {
                 cout << ", \"rest\": ";
                 this->pieces[0]->debug_print();

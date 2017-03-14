@@ -1129,7 +1129,41 @@ _function_actual_part:
         $$ = new VhdlParseTreeNode(PT_TOK_OPEN);
     }
 
+// Here are the non-hacked versions
 association_list:
+    association_element
+    | association_list ',' association_element {
+        $$ = new VhdlParseTreeNode(PT_ASSOCIATION_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+association_element:
+    actual_part {
+        $$ = new VhdlParseTreeNode(PT_ASSOCIATION_ELEMENT);
+        $$->piece_count = 1;
+        $$->pieces[0] = $1;
+    }
+    | name DL_ARR actual_part {
+        $$ = new VhdlParseTreeNode(PT_ASSOCIATION_ELEMENT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+actual_part:
+    // actual_designator is folded in
+    expression
+    | KW_INERTIAL expression {
+        $$ = new VhdlParseTreeNode(PT_INERTIAL_EXPRESSION);
+        $$->piece_count = 1;
+        $$->pieces[0] = $2;
+    }
+    // expression includes all the possible types of names
+    | KW_OPEN {
+        $$ = new VhdlParseTreeNode(PT_TOK_OPEN);
+    }
     // TODO
 
 generic_map_aspect:
