@@ -1,7 +1,6 @@
 process
     procedure foo generic map(
-        aaa => bbb,
-        ccc(ddd) => inertial eee
+        aaa => x."bbb" ccc
     );
 begin
 end process;

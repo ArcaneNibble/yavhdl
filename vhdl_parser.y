@@ -661,27 +661,8 @@ subtype_declaration:
 
 subtype_indication:
     _simple_or_selected_name
-    | resolution_indication _simple_or_selected_name {
-        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
-        $$->piece_count = 3;
-        $$->pieces[0] = $2;
-        $$->pieces[1] = $1;
-        $$->pieces[2] = nullptr;
-    }
-    | _simple_or_selected_name constraint {
-        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
-        $$->piece_count = 3;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = nullptr;
-        $$->pieces[2] = $2;
-    }
-    | resolution_indication _simple_or_selected_name constraint {
-        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
-        $$->piece_count = 3;
-        $$->pieces[0] = $2;
-        $$->pieces[1] = $1;
-        $$->pieces[2] = $3;
-    }
+    // Doing this fixes a frivolous shift/reduce conflict
+    | _association_list_subtype_indication
 
 // Does not handle the case of only a type_mark because that can cause
 // ambiguities. Does not allow a resolution indication because that isn't
@@ -709,6 +690,30 @@ _allocator_subtype_indication:
         $$->pieces[0] = $1;
         $$->pieces[1] = nullptr;
         $$->pieces[2] = $2;
+    }
+
+// Does not have a bare name because that's ambiguous
+_association_list_subtype_indication:
+    resolution_indication _simple_or_selected_name {
+        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $1;
+        $$->pieces[2] = nullptr;
+    }
+    | _simple_or_selected_name constraint {
+        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = nullptr;
+        $$->pieces[2] = $2;
+    }
+    | resolution_indication _simple_or_selected_name constraint {
+        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $1;
+        $$->pieces[2] = $3;
     }
 
 resolution_indication:
@@ -1161,10 +1166,10 @@ actual_part:
         $$->pieces[0] = $2;
     }
     // expression includes all the possible types of names
+    | _association_list_subtype_indication
     | KW_OPEN {
         $$ = new VhdlParseTreeNode(PT_TOK_OPEN);
     }
-    // TODO
 
 generic_map_aspect:
     KW_GENERIC KW_MAP '(' association_list ')' {
