@@ -831,15 +831,39 @@ interface_declaration:
 /// Section 6.5.2
 interface_object_declaration:
     _interface_ambig_obj_declaration
+    | _definitely_interface_constant_declaration
+    | _definitely_interface_signal_declaration
+    | _definitely_interface_variable_declaration
     | interface_file_declaration
-    // TODO
+
+_definitely_interface_constant_declaration:
+    KW_CONSTANT _interface_ambig_obj_declaration {
+        $$ = $2;
+        $$->type = PT_INTERFACE_CONSTANT_DECLARATION;
+    }
+
+_definitely_interface_signal_declaration:
+    KW_SIGNAL _interface_ambig_obj_declaration {
+        $$ = $2;
+        $$->boolean = false;
+        $$->type = PT_INTERFACE_SIGNAL_DECLARATION;
+    }
+    | _interface_signal_bus_declaration
+    | KW_SIGNAL _interface_signal_bus_declaration {
+        $$ = $2;
+    }
+
+_definitely_interface_variable_declaration:
+    KW_VARIABLE _interface_ambig_obj_declaration {
+        $$ = $2;
+        $$->type = PT_INTERFACE_VARIABLE_DECLARATION;
+    }
 
 // Handles all the cases where there is no explicit type
 _interface_ambig_obj_declaration:
     identifier_list ':' subtype_indication {
         $$ = new VhdlParseTreeNode(PT_INTERFACE_AMBIG_OBJ_DECLARATION);
         $$->piece_count = 4;
-        $$->boolean = false;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
         $$->pieces[2] = nullptr;
@@ -848,7 +872,6 @@ _interface_ambig_obj_declaration:
     | identifier_list ':' mode subtype_indication {
         $$ = new VhdlParseTreeNode(PT_INTERFACE_AMBIG_OBJ_DECLARATION);
         $$->piece_count = 4;
-        $$->boolean = false;
         $$->pieces[0] = $1;
         $$->pieces[1] = $4;
         $$->pieces[2] = nullptr;
@@ -857,7 +880,6 @@ _interface_ambig_obj_declaration:
     | identifier_list ':' subtype_indication DL_ASS expression {
         $$ = new VhdlParseTreeNode(PT_INTERFACE_AMBIG_OBJ_DECLARATION);
         $$->piece_count = 4;
-        $$->boolean = false;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
         $$->pieces[2] = $5;
@@ -866,10 +888,48 @@ _interface_ambig_obj_declaration:
     | identifier_list ':' mode subtype_indication DL_ASS expression {
         $$ = new VhdlParseTreeNode(PT_INTERFACE_AMBIG_OBJ_DECLARATION);
         $$->piece_count = 4;
-        $$->boolean = false;
         $$->pieces[0] = $1;
         $$->pieces[1] = $4;
         $$->pieces[2] = $6;
+        $$->pieces[3] = $3;
+    }
+
+// Has the keyword "bus" in it
+_interface_signal_bus_declaration:
+    identifier_list ':' subtype_indication KW_BUS {
+        $$ = new VhdlParseTreeNode(PT_INTERFACE_SIGNAL_DECLARATION);
+        $$->piece_count = 4;
+        $$->boolean = true;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = nullptr;
+    }
+    | identifier_list ':' mode subtype_indication KW_BUS {
+        $$ = new VhdlParseTreeNode(PT_INTERFACE_SIGNAL_DECLARATION);
+        $$->piece_count = 4;
+        $$->boolean = true;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = $3;
+    }
+    | identifier_list ':' subtype_indication KW_BUS DL_ASS expression {
+        $$ = new VhdlParseTreeNode(PT_INTERFACE_SIGNAL_DECLARATION);
+        $$->piece_count = 4;
+        $$->boolean = true;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = $6;
+        $$->pieces[3] = nullptr;
+    }
+    | identifier_list ':' mode subtype_indication KW_BUS DL_ASS expression {
+        $$ = new VhdlParseTreeNode(PT_INTERFACE_SIGNAL_DECLARATION);
+        $$->piece_count = 4;
+        $$->boolean = true;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $7;
         $$->pieces[3] = $3;
     }
 

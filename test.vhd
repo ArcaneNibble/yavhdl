@@ -1,10 +1,9 @@
 process
     procedure foo (
-        file aaa : bbb;
-        ccc : ddd;
-        eee : fff := ggg;
-        hhh : inout iii;
-        jjj : linkage kkk := lll
+        aaa : bbb bus;
+        ccc : inout ddd bus;
+        eee : fff bus := ggg;
+        hhh : linkage iii bus := jjj
     );
 begin
 end process;
