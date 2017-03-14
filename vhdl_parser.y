@@ -864,20 +864,11 @@ _definitely_parameter_association_list:
 
 // Must have => in it
 _definitely_parameter_association_element:
-    formal_part DL_ARR _function_actual_part {
+    name DL_ARR _function_actual_part {
         $$ = new VhdlParseTreeNode(PT_PARAMETER_ASSOCIATION_ELEMENT);
         $$->piece_count = 2;
         $$->pieces[0] = $3;
         $$->pieces[1] = $1;
-    }
-
-formal_part:
-    identifier
-    | function_name '(' identifier ')' {
-        $$ = new VhdlParseTreeNode(PT_FORMAL_PART_FN);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $3;
     }
 
 // By accepting expression we already accept all the possible types of names.

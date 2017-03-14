@@ -66,7 +66,6 @@ enum ParseTreeNodeType
     PT_FUNCTION_CALL,
     PT_PARAMETER_ASSOCIATION_LIST,
     PT_PARAMETER_ASSOCIATION_ELEMENT,
-    PT_FORMAL_PART_FN,
 
     // Sequential statements, section 10
     PT_STATEMENT_LABEL,
