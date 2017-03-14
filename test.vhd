@@ -1,4 +1,8 @@
 process
-    procedure aaa is new bbb [] generic map (ccc);
+    procedure aaa is
+        procedure bbb is begin end function bbb;
+    begin
+        xxx <= yyy;
+    end procedure zzz;
 begin
 end process;

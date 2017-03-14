@@ -291,6 +291,70 @@ designator:
     identifier
     | string_literal    // was operator_symbol
 
+/// Section 4.3
+subprogram_body:
+    _real_subprogram_body ';'
+    | _real_subprogram_body KW_FUNCTION ';' {
+        $$ = $1;
+        $$->subprogram_kind = SUBPROGRAM_FUNCTION;
+    }
+    | _real_subprogram_body KW_PROCEDURE ';' {
+        $$ = $1;
+        $$->subprogram_kind = SUBPROGRAM_PROCEDURE;
+    }
+    | _real_subprogram_body designator ';' {
+        $$ = $1;
+        $$->pieces[3] = $2;
+    }
+    | _real_subprogram_body KW_FUNCTION designator ';' {
+        $$ = $1;
+        $$->subprogram_kind = SUBPROGRAM_FUNCTION;
+        $$->pieces[3] = $3;
+    }
+    | _real_subprogram_body KW_PROCEDURE designator ';' {
+        $$ = $1;
+        $$->subprogram_kind = SUBPROGRAM_PROCEDURE;
+        $$->pieces[3] = $3;
+    }
+
+_real_subprogram_body:
+    subprogram_specification KW_IS subprogram_declarative_part
+    KW_BEGIN sequence_of_statements KW_END {
+        $$ = new VhdlParseTreeNode(PT_SUBPROGRAM_BODY);
+        $$->subprogram_kind = SUBPROGRAM_UNSPEC;
+        $$->piece_count = 4;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = $5;
+        $$->pieces[3] = nullptr;
+    }
+
+subprogram_declarative_part:
+    %empty
+    | _real_subprogram_declarative_part
+
+_real_subprogram_declarative_part:
+    subprogram_declarative_item
+    | _real_subprogram_declarative_part subprogram_declarative_item {
+        $$ = new VhdlParseTreeNode(PT_DECLARATION_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
+
+subprogram_declarative_item:
+    subprogram_declaration
+    | subprogram_body
+    | subprogram_instantiation_declaration
+    | type_declaration
+    | subtype_declaration
+    | constant_declaration
+    | variable_declaration
+    | file_declaration
+    | alias_declaration
+    | attribute_declaration
+    // TODO
+
 /// Section 4.4
 subprogram_instantiation_declaration:
     KW_PROCEDURE _real_subprogram_instantiation_declaration ';' {
@@ -2788,6 +2852,7 @@ _real_process_declarative_part:
 
 process_declarative_item:
     subprogram_declaration
+    | subprogram_body
     | subprogram_instantiation_declaration
     | type_declaration
     | subtype_declaration

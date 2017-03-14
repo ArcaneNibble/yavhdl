@@ -165,6 +165,8 @@ const char *parse_tree_types[] = {
     "PT_INERTIAL_EXPRESSION",
 
     "PT_SUBPROGRAM_INSTANTIATION_DECLARATION",
+
+    "PT_SUBPROGRAM_BODY",
 };
 
 const char *parse_operators[] = {
@@ -232,6 +234,7 @@ const char *interface_modes[] = {
 };
 
 const char *subprogram_kinds[] = {
+    nullptr,
     "procedure",
     "function",
 };
@@ -1081,6 +1084,28 @@ void VhdlParseTreeNode::debug_print() {
             if (this->pieces[3]) {
                 cout << ", \"generic_map\": ";
                 this->pieces[3]->debug_print();
+            }
+            break;
+
+        case PT_SUBPROGRAM_BODY:
+            cout << ", \"specification\": ";
+            this->pieces[0]->debug_print();
+            if (this->pieces[1]) {
+                cout << ", \"declarations\": ";
+                this->pieces[1]->debug_print();
+            }
+            if (this->pieces[2]) {
+                cout << ", \"statements\": ";
+                this->pieces[2]->debug_print();
+            }
+            if (this->pieces[3]) {
+                cout << ", \"end_label\": ";
+                this->pieces[3]->debug_print();
+            }
+            if (this->subprogram_kind != SUBPROGRAM_UNSPEC) {
+                cout << ", \"end_kind\": \"";
+                cout << subprogram_kinds[this->subprogram_kind];
+                cout << "\"";
             }
             break;
 

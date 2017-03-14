@@ -169,6 +169,8 @@ enum ParseTreeNodeType
     PT_INERTIAL_EXPRESSION,
 
     PT_SUBPROGRAM_INSTANTIATION_DECLARATION,
+
+    PT_SUBPROGRAM_BODY,
 };
 
 // Operators, section 9.2
@@ -243,6 +245,7 @@ enum ParseTreeInterfaceObjectMode
 
 enum ParseTreeSubprogramKind
 {
+    SUBPROGRAM_UNSPEC,
     SUBPROGRAM_PROCEDURE,
     SUBPROGRAM_FUNCTION,
 };
