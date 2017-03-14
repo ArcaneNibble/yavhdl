@@ -167,6 +167,8 @@ enum ParseTreeNodeType
     PT_ASSOCIATION_LIST,
     PT_ASSOCIATION_ELEMENT,
     PT_INERTIAL_EXPRESSION,
+
+    PT_SUBPROGRAM_INSTANTIATION_DECLARATION,
 };
 
 // Operators, section 9.2
@@ -239,6 +241,12 @@ enum ParseTreeInterfaceObjectMode
     MODE_LINKAGE,
 };
 
+enum ParseTreeSubprogramKind
+{
+    SUBPROGRAM_PROCEDURE,
+    SUBPROGRAM_FUNCTION,
+};
+
 // Definition of a parse tree node
 #define NUM_FIXED_PIECES 8
 
@@ -259,6 +267,7 @@ struct VhdlParseTreeNode {
     ParseTreeForceMode force_mode;
     ParseTreeFunctionPurity purity;
     ParseTreeInterfaceObjectMode interface_mode;
+    ParseTreeSubprogramKind subprogram_kind;
 
     VhdlParseTreeNode(enum ParseTreeNodeType type);
     ~VhdlParseTreeNode();

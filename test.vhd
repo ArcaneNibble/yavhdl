@@ -1,6 +1,4 @@
 process
-    procedure foo generic map(
-        (x."bbb") ccc (ddd)
-    );
+    procedure aaa is new bbb [] generic map (ccc);
 begin
 end process;

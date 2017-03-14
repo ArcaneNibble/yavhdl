@@ -291,6 +291,51 @@ designator:
     identifier
     | string_literal    // was operator_symbol
 
+/// Section 4.4
+subprogram_instantiation_declaration:
+    KW_PROCEDURE _real_subprogram_instantiation_declaration ';' {
+        $$ = $2;
+        $$->subprogram_kind = SUBPROGRAM_PROCEDURE;
+    }
+    | KW_FUNCTION _real_subprogram_instantiation_declaration ';' {
+        $$ = $2;
+        $$->subprogram_kind = SUBPROGRAM_FUNCTION;
+    }
+
+_real_subprogram_instantiation_declaration:
+    designator KW_IS KW_NEW name {
+        $$ = new VhdlParseTreeNode(PT_SUBPROGRAM_INSTANTIATION_DECLARATION);
+        $$->piece_count = 4;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = nullptr;
+    }
+    | designator KW_IS KW_NEW name signature {
+        $$ = new VhdlParseTreeNode(PT_SUBPROGRAM_INSTANTIATION_DECLARATION);
+        $$->piece_count = 4;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $5;
+        $$->pieces[3] = nullptr;
+    }
+    | designator KW_IS KW_NEW name generic_map_aspect {
+        $$ = new VhdlParseTreeNode(PT_SUBPROGRAM_INSTANTIATION_DECLARATION);
+        $$->piece_count = 4;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = $5;
+    }
+    | designator KW_IS KW_NEW name signature generic_map_aspect {
+        $$ = new VhdlParseTreeNode(PT_SUBPROGRAM_INSTANTIATION_DECLARATION);
+        $$->piece_count = 4;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $5;
+        $$->pieces[3] = $6;
+    }
+
 /// Section 4.5.3
 signature:
     '[' ']' {
@@ -2743,6 +2788,7 @@ _real_process_declarative_part:
 
 process_declarative_item:
     subprogram_declaration
+    | subprogram_instantiation_declaration
     | type_declaration
     | subtype_declaration
     | constant_declaration

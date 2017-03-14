@@ -163,6 +163,8 @@ const char *parse_tree_types[] = {
     "PT_ASSOCIATION_LIST",
     "PT_ASSOCIATION_ELEMENT",
     "PT_INERTIAL_EXPRESSION",
+
+    "PT_SUBPROGRAM_INSTANTIATION_DECLARATION",
 };
 
 const char *parse_operators[] = {
@@ -227,6 +229,11 @@ const char *interface_modes[] = {
     "inout",
     "buffer",
     "linkage",
+};
+
+const char *subprogram_kinds[] = {
+    "procedure",
+    "function",
 };
 
 // Escape values for JSON output
@@ -1057,6 +1064,24 @@ void VhdlParseTreeNode::debug_print() {
         case PT_INERTIAL_EXPRESSION:
             cout << ", \"expression\": ";
             this->pieces[0]->debug_print();
+            break;
+
+        case PT_SUBPROGRAM_INSTANTIATION_DECLARATION:
+            cout << ", \"kind\": \"";
+            cout << subprogram_kinds[this->subprogram_kind];
+            cout << "\"";
+            cout << ", \"designator\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"uninstantiated_name\": ";
+            this->pieces[1]->debug_print();
+            if (this->pieces[2]) {
+                cout << ", \"signature\": ";
+                this->pieces[2]->debug_print();
+            }
+            if (this->pieces[3]) {
+                cout << ", \"generic_map\": ";
+                this->pieces[3]->debug_print();
+            }
             break;
 
         case PT_EXPRESSION_LIST:
