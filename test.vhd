@@ -1,8 +1,6 @@
 process
-    procedure aaa is
-        procedure bbb is begin end function bbb;
-    begin
-        xxx <= yyy;
-    end procedure zzz;
+    procedure aaa is new bbb generic map(
+        foo => bar(baz(0 to 2), qux(1 to 3))
+    );
 begin
 end process;
