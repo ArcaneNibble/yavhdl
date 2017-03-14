@@ -154,6 +154,10 @@ const char *parse_tree_types[] = {
     "PT_INTERFACE_VARIABLE_DECLARATION",
     "PT_INTERFACE_MODE",
     "PT_INTERFACE_TYPE_DECLARATION",
+    "PT_INTERFACE_SUBPROGRAM_DECLARATION",
+    "PT_INTERFACE_PROCEDURE_SPECIFICATION",
+    "PT_INTERFACE_FUNCTION_SPECIFICATION",
+    "PT_INTERFACE_SUBPROGRAM_DEFAULT_BOX",
 };
 
 const char *parse_operators[] = {
@@ -1004,6 +1008,26 @@ void VhdlParseTreeNode::debug_print() {
                 cout << "\"";
             }
             break;
+
+        case PT_INTERFACE_SUBPROGRAM_DECLARATION:
+            cout << ", \"specification\": ";
+            this->pieces[0]->debug_print();
+            if (this->pieces[1]) {
+                cout << ", \"default\": ";
+                this->pieces[1]->debug_print();
+            }
+            break;
+
+        case PT_INTERFACE_PROCEDURE_SPECIFICATION:
+            cout << ", \"designator\": ";
+            this->pieces[0]->debug_print();
+            if (this->pieces[1]) {
+                cout << ", \"parameters\": ";
+                this->pieces[1]->debug_print();
+            }
+            break;
+
+        case PT_INTERFACE_FUNCTION_SPECIFICATION:
 
         case PT_EXPRESSION_LIST:
         case PT_ID_LIST:

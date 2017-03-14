@@ -1,10 +1,8 @@
 process
     procedure foo (
-        aaa : bbb bus;
-        ccc : inout ddd bus;
-        eee : fff bus := ggg;
-        hhh : linkage iii bus := jjj;
-        type kkk;
+        procedure aaa;
+        procedure bbb is <>;
+        procedure ccc is ddd
     );
 begin
 end process;

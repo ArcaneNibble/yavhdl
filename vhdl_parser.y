@@ -827,6 +827,7 @@ file_open_information:
 interface_declaration:
     interface_object_declaration
     | interface_type_declaration
+    | interface_subprogram_declaration
     // TODO
 
 /// Section 6.5.2
@@ -970,6 +971,39 @@ interface_type_declaration:
         $$ = $1;
         $$->type = PT_INTERFACE_TYPE_DECLARATION;
     }
+
+/// Section 6.5.4
+interface_subprogram_declaration:
+    interface_subprogram_specification {
+        $$ = new VhdlParseTreeNode(PT_INTERFACE_SUBPROGRAM_DECLARATION);
+        $$->piece_count = 1;
+        $$->pieces[0] = $1;
+    }
+    | interface_subprogram_specification KW_IS name {
+        $$ = new VhdlParseTreeNode(PT_INTERFACE_SUBPROGRAM_DECLARATION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    | interface_subprogram_specification KW_IS DL_BOX {
+        $$ = new VhdlParseTreeNode(PT_INTERFACE_SUBPROGRAM_DECLARATION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] =
+            new VhdlParseTreeNode(PT_INTERFACE_SUBPROGRAM_DEFAULT_BOX);
+    }
+
+interface_subprogram_specification:
+    interface_procedure_specification
+    // TODO
+
+interface_procedure_specification:
+    KW_PROCEDURE designator {
+        $$ = new VhdlParseTreeNode(PT_INTERFACE_PROCEDURE_SPECIFICATION);
+        $$->piece_count = 1;
+        $$->pieces[0] = $2;
+    }
+    // TODO
 
 /// Section 6.5.6
 interface_list:
