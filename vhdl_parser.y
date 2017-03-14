@@ -692,7 +692,9 @@ _allocator_subtype_indication:
         $$->pieces[2] = $2;
     }
 
-// Does not have a bare name because that's ambiguous
+// Does not have a bare name because that's ambiguous.
+// FIXME: This causes a reduce/reduce conflict. I believe it is due to
+// the need for too much lookahead to make this work.
 _association_list_subtype_indication:
     resolution_indication _simple_or_selected_name {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);

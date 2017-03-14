@@ -1,6 +1,6 @@
 process
     procedure foo generic map(
-        aaa => x."bbb" ccc
+        (x."bbb") ccc (ddd)
     );
 begin
 end process;
