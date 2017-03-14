@@ -158,6 +158,8 @@ const char *parse_tree_types[] = {
     "PT_INTERFACE_PROCEDURE_SPECIFICATION",
     "PT_INTERFACE_FUNCTION_SPECIFICATION",
     "PT_INTERFACE_SUBPROGRAM_DEFAULT_BOX",
+
+    "PT_GENERIC_MAP_ASPECT",
 };
 
 const char *parse_operators[] = {

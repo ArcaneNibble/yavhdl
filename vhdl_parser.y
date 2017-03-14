@@ -274,7 +274,18 @@ subprogram_header:
         $$->pieces[0] = $3;
         $$->pieces[1] = nullptr;
     }
-    // TODO
+    | generic_map_aspect {
+        $$ = new VhdlParseTreeNode(PT_SUBPROGRAM_HEADER);
+        $$->piece_count = 2;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = $1;
+    }
+    | KW_GENERIC '(' interface_list ')' generic_map_aspect {
+        $$ = new VhdlParseTreeNode(PT_SUBPROGRAM_HEADER);
+        $$->piece_count = 2;
+        $$->pieces[0] = $3;
+        $$->pieces[1] = $5;
+    }
 
 designator:
     identifier
@@ -1116,6 +1127,16 @@ _function_actual_part:
     expression
     | KW_OPEN {
         $$ = new VhdlParseTreeNode(PT_TOK_OPEN);
+    }
+
+association_list:
+    // TODO
+
+generic_map_aspect:
+    KW_GENERIC KW_MAP '(' association_list ')' {
+        $$ = new VhdlParseTreeNode(PT_GENERIC_MAP_ASPECT);
+        $$->piece_count = 1;
+        $$->pieces[0] = $4;
     }
 
 /// Section 6.6
