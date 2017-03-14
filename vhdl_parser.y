@@ -826,6 +826,7 @@ file_open_information:
 /// Section 6.5
 interface_declaration:
     interface_object_declaration
+    | interface_type_declaration
     // TODO
 
 /// Section 6.5.2
@@ -961,6 +962,13 @@ interface_file_declaration:
         $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
+    }
+
+/// Section 6.5.3
+interface_type_declaration:
+    incomplete_type_declaration {
+        $$ = $1;
+        $$->type = PT_INTERFACE_TYPE_DECLARATION;
     }
 
 /// Section 6.5.6

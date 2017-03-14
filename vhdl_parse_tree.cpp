@@ -153,6 +153,7 @@ const char *parse_tree_types[] = {
     "PT_INTERFACE_SIGNAL_DECLARATION",
     "PT_INTERFACE_VARIABLE_DECLARATION",
     "PT_INTERFACE_MODE",
+    "PT_INTERFACE_TYPE_DECLARATION",
 };
 
 const char *parse_operators[] = {
@@ -818,6 +819,7 @@ void VhdlParseTreeNode::debug_print() {
             break;
 
         case PT_INCOMPLETE_TYPE_DECLARATION:
+        case PT_INTERFACE_TYPE_DECLARATION:
             cout << ", \"identifier\": ";
             this->pieces[0]->debug_print();
             break;
