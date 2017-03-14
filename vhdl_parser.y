@@ -995,7 +995,7 @@ interface_subprogram_declaration:
 
 interface_subprogram_specification:
     interface_procedure_specification
-    // TODO
+    | interface_function_specification
 
 interface_procedure_specification:
     KW_PROCEDURE designator {
@@ -1003,7 +1003,56 @@ interface_procedure_specification:
         $$->piece_count = 1;
         $$->pieces[0] = $2;
     }
-    // TODO
+    | KW_PROCEDURE designator '(' interface_list ')' {
+        $$ = new VhdlParseTreeNode(PT_INTERFACE_PROCEDURE_SPECIFICATION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+    }
+    | KW_PROCEDURE designator KW_PARAMETER '(' interface_list ')' {
+        $$ = new VhdlParseTreeNode(PT_INTERFACE_PROCEDURE_SPECIFICATION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $5;
+    }
+
+interface_function_specification:
+    _real_interface_function_specification
+    | KW_PURE _real_interface_function_specification {
+        $$ = $2;
+        $$->purity = PURITY_PURE;
+    }
+    | KW_IMPURE _real_interface_function_specification {
+        $$ = $2;
+        $$->purity = PURITY_IMPURE;
+    }
+
+_real_interface_function_specification:
+    KW_FUNCTION designator KW_RETURN _simple_or_selected_name {
+        $$ = new VhdlParseTreeNode(PT_INTERFACE_FUNCTION_SPECIFICATION);
+        $$->purity = PURITY_UNSPEC;
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+    }
+    | KW_FUNCTION designator '(' interface_list ')'
+      KW_RETURN _simple_or_selected_name {
+        $$ = new VhdlParseTreeNode(PT_INTERFACE_FUNCTION_SPECIFICATION);
+        $$->purity = PURITY_UNSPEC;
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $7;
+        $$->pieces[2] = $4;
+    }
+    | KW_FUNCTION designator KW_PARAMETER '(' interface_list ')'
+      KW_RETURN _simple_or_selected_name {
+        $$ = new VhdlParseTreeNode(PT_INTERFACE_FUNCTION_SPECIFICATION);
+        $$->purity = PURITY_UNSPEC;
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $8;
+        $$->pieces[2] = $5;
+    }
 
 /// Section 6.5.6
 interface_list:

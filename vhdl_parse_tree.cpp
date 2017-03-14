@@ -1028,6 +1028,20 @@ void VhdlParseTreeNode::debug_print() {
             break;
 
         case PT_INTERFACE_FUNCTION_SPECIFICATION:
+            cout << ", \"designator\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"return\": ";
+            this->pieces[1]->debug_print();
+            if (this->pieces[2]) {
+                cout << ", \"parameters\": ";
+                this->pieces[2]->debug_print();
+            }
+            if (this->purity != PURITY_UNSPEC) {
+                cout << ", \"purity\": \"";
+                cout << func_purity[this->purity];
+                cout << "\"";
+            }
+            break;
 
         case PT_EXPRESSION_LIST:
         case PT_ID_LIST:
