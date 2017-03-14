@@ -146,6 +146,8 @@ const char *parse_tree_types[] = {
     "PT_PROCEDURE_SPECIFICATION",
     "PT_FUNCTION_SPECIFICATION",
     "PT_SUBPROGRAM_HEADER",
+    "PT_INTERFACE_LIST",
+    "PT_INTERFACE_FILE_DECLARATION",
 };
 
 const char *parse_operators[] = {
@@ -868,6 +870,7 @@ void VhdlParseTreeNode::debug_print() {
             break;
 
         case PT_FILE_DECLARATION:
+        case PT_INTERFACE_FILE_DECLARATION:
             cout << ", \"identifiers\": ";
             this->pieces[0]->debug_print();
             cout << ", \"subtype\": ";
@@ -982,6 +985,7 @@ void VhdlParseTreeNode::debug_print() {
         case PT_ELEMENT_DECLARATION_LIST:
         case PT_ID_LIST_REAL:
         case PT_DECLARATION_LIST:
+        case PT_INTERFACE_LIST:
             if (this->pieces[0]) {
                 cout << ", \"rest\": ";
                 this->pieces[0]->debug_print();

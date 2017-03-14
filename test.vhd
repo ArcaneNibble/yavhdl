@@ -1,9 +1,9 @@
 process
-    procedure aaa generic();
-    procedure bbb generic() ();
-    procedure ccc generic() parameter ();
-    function ddd generic() return zzz;
-    function eee generic() () return zzz;
-    function fff generic() parameter () return zzz;
+    procedure aaa;
+    procedure bbb (file xxx : yyy; file vvv : www);
+    procedure ccc parameter (file xxx : yyy);
+    function ddd return zzz;
+    function eee (file xxx : yyy) return zzz;
+    function fff parameter (file xxx : yyy) return zzz;
 begin
 end process;

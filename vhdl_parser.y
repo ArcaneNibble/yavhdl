@@ -266,9 +266,6 @@ _real_function_specification:
         $$->pieces[3] = $6;
     }
 
-interface_list:
-    // TODO
-
 subprogram_header:
     %empty
     | KW_GENERIC '(' interface_list ')' {
@@ -824,6 +821,34 @@ file_open_information:
         $$->piece_count = 2;
         $$->pieces[0] = $4;
         $$->pieces[1] = $2;
+    }
+
+/// Section 6.5
+interface_declaration:
+    interface_object_declaration
+    // TODO
+
+/// Section 6.5.2
+interface_object_declaration:
+    interface_file_declaration
+    // TODO
+
+interface_file_declaration:
+    KW_FILE identifier_list ':' subtype_indication {
+        $$ = new VhdlParseTreeNode(PT_INTERFACE_FILE_DECLARATION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+    }
+
+/// Section 6.5.6
+interface_list:
+    interface_declaration
+    | interface_list ';' interface_declaration {
+        $$ = new VhdlParseTreeNode(PT_INTERFACE_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
     }
 
 /// Section 6.5.7
