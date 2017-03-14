@@ -152,6 +152,11 @@ enum ParseTreeNodeType
     PT_SUBPROGRAM_HEADER,
     PT_INTERFACE_LIST,
     PT_INTERFACE_FILE_DECLARATION,
+    PT_INTERFACE_AMBIG_OBJ_DECLARATION,
+    PT_INTERFACE_CONSTANT_DECLARATION,
+    PT_INTERFACE_SIGNAL_DECLARATION,
+    PT_INTERFACE_VARIABLE_DECLARATION,
+    PT_INTERFACE_MODE,
 };
 
 // Operators, section 9.2
@@ -214,6 +219,16 @@ enum ParseTreeFunctionPurity
     PURITY_IMPURE,
 };
 
+enum ParseTreeInterfaceObjectMode
+{
+    MODE_UNSPEC,
+    MODE_IN,
+    MODE_OUT,
+    MODE_INOUT,
+    MODE_BUFFER,
+    MODE_LINKAGE,
+};
+
 // Definition of a parse tree node
 #define NUM_FIXED_PIECES 8
 
@@ -233,6 +248,7 @@ struct VhdlParseTreeNode {
     ParseTreeRangeDirection range_dir;
     ParseTreeForceMode force_mode;
     ParseTreeFunctionPurity purity;
+    ParseTreeInterfaceObjectMode interface_mode;
 
     VhdlParseTreeNode(enum ParseTreeNodeType type);
     ~VhdlParseTreeNode();

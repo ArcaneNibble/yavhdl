@@ -830,8 +830,70 @@ interface_declaration:
 
 /// Section 6.5.2
 interface_object_declaration:
-    interface_file_declaration
+    _interface_ambig_obj_declaration
+    | interface_file_declaration
     // TODO
+
+// Handles all the cases where there is no explicit type
+_interface_ambig_obj_declaration:
+    identifier_list ':' subtype_indication {
+        $$ = new VhdlParseTreeNode(PT_INTERFACE_AMBIG_OBJ_DECLARATION);
+        $$->piece_count = 4;
+        $$->boolean = false;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = nullptr;
+    }
+    | identifier_list ':' mode subtype_indication {
+        $$ = new VhdlParseTreeNode(PT_INTERFACE_AMBIG_OBJ_DECLARATION);
+        $$->piece_count = 4;
+        $$->boolean = false;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = $3;
+    }
+    | identifier_list ':' subtype_indication DL_ASS expression {
+        $$ = new VhdlParseTreeNode(PT_INTERFACE_AMBIG_OBJ_DECLARATION);
+        $$->piece_count = 4;
+        $$->boolean = false;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = $5;
+        $$->pieces[3] = nullptr;
+    }
+    | identifier_list ':' mode subtype_indication DL_ASS expression {
+        $$ = new VhdlParseTreeNode(PT_INTERFACE_AMBIG_OBJ_DECLARATION);
+        $$->piece_count = 4;
+        $$->boolean = false;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $6;
+        $$->pieces[3] = $3;
+    }
+
+mode:
+    KW_IN {
+        $$ = new VhdlParseTreeNode(PT_INTERFACE_MODE);
+        $$->interface_mode = MODE_IN;
+    }
+    | KW_OUT {
+        $$ = new VhdlParseTreeNode(PT_INTERFACE_MODE);
+        $$->interface_mode = MODE_OUT;
+    }
+    | KW_INOUT {
+        $$ = new VhdlParseTreeNode(PT_INTERFACE_MODE);
+        $$->interface_mode = MODE_INOUT;
+    }
+    | KW_BUFFER {
+        $$ = new VhdlParseTreeNode(PT_INTERFACE_MODE);
+        $$->interface_mode = MODE_BUFFER;
+    }
+    | KW_LINKAGE {
+        $$ = new VhdlParseTreeNode(PT_INTERFACE_MODE);
+        $$->interface_mode = MODE_LINKAGE;
+    }
 
 interface_file_declaration:
     KW_FILE identifier_list ':' subtype_indication {

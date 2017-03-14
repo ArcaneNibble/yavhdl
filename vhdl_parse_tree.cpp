@@ -148,6 +148,11 @@ const char *parse_tree_types[] = {
     "PT_SUBPROGRAM_HEADER",
     "PT_INTERFACE_LIST",
     "PT_INTERFACE_FILE_DECLARATION",
+    "PT_INTERFACE_AMBIG_OBJ_DECLARATION",
+    "PT_INTERFACE_CONSTANT_DECLARATION",
+    "PT_INTERFACE_SIGNAL_DECLARATION",
+    "PT_INTERFACE_VARIABLE_DECLARATION",
+    "PT_INTERFACE_MODE",
 };
 
 const char *parse_operators[] = {
@@ -203,6 +208,15 @@ const char *func_purity[] = {
     nullptr,
     "pure",
     "impure",
+};
+
+const char *interface_modes[] = {
+    nullptr,
+    "in",
+    "out",
+    "inout",
+    "buffer",
+    "linkage",
 };
 
 // Escape values for JSON output
@@ -958,6 +972,34 @@ void VhdlParseTreeNode::debug_print() {
             if (this->pieces[1]) {
                 cout << ", \"generic_map\": ";
                 this->pieces[1]->debug_print();
+            }
+            break;
+
+        case PT_INTERFACE_SIGNAL_DECLARATION:
+            cout << ", \"is_bus\": ";
+            cout << (this->boolean ? "true" : "false");
+        case PT_INTERFACE_AMBIG_OBJ_DECLARATION:
+        case PT_INTERFACE_CONSTANT_DECLARATION:
+        case PT_INTERFACE_VARIABLE_DECLARATION:
+            cout << ", \"identifiers\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"subtype\": ";
+            this->pieces[1]->debug_print();
+            if (this->pieces[2]) {
+                cout << ", \"expression\": ";
+                this->pieces[2]->debug_print();
+            }
+            if (this->pieces[3]) {
+                cout << ", \"mode\": ";
+                this->pieces[3]->debug_print();
+            }
+            break;
+
+        case PT_INTERFACE_MODE:
+            if (this->interface_mode != MODE_UNSPEC) {
+                cout << ", \"mode\": \"";
+                cout << interface_modes[this->interface_mode];
+                cout << "\"";
             }
             break;
 
