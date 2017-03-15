@@ -196,6 +196,8 @@ const char *parse_tree_types[] = {
     "PT_SIGNAL_KIND",
 
     "PT_PACKAGE_BODY",
+
+    "PT_PACKAGE_INSTANTIATION_DECLARATION",
 };
 
 const char *parse_operators[] = {
@@ -1285,6 +1287,17 @@ void VhdlParseTreeNode::debug_print() {
             }
             if (this->pieces[2]) {
                 cout << ", \"end_label\": ";
+                this->pieces[2]->debug_print();
+            }
+            break;
+
+        case PT_PACKAGE_INSTANTIATION_DECLARATION:
+            cout << ", \"identifier\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"uninstantiated_name\": ";
+            this->pieces[1]->debug_print();
+            if (this->pieces[2]) {
+                cout << ", \"generic_map\": ";
                 this->pieces[2]->debug_print();
             }
             break;

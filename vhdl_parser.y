@@ -348,6 +348,7 @@ subprogram_declarative_item:
     | subprogram_instantiation_declaration
     | package_declaration
     | package_body
+    | package_instantiation_declaration
     | type_declaration
     | subtype_declaration
     | constant_declaration
@@ -359,7 +360,6 @@ subprogram_declarative_item:
     | use_clause
     | group_template_declaration
     | group_declaration
-    // TODO
 
 /// Section 4.4
 subprogram_instantiation_declaration:
@@ -499,6 +499,7 @@ package_declarative_item:
     subprogram_declaration
     | subprogram_instantiation_declaration
     | package_declaration
+    | package_instantiation_declaration
     | type_declaration
     | subtype_declaration
     | constant_declaration
@@ -554,6 +555,7 @@ package_body_declarative_item:
     | subprogram_instantiation_declaration
     | package_declaration
     | package_body
+    | package_instantiation_declaration
     | type_declaration
     | subtype_declaration
     | constant_declaration
@@ -565,7 +567,22 @@ package_body_declarative_item:
     | use_clause
     | group_template_declaration
     | group_declaration
-    // TODO
+
+/// Section 4.9
+package_instantiation_declaration:
+    KW_PACKAGE identifier KW_IS KW_NEW name ';' {
+        $$ = new VhdlParseTreeNode(PT_PACKAGE_INSTANTIATION_DECLARATION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $5;
+    }
+    | KW_PACKAGE identifier KW_IS KW_NEW name generic_map_aspect ';' {
+        $$ = new VhdlParseTreeNode(PT_PACKAGE_INSTANTIATION_DECLARATION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $5;
+        $$->pieces[2] = $6;
+    }
 
 ////////////////////////////// Types, section 5 //////////////////////////////
 
@@ -3363,6 +3380,7 @@ process_declarative_item:
     | subprogram_instantiation_declaration
     | package_declaration
     | package_body
+    | package_instantiation_declaration
     | type_declaration
     | subtype_declaration
     | constant_declaration
@@ -3374,7 +3392,6 @@ process_declarative_item:
     | use_clause
     | group_template_declaration
     | group_declaration
-    // TODO
 
 ////////////////////// Scope and visibility, section 12 //////////////////////
 
