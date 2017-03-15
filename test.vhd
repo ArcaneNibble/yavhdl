@@ -1,1 +1,1 @@
-mylabel: component foo;
+mylabel: entity foo(bar).baz(qux);

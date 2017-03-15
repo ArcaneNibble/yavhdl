@@ -3687,7 +3687,7 @@ component_instantiation_statement:
 
 instantiated_unit:
     _definitely_instantiated_unit
-    | name {
+    | _simple_or_selected_name {
         $$ = new VhdlParseTreeNode(PT_INSTANTIATED_UNIT_COMPONENT);
         $$->piece_count = 1;
         $$->pieces[0] = $1;
@@ -3695,13 +3695,27 @@ instantiated_unit:
 
 _definitely_instantiated_unit:
     _component_instantiated_unit
+    | _entity_instantiated_unit
     // TODO
 
 _component_instantiated_unit:
-    KW_COMPONENT name {
+    KW_COMPONENT _simple_or_selected_name {
         $$ = new VhdlParseTreeNode(PT_INSTANTIATED_UNIT_COMPONENT);
         $$->piece_count = 1;
         $$->pieces[0] = $2;
+    }
+
+_entity_instantiated_unit:
+    KW_ENTITY _simple_or_selected_name {
+        $$ = new VhdlParseTreeNode(PT_INSTANTIATED_UNIT_ENTITY);
+        $$->piece_count = 1;
+        $$->pieces[0] = $2;
+    }
+    | KW_ENTITY _simple_or_selected_name '(' identifier ')' {
+        $$ = new VhdlParseTreeNode(PT_INSTANTIATED_UNIT_ENTITY);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
     }
 
 ////////////////////// Scope and visibility, section 12 //////////////////////
