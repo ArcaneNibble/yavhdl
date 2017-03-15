@@ -265,6 +265,7 @@ const char *parse_tree_types[] = {
     "PT_USE_CLAUSE_LIST",
     "PT_CONFIGURATION_ITEM_LIST",
     "PT_BLOCK_SPECIFICATION",
+    "PT_COMPONENT_CONFIGURATION",
 };
 
 const char *parse_operators[] = {
@@ -1777,6 +1778,23 @@ void VhdlParseTreeNode::debug_print() {
             if (this->pieces[1]) {
                 cout << ", \"generate_specification\": ";
                 this->pieces[1]->debug_print();
+            }
+            break;
+
+        case PT_COMPONENT_CONFIGURATION:
+            cout << ", \"specification\": ";
+            this->pieces[0]->debug_print();
+            if (this->pieces[1]) {
+                cout << ", \"binding_indication\": ";
+                this->pieces[1]->debug_print();
+            }
+            if (this->pieces[2]) {
+                cout << ", \"vunits\": ";
+                this->pieces[2]->debug_print();
+            }
+            if (this->pieces[3]) {
+                cout << ", \"block_configuration\": ";
+                this->pieces[3]->debug_print();
             }
             break;
 

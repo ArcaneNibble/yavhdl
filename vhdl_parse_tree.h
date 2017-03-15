@@ -269,6 +269,7 @@ enum ParseTreeNodeType
     PT_USE_CLAUSE_LIST,
     PT_CONFIGURATION_ITEM_LIST,
     PT_BLOCK_SPECIFICATION,
+    PT_COMPONENT_CONFIGURATION,
 };
 
 // Operators, section 9.2

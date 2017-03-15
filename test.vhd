@@ -1,7 +1,10 @@
-configuration aaa of bbb is
-    use a.b;
-    use vunit c;
-
-    for xxx(yyy).zzz(www range iii'jjj)
+configuration xxx of xxx is
+    for xxx
+        for aaa : bbb
+            generic map (ccc => ddd);
+            use vunit a;
+            for yyy
+            end for;
+        end for;
     end for;
-end configuration ccc;
+end configuration xxx;

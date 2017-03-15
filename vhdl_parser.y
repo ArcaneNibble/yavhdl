@@ -411,7 +411,7 @@ generate_specification:
 
 configuration_item:
     block_configuration
-    // TODO
+    | component_configuration
 
 _zero_or_more_use_clauses:
     %empty
@@ -437,6 +437,47 @@ _one_or_more_configuration_items:
         $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
+    }
+
+/// Section 3.4.3
+component_configuration:
+    KW_FOR component_specification
+    _zero_or_more_verification_unit_binding_indications KW_END KW_FOR ';' {
+        $$ = new VhdlParseTreeNode(PT_COMPONENT_CONFIGURATION);
+        $$->piece_count = 4;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = nullptr;
+        $$->pieces[2] = $3;
+        $$->pieces[3] = nullptr;
+    }
+    | KW_FOR component_specification binding_indication ';'
+      _zero_or_more_verification_unit_binding_indications KW_END KW_FOR ';' {
+        $$ = new VhdlParseTreeNode(PT_COMPONENT_CONFIGURATION);
+        $$->piece_count = 4;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = $5;
+        $$->pieces[3] = nullptr;
+    }
+    | KW_FOR component_specification
+      _zero_or_more_verification_unit_binding_indications
+      block_configuration KW_END KW_FOR ';' {
+        $$ = new VhdlParseTreeNode(PT_COMPONENT_CONFIGURATION);
+        $$->piece_count = 4;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = nullptr;
+        $$->pieces[2] = $3;
+        $$->pieces[3] = $4;
+    }
+    | KW_FOR component_specification binding_indication ';'
+      _zero_or_more_verification_unit_binding_indications
+      block_configuration KW_END KW_FOR ';' {
+        $$ = new VhdlParseTreeNode(PT_COMPONENT_CONFIGURATION);
+        $$->piece_count = 4;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = $5;
+        $$->pieces[3] = $6;
     }
 
 ///////////////////// Subprograms and packages, section 4 /////////////////////
