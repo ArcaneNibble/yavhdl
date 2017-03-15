@@ -670,14 +670,15 @@ _one_or_more_discrete_range:
         $$->pieces[1] = $3;
     }
 
+// Really hacked up, must have two or more and not be a bare name
 _two_or_more_discrete_range:
-    discrete_range ',' discrete_range {
+    _almost_discrete_range ',' _almost_discrete_range {
         $$ = new VhdlParseTreeNode(PT_INDEX_CONSTRAINT);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
-    | _two_or_more_discrete_range ',' discrete_range {
+    | _two_or_more_discrete_range ',' _almost_discrete_range {
         $$ = new VhdlParseTreeNode(PT_INDEX_CONSTRAINT);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
