@@ -3521,7 +3521,7 @@ concurrent_statement:
     | concurrent_assertion_statement
     | concurrent_signal_assignment_statement
     | component_instantiation_statement
-    // TODO
+    | generate_statement
 
 _sequence_of_concurrent_statements:
     %empty
@@ -4076,6 +4076,51 @@ _configuration_instantiated_unit:
         $$->piece_count = 1;
         $$->pieces[0] = $2;
     }
+
+/// Section 11.8
+generate_statement:
+    for_generate_statement
+    // TODO
+
+for_generate_statement:
+    _real_for_generate_statement ';'
+    | _real_for_generate_statement identifier ';' {
+        $$ = $1;
+        $$->pieces[3] = $2;
+    }
+
+_real_for_generate_statement:
+    identifier ':' KW_FOR parameter_specification KW_GENERATE
+    generate_statement_body KW_END KW_GENERATE {
+        $$ = new VhdlParseTreeNode(PT_FOR_GENERATE);
+        $$->piece_count = 4;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $6;
+        $$->pieces[3] = nullptr;
+    }
+
+// FIXME: Presumably begin/end need to match?
+generate_statement_body:
+    _sequence_of_concurrent_statements {
+        $$ = new VhdlParseTreeNode(PT_GENERATE_BODY);
+        $$->piece_count = 3;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = $1;
+        $$->pieces[2] = nullptr;
+    }
+    | block_declarative_part KW_BEGIN
+      _sequence_of_concurrent_statements _generate_statement_body_end {
+        $$ = new VhdlParseTreeNode(PT_GENERATE_BODY);
+        $$->piece_count = 3;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = $4;
+    }
+
+_generate_statement_body_end:
+    KW_END ';'              { $$ = nullptr; }
+    | KW_END identifier ';' { $$ = $2; }
 
 ////////////////////// Scope and visibility, section 12 //////////////////////
 

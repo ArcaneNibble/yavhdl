@@ -229,6 +229,11 @@ const char *parse_tree_types[] = {
 
     "PT_BLOCK",
     "PT_BLOCK_HEADER",
+
+    "PT_FOR_GENERATE",
+    "PT_IF_GENERATE",
+    "PT_CASE_GENERATE",
+    "PT_GENERATE_BODY",
 };
 
 const char *parse_operators[] = {
@@ -1490,6 +1495,36 @@ void VhdlParseTreeNode::debug_print() {
             if (this->pieces[3]) {
                 cout << ", \"port_map\": ";
                 this->pieces[3]->debug_print();
+            }
+            break;
+
+        case PT_FOR_GENERATE:
+            cout << ", \"label\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"parameter_specification\": ";
+            this->pieces[1]->debug_print();
+            cout << ", \"body\": ";
+            this->pieces[2]->debug_print();
+            if (this->pieces[3]) {
+                cout << ", \"end_label\": ";
+                this->pieces[3]->debug_print();
+            }
+            break;
+
+        case PT_IF_GENERATE:
+        case PT_CASE_GENERATE:
+        case PT_GENERATE_BODY:
+            if (this->pieces[0]) {
+                cout << ", \"declarations\": ";
+                this->pieces[0]->debug_print();
+            }
+            if (this->pieces[1]) {
+                cout << ", \"statements\": ";
+                this->pieces[1]->debug_print();
+            }
+            if (this->pieces[2]) {
+                cout << ", \"end_label\": ";
+                this->pieces[2]->debug_print();
             }
             break;
 

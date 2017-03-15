@@ -233,6 +233,11 @@ enum ParseTreeNodeType
 
     PT_BLOCK,
     PT_BLOCK_HEADER,
+
+    PT_FOR_GENERATE,
+    PT_IF_GENERATE,
+    PT_CASE_GENERATE,
+    PT_GENERATE_BODY,
 };
 
 // Operators, section 9.2
