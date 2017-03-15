@@ -268,6 +268,9 @@ const char *parse_tree_types[] = {
     "PT_COMPONENT_CONFIGURATION",
 
     "PT_ARCHITECTURE",
+
+    "PT_DESIGN_UNIT",
+    "PT_DESIGN_FILE",
 };
 
 const char *parse_operators[] = {
@@ -1819,6 +1822,15 @@ void VhdlParseTreeNode::debug_print() {
             }
             break;
 
+        case PT_DESIGN_UNIT:
+            cout << ", \"library_unit\": ";
+            this->pieces[0]->debug_print();
+            if (this->pieces[1]) {
+                cout << ", \"context_clause\": ";
+                this->pieces[1]->debug_print();
+            }
+            break;
+
         case PT_EXPRESSION_LIST:
         case PT_ID_LIST:
         case PT_RECORD_RESOLUTION:
@@ -1855,6 +1867,7 @@ void VhdlParseTreeNode::debug_print() {
         case PT_CONTEXT_CLAUSE:
         case PT_USE_CLAUSE_LIST:
         case PT_CONFIGURATION_ITEM_LIST:
+        case PT_DESIGN_FILE:
             if (this->pieces[0]) {
                 cout << ", \"rest\": ";
                 this->pieces[0]->debug_print();

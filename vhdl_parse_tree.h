@@ -272,6 +272,9 @@ enum ParseTreeNodeType
     PT_COMPONENT_CONFIGURATION,
 
     PT_ARCHITECTURE,
+
+    PT_DESIGN_UNIT,
+    PT_DESIGN_FILE,
 };
 
 // Operators, section 9.2

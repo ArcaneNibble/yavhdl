@@ -180,12 +180,7 @@ struct VhdlParseTreeNode *parse_output;
 
 // Start token used for saving the parse tree
 _toplevel_token:
-    not_actualy_design_file { parse_output = $1; }
-
-// Fake start token for testing
-not_actualy_design_file:
-    primary_unit
-    | secondary_unit
+    design_file { parse_output = $1; }
 
 //////////////// Design entities and configurations, section 3 ////////////////
 
@@ -4728,6 +4723,27 @@ _one_or_more_selected_names:
 ///////////////// Design units and their analysis, section 13 /////////////////
 
 /// Section 13.1
+design_file:
+    design_unit
+    | design_file design_unit {
+        $$ = new VhdlParseTreeNode(PT_DESIGN_FILE);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
+
+design_unit:
+    context_clause library_unit {
+        $$ = new VhdlParseTreeNode(PT_DESIGN_UNIT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $1;
+    }
+
+library_unit:
+    primary_unit
+    | secondary_unit
+
 primary_unit:
     entity_declaration
     | configuration_declaration
