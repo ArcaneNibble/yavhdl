@@ -211,6 +211,8 @@ const char *parse_tree_types[] = {
     "PT_GUARDED_SIGNAL_SPECIFICATION",
     "PT_SIGNAL_LIST_OTHERS",
     "PT_SIGNAL_LIST_ALL",
+
+    "PT_CONCURRENT_PROCEDURE_CALL",
 };
 
 const char *parse_operators[] = {
@@ -1365,6 +1367,17 @@ void VhdlParseTreeNode::debug_print() {
             this->pieces[0]->debug_print();
             cout << ", \"type_mark\": ";
             this->pieces[1]->debug_print();
+            break;
+
+        case PT_CONCURRENT_PROCEDURE_CALL:
+            cout << ", \"procedure_call\": ";
+            this->pieces[0]->debug_print();
+            if (this->pieces[1]) {
+                cout << ", \"label\": ";
+                this->pieces[1]->debug_print();
+            }
+            cout << ", \"postponed\": ";
+            cout << (this->boolean ? "true" : "false");
             break;
 
         case PT_EXPRESSION_LIST:

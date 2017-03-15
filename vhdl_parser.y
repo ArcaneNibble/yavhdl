@@ -184,7 +184,7 @@ _toplevel_token:
 
 // Fake start token for testing
 not_actualy_design_file:
-    process_statement
+    concurrent_statement
 
 ///////////////////// Subprograms and packages, section 4 /////////////////////
 
@@ -3239,7 +3239,12 @@ selected_variable_assignment:
     }
 
 /// Section 10.7
+// Because of how we refactored the label logic out of statements, this is
+// a direct passthrough
 procedure_call_statement:
+    procedure_call
+
+procedure_call:
     // Fun, accepts lots of crap. Functions and procedures basically look
     // about the same though, so the hacks we have for functions should be
     // sufficient.
@@ -3471,6 +3476,12 @@ null_statement:
 
 ////////////////////// Concurrent statements, section 11 //////////////////////
 
+/// Section 11.1
+concurrent_statement:
+    process_statement
+    | concurrent_procedure_call_statement
+    // TODO
+
 /// Section 11.3
 process_statement:
     _real_process_statement ';'
@@ -3575,6 +3586,30 @@ process_declarative_item:
     | use_clause
     | group_template_declaration
     | group_declaration
+
+/// Section 11.4
+concurrent_procedure_call_statement:
+    _real_concurrent_procedure_call_statement ';'
+    | identifier ':' _real_concurrent_procedure_call_statement ';' {
+        $$ = $3;
+        $$->pieces[1] = $1;
+    }
+
+_real_concurrent_procedure_call_statement:
+    procedure_call {
+        $$ = new VhdlParseTreeNode(PT_CONCURRENT_PROCEDURE_CALL);
+        $$->piece_count = 2;
+        $$->boolean = false;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = nullptr;
+    }
+    | KW_POSTPONED procedure_call {
+        $$ = new VhdlParseTreeNode(PT_CONCURRENT_PROCEDURE_CALL);
+        $$->piece_count = 2;
+        $$->boolean = true;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = nullptr;
+    }
 
 ////////////////////// Scope and visibility, section 12 //////////////////////
 

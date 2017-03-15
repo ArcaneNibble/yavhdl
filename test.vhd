@@ -1,6 +1,1 @@
-process
-    package p is
-        disconnect others:zzz after 5 ns;
-    end;
-begin
-end process;
+mylabel: postponed asdf(fdsa, aaa => bbb);

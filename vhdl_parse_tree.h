@@ -215,6 +215,8 @@ enum ParseTreeNodeType
     PT_GUARDED_SIGNAL_SPECIFICATION,
     PT_SIGNAL_LIST_OTHERS,
     PT_SIGNAL_LIST_ALL,
+
+    PT_CONCURRENT_PROCEDURE_CALL,
 };
 
 // Operators, section 9.2
