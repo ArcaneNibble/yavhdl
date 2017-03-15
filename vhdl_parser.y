@@ -941,16 +941,19 @@ resolution_indication:
 // Folding in the element_resolution eliminates a reduce/reduce conflict.
 _parens_element_resolution:
     '(' function_name ')' {
-        // FIXME: Do I need to store more information here?
-        $$ = $2;
+        $$ = new VhdlParseTreeNode(PT_ELEMENT_RESOLUTION_NEST);
+        $$->piece_count = 1;
+        $$->pieces[0] = $2;
     }
     | '(' _parens_element_resolution ')' {
-        // FIXME: Do I need to store more information here?
-        $$ = $2;
+        $$ = new VhdlParseTreeNode(PT_ELEMENT_RESOLUTION_NEST);
+        $$->piece_count = 1;
+        $$->pieces[0] = $2;
     }
     | '(' record_resolution ')' {
-        // FIXME: Do I need to store more information here?
-        $$ = $2;
+        $$ = new VhdlParseTreeNode(PT_ELEMENT_RESOLUTION_NEST);
+        $$->piece_count = 1;
+        $$->pieces[0] = $2;
     }
 
 record_resolution:

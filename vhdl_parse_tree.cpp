@@ -168,6 +168,8 @@ const char *parse_tree_types[] = {
 
     "PT_SUBPROGRAM_BODY",
     "PT_SUBTYPE_INDICATION_AMBIG_WTF",
+
+    "PT_ELEMENT_RESOLUTION_NEST",
 };
 
 const char *parse_operators[] = {
@@ -1112,6 +1114,11 @@ void VhdlParseTreeNode::debug_print() {
 
         case PT_SUBTYPE_INDICATION_AMBIG_WTF:
             cout << ", \"fixup_needed\": ";
+            this->pieces[0]->debug_print();
+            break;
+
+        case PT_ELEMENT_RESOLUTION_NEST:
+            cout << ", \"inner\": ";
             this->pieces[0]->debug_print();
             break;
 

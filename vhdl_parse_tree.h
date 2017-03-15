@@ -172,6 +172,8 @@ enum ParseTreeNodeType
 
     PT_SUBPROGRAM_BODY,
     PT_SUBTYPE_INDICATION_AMBIG_WTF,
+
+    PT_ELEMENT_RESOLUTION_NEST,
 };
 
 // Operators, section 9.2
