@@ -1,6 +1,6 @@
 process
-    type t is protected
+    type t is protected body
         procedure p;
-    end protected u;
+    end protected body u;
 begin
 end process;

@@ -985,7 +985,7 @@ file_type_definition:
 /// Section 5.6
 protected_type_definition:
     protected_type_declaration
-    // TODO
+    | protected_type_body
 
 /// Section 5.6.2
 protected_type_declaration:
@@ -1021,6 +1021,56 @@ protected_type_declarative_item:
     | subprogram_instantiation_declaration
     | attribute_specification
     | use_clause
+
+/// Section 5.6.3
+protected_type_body:
+    _real_protected_type_body
+    | _real_protected_type_body identifier {
+        $$ = $1;
+        $$->pieces[1] = $2;
+    }
+
+_real_protected_type_body:
+    KW_PROTECTED KW_BODY protected_type_body_declarative_part
+    KW_END KW_PROTECTED KW_BODY {
+        $$ = new VhdlParseTreeNode(PT_PROTECTED_TYPE_BODY);
+        $$->piece_count = 2;
+        $$->pieces[0] = $3;
+        $$->pieces[1] = nullptr;
+    }
+
+protected_type_body_declarative_part:
+    %empty
+    | _real_protected_type_body_declarative_part
+
+_real_protected_type_body_declarative_part:
+    protected_type_body_declarative_item
+    | _real_protected_type_body_declarative_part
+      protected_type_body_declarative_item {
+        $$ = new VhdlParseTreeNode(PT_DECLARATION_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
+
+protected_type_body_declarative_item:
+    subprogram_declaration
+    | subprogram_body
+    | subprogram_instantiation_declaration
+    | package_declaration
+    | package_body
+    | package_instantiation_declaration
+    | type_declaration
+    | subtype_declaration
+    | constant_declaration
+    | variable_declaration
+    | file_declaration
+    | alias_declaration
+    | attribute_declaration
+    | attribute_specification
+    | use_clause
+    | group_template_declaration
+    | group_declaration
 
 /////////////////////////// Declarations, section 6 ///////////////////////////
 

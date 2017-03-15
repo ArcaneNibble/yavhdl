@@ -204,6 +204,7 @@ const char *parse_tree_types[] = {
     "PT_INTERFACE_PACKAGE_GENERIC_MAP_DEFAULT",
 
     "PT_PROTECTED_TYPE_DECLARATION",
+    "PT_PROTECTED_TYPE_BODY",
 };
 
 const char *parse_operators[] = {
@@ -1318,6 +1319,7 @@ void VhdlParseTreeNode::debug_print() {
             break;
 
         case PT_PROTECTED_TYPE_DECLARATION:
+        case PT_PROTECTED_TYPE_BODY:
             if (this->pieces[0]) {
                 cout << ", \"declarations\": ";
                 this->pieces[0]->debug_print();

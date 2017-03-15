@@ -208,6 +208,7 @@ enum ParseTreeNodeType
     PT_INTERFACE_PACKAGE_GENERIC_MAP_DEFAULT,
 
     PT_PROTECTED_TYPE_DECLARATION,
+    PT_PROTECTED_TYPE_BODY,
 };
 
 // Operators, section 9.2
