@@ -184,7 +184,8 @@ _toplevel_token:
 
 // Fake start token for testing
 not_actualy_design_file:
-    entity_declaration
+    primary_unit
+    | _sequence_of_concurrent_statements
 
 //////////////// Design entities and configurations, section 3 ////////////////
 
@@ -4546,6 +4547,72 @@ _one_or_more_selected_names:
         $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
+    }
+
+///////////////// Design units and their analysis, section 13 /////////////////
+
+/// Section 13.1
+primary_unit:
+    entity_declaration
+    | package_declaration
+    | package_instantiation_declaration
+    | context_declaration
+    // TODO
+
+/// Section 13.2
+library_clause:
+    KW_LIBRARY identifier_list ';' {
+        $$ = new VhdlParseTreeNode(PT_LIBRARY_CLAUSE);
+        $$->piece_count = 1;
+        $$->pieces[0] = $2;
+    }
+
+/// Section 13.3
+context_declaration:
+    _real_context_declaration ';'
+    | _real_context_declaration KW_CONTEXT ';'
+    | _real_context_declaration identifier ';' {
+        $$ = $1;
+        $$->pieces[2] = $2;
+    }
+    | _real_context_declaration KW_CONTEXT identifier ';' {
+        $$ = $1;
+        $$->pieces[2] = $3;
+    }
+
+_real_context_declaration:
+    KW_CONTEXT identifier KW_IS context_clause KW_END {
+        $$ = new VhdlParseTreeNode(PT_CONTEXT_DECLARATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = nullptr;
+    }
+
+/// Section 13.4
+context_clause:
+    %empty
+    | _real_context_clause
+
+_real_context_clause:
+    context_item
+    | _real_context_clause context_item {
+        $$ = new VhdlParseTreeNode(PT_CONTEXT_CLAUSE);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
+
+context_item:
+    library_clause
+    | use_clause
+    | context_reference
+
+context_reference:
+    KW_CONTEXT _one_or_more_selected_names ';' {
+        $$ = new VhdlParseTreeNode(PT_CONTEXT_REFERENCE);
+        $$->piece_count = 1;
+        $$->pieces[0] = $2;
     }
 
 //////////////////////// Lexical elements, section 15 ////////////////////////

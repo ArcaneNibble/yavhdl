@@ -1,6 +1,3 @@
-entity zzz is
-    generic(aaa:bbb);
-    port(ccc:ddd);
-begin
-    assert a;
+context aaa is
+    library a, b;
 end;

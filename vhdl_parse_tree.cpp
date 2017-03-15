@@ -253,6 +253,11 @@ const char *parse_tree_types[] = {
 
     "PT_ENTITY",
     "PT_ENTITY_HEADER",
+
+    "PT_CONTEXT_DECLARATION",
+    "PT_LIBRARY_CLAUSE",
+    "PT_CONTEXT_REFERENCE",
+    "PT_CONTEXT_CLAUSE",
 };
 
 const char *parse_operators[] = {
@@ -1698,6 +1703,29 @@ void VhdlParseTreeNode::debug_print() {
             }
             break;
 
+        case PT_CONTEXT_DECLARATION:
+            cout << ", \"identifier\": ";
+            this->pieces[0]->debug_print();
+            if (this->pieces[1]) {
+                cout << ", \"context\": ";
+                this->pieces[1]->debug_print();
+            }
+            if (this->pieces[2]) {
+                cout << ", \"end_label\": ";
+                this->pieces[2]->debug_print();
+            }
+            break;
+
+        case PT_LIBRARY_CLAUSE:
+            cout << ", \"names\": ";
+            this->pieces[0]->debug_print();
+            break;
+            
+        case PT_CONTEXT_REFERENCE:
+            cout << ", \"names\": ";
+            this->pieces[0]->debug_print();
+            break;
+
         case PT_EXPRESSION_LIST:
         case PT_ID_LIST:
         case PT_RECORD_RESOLUTION:
@@ -1731,6 +1759,7 @@ void VhdlParseTreeNode::debug_print() {
         case PT_IF_GENERATE_ELSIF_LIST:
         case PT_CASE_GENERATE_ALTERNATIVE_LIST:
         case PT_VERIFICATION_UNIT_BINDING_INDICATION_LIST:
+        case PT_CONTEXT_CLAUSE:
             if (this->pieces[0]) {
                 cout << ", \"rest\": ";
                 this->pieces[0]->debug_print();

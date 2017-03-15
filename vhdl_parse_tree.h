@@ -257,6 +257,11 @@ enum ParseTreeNodeType
 
     PT_ENTITY,
     PT_ENTITY_HEADER,
+
+    PT_CONTEXT_DECLARATION,
+    PT_LIBRARY_CLAUSE,
+    PT_CONTEXT_REFERENCE,
+    PT_CONTEXT_CLAUSE,
 };
 
 // Operators, section 9.2
