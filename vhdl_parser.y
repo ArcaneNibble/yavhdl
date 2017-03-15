@@ -1002,7 +1002,7 @@ element_constraint:
 
 _association_list_for_record_element_constraint:
     _definitely_not_name_array_constraint
-    // TODO
+    | _definitely_not_name_record_constraint
 
 /// Section 6.4.2.2
 constant_declaration:
