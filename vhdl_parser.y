@@ -600,12 +600,7 @@ index_subtype_definition:
     }
 
 array_constraint:
-    '(' KW_OPEN ')' {
-        $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
-        $$->piece_count = 2;
-        $$->pieces[0] = nullptr;
-        $$->pieces[1] = nullptr;
-    }
+    _array_constraint_open
     | _array_constraint_open_and_element_constraint
     | index_constraint {
         $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
@@ -621,6 +616,19 @@ array_constraint:
     }
 
 // We need this for association list disambiguation with name
+_after_slice_limited_array_constraint:
+    _array_constraint_open
+    | _array_constraint_open_and_element_constraint
+    | _array_constraint_definitely_multiple_ranges
+
+_array_constraint_open:
+    '(' KW_OPEN ')' {
+        $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = nullptr;
+    }
+
 _array_constraint_open_and_element_constraint:
     '(' KW_OPEN ')' element_constraint {
         $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
@@ -882,6 +890,13 @@ _association_list_subtype_indication:
         $$->pieces[1] = $1;
         $$->pieces[2] = $3;
     }
+    // HACK
+    | slice_name _after_slice_limited_element_constraint {
+        $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
 
 resolution_indication:
     // The following two are for function names
@@ -938,6 +953,11 @@ _allocator_constraint:
 element_constraint:
     array_constraint
     | record_constraint
+
+// FIXME: Ugly hack
+_after_slice_limited_element_constraint:
+    // TODO
+    _after_slice_limited_array_constraint
 
 /// Section 6.4.2.2
 constant_declaration:
