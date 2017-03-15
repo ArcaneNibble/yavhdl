@@ -238,6 +238,8 @@ enum ParseTreeNodeType
     PT_IF_GENERATE,
     PT_CASE_GENERATE,
     PT_GENERATE_BODY,
+    PT_IF_GENERATE_ELSIF,
+    PT_IF_GENERATE_ELSIF_LIST,
 };
 
 // Operators, section 9.2

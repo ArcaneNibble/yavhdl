@@ -234,6 +234,8 @@ const char *parse_tree_types[] = {
     "PT_IF_GENERATE",
     "PT_CASE_GENERATE",
     "PT_GENERATE_BODY",
+    "PT_IF_GENERATE_ELSIF",
+    "PT_IF_GENERATE_ELSIF_LIST",
 };
 
 const char *parse_operators[] = {
@@ -1512,6 +1514,34 @@ void VhdlParseTreeNode::debug_print() {
             break;
 
         case PT_IF_GENERATE:
+            cout << ", \"generate_label\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"condition\": ";
+            this->pieces[1]->debug_print();
+            cout << ", \"if_body\": ";
+            this->pieces[2]->debug_print();
+            if (this->pieces[3]) {
+                cout << ", \"if_label\": ";
+                this->pieces[3]->debug_print();
+            }
+            if (this->pieces[4]) {
+                cout << ", \"elsif_arms\": ";
+                this->pieces[4]->debug_print();
+            }
+            if (this->pieces[5]) {
+                cout << ", \"else_body\": ";
+                this->pieces[5]->debug_print();
+            }
+            if (this->pieces[6]) {
+                cout << ", \"else_label\": ";
+                this->pieces[6]->debug_print();
+            }
+            if (this->pieces[7]) {
+                cout << ", \"end_label\": ";
+                this->pieces[7]->debug_print();
+            }
+            break;
+
         case PT_CASE_GENERATE:
         case PT_GENERATE_BODY:
             if (this->pieces[0]) {
@@ -1524,6 +1554,19 @@ void VhdlParseTreeNode::debug_print() {
             }
             if (this->pieces[2]) {
                 cout << ", \"end_label\": ";
+                this->pieces[2]->debug_print();
+            }
+            break;
+
+        case PT_IF_GENERATE_ELSIF:
+            cout << ", \"condition\": ";
+            this->pieces[0]->debug_print();
+            if (this->pieces[1]) {
+                cout << ", \"label\": ";
+                this->pieces[1]->debug_print();
+            }
+            if (this->pieces[2]) {
+                cout << ", \"body\": ";
                 this->pieces[2]->debug_print();
             }
             break;
@@ -1558,6 +1601,7 @@ void VhdlParseTreeNode::debug_print() {
         case PT_ENTITY_NAME_LIST:
         case PT_ENTITY_CLASS_ENTRY_LIST:
         case PT_SEQUENCE_OF_CONCURRENT_STATEMENTS:
+        case PT_IF_GENERATE_ELSIF_LIST:
             if (this->pieces[0]) {
                 cout << ", \"rest\": ";
                 this->pieces[0]->debug_print();
