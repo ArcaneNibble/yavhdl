@@ -247,6 +247,9 @@ const char *parse_tree_types[] = {
     "PT_ENTITY_ASPECT_ENTITY",
     "PT_ENTITY_ASPECT_CONFIGURATION",
     "PT_ENTITY_ASPECT_OPEN",
+    "PT_VERIFICATION_UNIT_BINDING_INDICATION",
+    "PT_VERIFICATION_UNIT_BINDING_INDICATION_LIST",
+    "PT_COMPOUND_CONFIGURATION_SPECIFICATION",
 };
 
 const char *parse_operators[] = {
@@ -1646,6 +1649,20 @@ void VhdlParseTreeNode::debug_print() {
             this->pieces[0]->debug_print();
             break;
 
+        case PT_VERIFICATION_UNIT_BINDING_INDICATION:
+            cout << ", \"vunits\": ";
+            this->pieces[0]->debug_print();
+            break;
+
+        case PT_COMPOUND_CONFIGURATION_SPECIFICATION:
+            cout << ", \"component\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"binding\": ";
+            this->pieces[1]->debug_print();
+            cout << ", \"vunits\": ";
+            this->pieces[2]->debug_print();
+            break;
+
         case PT_EXPRESSION_LIST:
         case PT_ID_LIST:
         case PT_RECORD_RESOLUTION:
@@ -1678,6 +1695,7 @@ void VhdlParseTreeNode::debug_print() {
         case PT_SEQUENCE_OF_CONCURRENT_STATEMENTS:
         case PT_IF_GENERATE_ELSIF_LIST:
         case PT_CASE_GENERATE_ALTERNATIVE_LIST:
+        case PT_VERIFICATION_UNIT_BINDING_INDICATION_LIST:
             if (this->pieces[0]) {
                 cout << ", \"rest\": ";
                 this->pieces[0]->debug_print();

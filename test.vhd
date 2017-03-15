@@ -1,7 +1,6 @@
 l: block
-    for others : z
-        use entity aaa(bbb).ccc(ddd)
-        generic map(eee => fff)
-        port map(ggg => hhh)
-    ;
+    for others : z;
+        use vunit a, b, c;
+        use vunit d;
+    end for;
 begin end block;

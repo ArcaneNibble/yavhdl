@@ -2053,7 +2053,7 @@ entity_tag:
 /// Section 7.3
 configuration_specification:
     simple_configuration_specification
-    // TODO
+    | compound_configuration_specification
 
 simple_configuration_specification:
     KW_FOR component_specification binding_indication ';' {
@@ -2070,9 +2070,20 @@ simple_configuration_specification:
         $$->pieces[1] = $3;
     }
 
+compound_configuration_specification:
+    KW_FOR component_specification binding_indication ';' 
+    _one_or_more_verification_unit_binding_indications
+    KW_END KW_FOR ';' {
+        $$ = new VhdlParseTreeNode(PT_COMPOUND_CONFIGURATION_SPECIFICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = $5;
+    }
+
 component_specification:
     instantiation_list ':' name {
-        $$ = new VhdlParseTreeNode(PT_SIMPLE_CONFIGURATION_SPECIFICATION);
+        $$ = new VhdlParseTreeNode(PT_COMPONENT_SPECIFICATION);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
@@ -2147,7 +2158,10 @@ binding_indication:
 
 entity_aspect:
     _entity_aspect_entity
-    // TODO
+    | _entity_aspect_configuration
+    | KW_OPEN {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_ASPECT_OPEN);
+    }
 
 _entity_aspect_entity:
     KW_ENTITY _simple_or_selected_name {
@@ -2160,6 +2174,31 @@ _entity_aspect_entity:
         $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
+    }
+
+_entity_aspect_configuration:
+    KW_CONFIGURATION _simple_or_selected_name {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_ASPECT_CONFIGURATION);
+        $$->piece_count = 1;
+        $$->pieces[0] = $2;
+    }
+
+_one_or_more_verification_unit_binding_indications:
+    verification_unit_binding_indication
+    | _one_or_more_verification_unit_binding_indications
+      verification_unit_binding_indication {
+        $$ = new VhdlParseTreeNode(
+            PT_VERIFICATION_UNIT_BINDING_INDICATION_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
+
+verification_unit_binding_indication:
+    KW_USE KW_VUNIT _list_of_names ';' {
+        $$ = new VhdlParseTreeNode(PT_VERIFICATION_UNIT_BINDING_INDICATION);
+        $$->piece_count = 1;
+        $$->pieces[0] = $3;
     }
 
 /// Section 7.4
