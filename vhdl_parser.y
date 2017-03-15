@@ -949,7 +949,7 @@ _association_list_record_element_constraint:
         $$->pieces[1] = $2;
     }
     // HACK, FIXME
-    | slice_name _after_slice_limited_array_constraint {
+    | _hack_name_for_association_list _after_slice_limited_array_constraint {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION_AMBIG_WTF);
         $$->piece_count = 1;
         $$->pieces[0] = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
@@ -1089,7 +1089,7 @@ _association_list_subtype_indication:
         $$->pieces[2] = $3;
     }
     // HACK, FIXME
-    | slice_name _after_slice_limited_array_constraint {
+    | _hack_name_for_association_list _after_slice_limited_array_constraint {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION_AMBIG_WTF);
         $$->piece_count = 1;
         $$->pieces[0] = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
@@ -1873,19 +1873,22 @@ name:
     // in order to make the grammar not have some reduce/reduce conflicts.
     function_name     
     | character_literal
+    | _hack_name_for_association_list
+    | _almost_attribute_name
+    | external_name
+
+_hack_name_for_association_list:
     // This handles anything that involves parentheses, including some things
     // that are actually a "primary." It needs to be disambiguated later in
     // second-stage parsing. However, it notably includes indexed and slice
     // names.
-    | name '(' _ambig_name_parens ')' {
+    name '(' _ambig_name_parens ')' {
         $$ = new VhdlParseTreeNode(PT_NAME_AMBIG_PARENS);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
     | slice_name
-    | _almost_attribute_name
-    | external_name
 
 // A number of things require a list of names
 _list_of_names:
