@@ -3682,7 +3682,36 @@ concurrent_simple_signal_assignment:
         $$->pieces[2] = nullptr;
         $$->pieces[3] = nullptr;
     }
-    // TODO
+    | target DL_LEQ delay_mechanism waveform {
+        $$ = new VhdlParseTreeNode(PT_CONCURRENT_SIMPLE_SIGNAL_ASSIGNMENT);
+        $$->piece_count = 4;
+        $$->boolean = false;
+        $$->boolean2 = false;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $3;
+        $$->pieces[3] = nullptr;
+    }
+    | target DL_LEQ KW_GUARDED waveform {
+        $$ = new VhdlParseTreeNode(PT_CONCURRENT_SIMPLE_SIGNAL_ASSIGNMENT);
+        $$->piece_count = 4;
+        $$->boolean = false;
+        $$->boolean2 = true;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = nullptr;
+    }
+    | target DL_LEQ KW_GUARDED delay_mechanism waveform {
+        $$ = new VhdlParseTreeNode(PT_CONCURRENT_SIMPLE_SIGNAL_ASSIGNMENT);
+        $$->piece_count = 4;
+        $$->boolean = false;
+        $$->boolean2 = true;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $5;
+        $$->pieces[2] = $4;
+        $$->pieces[3] = nullptr;
+    }
 
 /// Section 11.7
 // There is an ambiguity here when you have a bare name, so we are skipping

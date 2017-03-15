@@ -1,1 +1,1 @@
-postponed a <= b;
+postponed a <= guarded transport b;
