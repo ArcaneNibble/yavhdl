@@ -220,6 +220,10 @@ const char *parse_tree_types[] = {
     "PT_INSTANTIATED_UNIT_COMPONENT",
     "PT_INSTANTIATED_UNIT_ENTITY",
     "PT_INSTANTIATED_UNIT_CONFIGURATION",
+
+    "PT_CONCURRENT_SIMPLE_SIGNAL_ASSIGNMENT",
+    "PT_CONCURRENT_CONDITIONAL_SIGNAL_ASSIGNMENT",
+    "PT_CONCURRENT_SELECTED_SIGNAL_ASSIGNMENT",
 };
 
 const char *parse_operators[] = {
@@ -1413,6 +1417,31 @@ void VhdlParseTreeNode::debug_print() {
         case PT_INSTANTIATED_UNIT_CONFIGURATION:
             cout << ", \"name\": ";
             this->pieces[0]->debug_print();
+            break;
+
+        case PT_CONCURRENT_SELECTED_SIGNAL_ASSIGNMENT:
+            cout << ", \"select_expression\": ";
+            this->pieces[4]->debug_print();
+            cout << ", \"matching\": ";
+            cout << (this->boolean3 ? "true" : "false");
+        case PT_CONCURRENT_SIMPLE_SIGNAL_ASSIGNMENT:
+        case PT_CONCURRENT_CONDITIONAL_SIGNAL_ASSIGNMENT:
+            cout << ", \"target\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"waveform\": ";
+            this->pieces[1]->debug_print();
+            if (this->pieces[2]) {
+                cout << ", \"delay\": ";
+                this->pieces[2]->debug_print();
+            }
+            if (this->pieces[3]) {
+                cout << ", \"label\": ";
+                this->pieces[3]->debug_print();
+            }
+            cout << ", \"postponed\": ";
+            cout << (this->boolean ? "true" : "false");
+            cout << ", \"guarded\": ";
+            cout << (this->boolean2 ? "true" : "false");
             break;
 
         case PT_EXPRESSION_LIST:

@@ -224,6 +224,10 @@ enum ParseTreeNodeType
     PT_INSTANTIATED_UNIT_COMPONENT,
     PT_INSTANTIATED_UNIT_ENTITY,
     PT_INSTANTIATED_UNIT_CONFIGURATION,
+
+    PT_CONCURRENT_SIMPLE_SIGNAL_ASSIGNMENT,
+    PT_CONCURRENT_CONDITIONAL_SIGNAL_ASSIGNMENT,
+    PT_CONCURRENT_SELECTED_SIGNAL_ASSIGNMENT,
 };
 
 // Operators, section 9.2
@@ -345,6 +349,8 @@ struct VhdlParseTreeNode {
     char chr;
     int integer;
     bool boolean;
+    bool boolean2;
+    bool boolean3;
     struct VhdlParseTreeNode *pieces[NUM_FIXED_PIECES];
     int piece_count;
 

@@ -3492,6 +3492,7 @@ concurrent_statement:
     process_statement
     | concurrent_procedure_call_statement
     | concurrent_assertion_statement
+    | concurrent_signal_assignment_statement
     | component_instantiation_statement
     // TODO
 
@@ -3647,6 +3648,41 @@ _real_concurrent_assertion_statement:
         $$->pieces[0] = $2;
         $$->pieces[1] = nullptr;
     }
+
+/// Section 11.6
+concurrent_signal_assignment_statement:
+    _real_concurrent_signal_assignment_statement ';'
+    | identifier ':' _real_concurrent_signal_assignment_statement ';' {
+        $$ = $3;
+        $$->pieces[3] = $1;
+    }
+    | KW_POSTPONED _real_concurrent_signal_assignment_statement ';' {
+        $$ = $2;
+        $$->boolean = true;
+    }
+    | identifier ':' KW_POSTPONED
+      _real_concurrent_signal_assignment_statement ';' {
+        $$ = $4;
+        $$->boolean = true;
+        $$->pieces[3] = $1;
+    }
+
+_real_concurrent_signal_assignment_statement:
+    concurrent_simple_signal_assignment
+    // TODO
+
+concurrent_simple_signal_assignment:
+    target DL_LEQ waveform {
+        $$ = new VhdlParseTreeNode(PT_CONCURRENT_SIMPLE_SIGNAL_ASSIGNMENT);
+        $$->piece_count = 4;
+        $$->boolean = false;
+        $$->boolean2 = false;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = nullptr;
+    }
+    // TODO
 
 /// Section 11.7
 // There is an ambiguity here when you have a bare name, so we are skipping
