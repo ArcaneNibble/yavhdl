@@ -1497,13 +1497,12 @@ attribute_specification:
     }
 
 entity_specification:
-    identifier ':' entity_class {
+    entity_name_list ':' entity_class {
         $$ = new VhdlParseTreeNode(PT_ENTITY_SPECIFICATION);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
-    // TODO
 
 entity_class:
     KW_ENTITY {
@@ -1582,6 +1581,42 @@ entity_class:
         $$ = new VhdlParseTreeNode(PT_ENTITY_CLASS);
         $$->entity_class = ENTITY_SEQUENCE;
     }
+
+entity_name_list:
+    _one_or_more_entity_designators
+    | KW_OTHERS {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_NAME_LIST_OTHERS);
+    }
+    | KW_ALL {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_NAME_LIST_ALL);
+    }
+
+_one_or_more_entity_designators:
+    entity_designator
+    | _one_or_more_entity_designators ',' entity_designator {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_NAME_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+entity_designator:
+    entity_tag {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_DESIGNATOR);
+        $$->piece_count = 1;
+        $$->pieces[0] = $1;
+    }
+    | entity_tag signature {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_DESIGNATOR);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
+
+entity_tag:
+    identifier
+    | character_literal
+    | string_literal
 
 ////////////////////////////// Names, section 8 //////////////////////////////
 
