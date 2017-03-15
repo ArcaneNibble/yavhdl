@@ -606,12 +606,7 @@ array_constraint:
         $$->pieces[0] = nullptr;
         $$->pieces[1] = nullptr;
     }
-    | '(' KW_OPEN ')' element_constraint {
-        $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
-        $$->piece_count = 2;
-        $$->pieces[0] = nullptr;
-        $$->pieces[1] = $4;
-    }
+    | _array_constraint_open_and_element_constraint
     | index_constraint {
         $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
         $$->piece_count = 2;
@@ -625,14 +620,56 @@ array_constraint:
         $$->pieces[1] = $2;
     }
 
+// We need this for association list disambiguation with name
+_array_constraint_open_and_element_constraint:
+    '(' KW_OPEN ')' element_constraint {
+        $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = $4;
+    }
+
+_array_constraint_definitely_multiple_ranges:
+    _definitely_index_constraint {
+        $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = nullptr;
+    }
+    | _definitely_index_constraint element_constraint {
+        $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
+
 index_constraint:
     '(' _one_or_more_discrete_range ')' {
+        $$ = $2;
+    }
+
+_definitely_index_constraint:
+    '(' _two_or_more_discrete_range ')' {
         $$ = $2;
     }
 
 _one_or_more_discrete_range:
     discrete_range
     | _one_or_more_discrete_range ',' discrete_range {
+        $$ = new VhdlParseTreeNode(PT_INDEX_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+_two_or_more_discrete_range:
+    discrete_range ',' discrete_range {
+        $$ = new VhdlParseTreeNode(PT_INDEX_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    | _two_or_more_discrete_range ',' discrete_range {
         $$ = new VhdlParseTreeNode(PT_INDEX_CONSTRAINT);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
@@ -770,8 +807,27 @@ subtype_declaration:
 
 subtype_indication:
     _simple_or_selected_name
-    // Doing this fixes a frivolous shift/reduce conflict
-    | _association_list_subtype_indication
+    | resolution_indication _simple_or_selected_name {
+        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $1;
+        $$->pieces[2] = nullptr;
+    }
+    | _simple_or_selected_name constraint {
+        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = nullptr;
+        $$->pieces[2] = $2;
+    }
+    | resolution_indication _simple_or_selected_name constraint {
+        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $1;
+        $$->pieces[2] = $3;
+    }
 
 // Does not handle the case of only a type_mark because that can cause
 // ambiguities. Does not allow a resolution indication because that isn't
@@ -812,7 +868,7 @@ _association_list_subtype_indication:
         $$->pieces[1] = $1;
         $$->pieces[2] = nullptr;
     }
-    | _simple_or_selected_name constraint {
+    | _simple_or_selected_name _association_list_definitely_constraint {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
         $$->piece_count = 3;
         $$->pieces[0] = $1;
@@ -861,6 +917,12 @@ constraint:
     range_constraint
     | array_constraint
     | record_constraint
+
+// FIXME: Ugly, WTF is happening here?
+_association_list_definitely_constraint:
+    range_constraint
+    | _array_constraint_open_and_element_constraint
+    | _array_constraint_definitely_multiple_ranges
 
 // When a "discrete" subtype indication is needed, the _only_ type of
 // constraint we can have is a range constraint. Arrays and records aren't
@@ -1264,8 +1326,8 @@ association_element:
     | name DL_ARR actual_part {
         $$ = new VhdlParseTreeNode(PT_ASSOCIATION_ELEMENT);
         $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $3;
+        $$->pieces[0] = $3;
+        $$->pieces[1] = $1;
     }
 
 actual_part:
