@@ -890,12 +890,14 @@ _association_list_subtype_indication:
         $$->pieces[1] = $1;
         $$->pieces[2] = $3;
     }
-    // HACK
+    // HACK, FIXME
     | slice_name _after_slice_limited_element_constraint {
-        $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $2;
+        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION_AMBIG_WTF);
+        $$->piece_count = 1;
+        $$->pieces[0] = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
+        $$->pieces[0]->piece_count = 2;
+        $$->pieces[0]->pieces[0] = $1;
+        $$->pieces[0]->pieces[1] = $2;
     }
 
 resolution_indication:
@@ -938,6 +940,7 @@ _association_list_definitely_constraint:
     range_constraint
     | _array_constraint_open_and_element_constraint
     | _array_constraint_definitely_multiple_ranges
+    // TODO
 
 // When a "discrete" subtype indication is needed, the _only_ type of
 // constraint we can have is a range constraint. Arrays and records aren't
