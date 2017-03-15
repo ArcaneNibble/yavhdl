@@ -1,8 +1,4 @@
 process
-    group aaa is (signal);
-    group bbb is (signal, label);
-    group ccc is (signal<>);
-    group ccc is (signal<>, label);
-    group ccc is (signal<>, label<>);
+    group aaa : bbb(ddd, eee, fff'ggg'hhh, "iii", "jjj", kkk(lll));
 begin
 end process;

@@ -185,6 +185,9 @@ const char *parse_tree_types[] = {
     "PT_GROUP_TEMPLATE_DECLARATION",
     "PT_ENTITY_CLASS_ENTRY_LIST",
     "PT_ENTITY_CLASS_ENTRY",
+
+    "PT_GROUP_DECLARATION",
+    "PT_GROUP_CONSTITUENT_LIST",
 };
 
 const char *parse_operators[] = {
@@ -1209,6 +1212,15 @@ void VhdlParseTreeNode::debug_print() {
             cout << (this->boolean ? "true" : "false");
             break;
 
+        case PT_GROUP_DECLARATION:
+            cout << ", \"identifier\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"template\": ";
+            this->pieces[1]->debug_print();
+            cout << ", \"constituent\": ";
+            this->pieces[2]->debug_print();
+            break;
+
         case PT_EXPRESSION_LIST:
         case PT_ID_LIST:
         case PT_RECORD_RESOLUTION:
@@ -1238,6 +1250,7 @@ void VhdlParseTreeNode::debug_print() {
         case PT_SELECTED_NAME_LIST:
         case PT_ENTITY_NAME_LIST:
         case PT_ENTITY_CLASS_ENTRY_LIST:
+        case PT_GROUP_CONSTITUENT_LIST:
             if (this->pieces[0]) {
                 cout << ", \"rest\": ";
                 this->pieces[0]->debug_print();
