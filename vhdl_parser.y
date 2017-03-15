@@ -185,7 +185,7 @@ _toplevel_token:
 // Fake start token for testing
 not_actualy_design_file:
     primary_unit
-    | _sequence_of_concurrent_statements
+    | secondary_unit
 
 //////////////// Design entities and configurations, section 3 ////////////////
 
@@ -305,6 +305,32 @@ entity_statement:
     concurrent_assertion_statement
     | concurrent_procedure_call_statement
     | process_statement
+
+/// Section 3.3.1
+architecture_body:
+    _real_architecture_body ';'
+    | _real_architecture_body KW_ARCHITECTURE ';'
+    | _real_architecture_body identifier ';' {
+        $$ = $1;
+        $$->pieces[4] = $2;
+    }
+    | _real_architecture_body KW_ARCHITECTURE identifier ';' {
+        $$ = $1;
+        $$->pieces[4] = $3;
+    }
+
+_real_architecture_body:
+    KW_ARCHITECTURE identifier KW_OF _simple_or_selected_name KW_IS
+    block_declarative_part KW_BEGIN _sequence_of_concurrent_statements
+    KW_END {
+        $$ = new VhdlParseTreeNode(PT_ARCHITECTURE);
+        $$->piece_count = 5;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $6;
+        $$->pieces[3] = $8;
+        $$->pieces[4] = nullptr;
+    }
 
 /// Section 3.3.2
 block_declarative_item:
@@ -4708,6 +4734,10 @@ primary_unit:
     | package_declaration
     | package_instantiation_declaration
     | context_declaration
+
+secondary_unit:
+    architecture_body
+    | package_body
 
 /// Section 13.2
 library_clause:

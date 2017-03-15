@@ -266,6 +266,8 @@ const char *parse_tree_types[] = {
     "PT_CONFIGURATION_ITEM_LIST",
     "PT_BLOCK_SPECIFICATION",
     "PT_COMPONENT_CONFIGURATION",
+
+    "PT_ARCHITECTURE",
 };
 
 const char *parse_operators[] = {
@@ -1795,6 +1797,25 @@ void VhdlParseTreeNode::debug_print() {
             if (this->pieces[3]) {
                 cout << ", \"block_configuration\": ";
                 this->pieces[3]->debug_print();
+            }
+            break;
+
+        case PT_ARCHITECTURE:
+            cout << ", \"identifier\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"name\": ";
+            this->pieces[1]->debug_print();
+            if (this->pieces[2]) {
+                cout << ", \"declarations\": ";
+                this->pieces[2]->debug_print();
+            }
+            if (this->pieces[3]) {
+                cout << ", \"statements\": ";
+                this->pieces[3]->debug_print();
+            }
+            if (this->pieces[4]) {
+                cout << ", \"end_label\": ";
+                this->pieces[4]->debug_print();
             }
             break;
 
