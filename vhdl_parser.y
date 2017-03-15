@@ -330,6 +330,57 @@ block_declarative_item:
     | group_template_declaration
     | group_declaration
 
+/// Section 3.4
+configuration_declaration:
+    _real_configuration_declaration ';'
+    | _real_configuration_declaration KW_CONFIGURATION ';'
+    | _real_configuration_declaration identifier ';' {
+        $$ = $1;
+        $$->pieces[5] = $2;
+    }
+    | _real_configuration_declaration KW_CONFIGURATION identifier ';' {
+        $$ = $1;
+        $$->pieces[5] = $3;
+    }
+
+_real_configuration_declaration:
+    KW_CONFIGURATION identifier KW_OF _simple_or_selected_name KW_IS
+    configuration_declarative_part
+    _zero_or_more_verification_unit_binding_indications
+    // TODO
+    KW_END {
+        $$ = new VhdlParseTreeNode(PT_CONFIGURATION_DECLARATION);
+        $$->piece_count = 6;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $6;
+        $$->pieces[3] = $7;
+        $$->pieces[4] = nullptr;
+        $$->pieces[5] = nullptr;
+    }
+
+_zero_or_more_verification_unit_binding_indications:
+    %empty
+    | _one_or_more_verification_unit_binding_indications
+
+configuration_declarative_part:
+    %empty
+    | _real_configuration_declarative_part
+
+_real_configuration_declarative_part:
+    configuration_declarative_item
+    | _real_configuration_declarative_part configuration_declarative_item {
+        $$ = new VhdlParseTreeNode(PT_DECLARATION_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
+
+configuration_declarative_item:
+    use_clause
+    | attribute_specification
+    | group_declaration
+
 ///////////////////// Subprograms and packages, section 4 /////////////////////
 
 /// Section 4.2
@@ -4554,10 +4605,10 @@ _one_or_more_selected_names:
 /// Section 13.1
 primary_unit:
     entity_declaration
+    | configuration_declaration
     | package_declaration
     | package_instantiation_declaration
     | context_declaration
-    // TODO
 
 /// Section 13.2
 library_clause:
