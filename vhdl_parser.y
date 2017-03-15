@@ -778,6 +778,14 @@ _definitely_not_name_record_constraint:
 _one_or_more_association_list_record_element_constraint:
     _association_list_record_element_constraint
     | _one_or_more_association_list_record_element_constraint ','
+      record_element_constraint {
+        $$ = new VhdlParseTreeNode(PT_RECORD_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    // HACK
+    | _one_or_more_expressions ','
       _association_list_record_element_constraint {
         $$ = new VhdlParseTreeNode(PT_RECORD_CONSTRAINT);
         $$->piece_count = 2;
