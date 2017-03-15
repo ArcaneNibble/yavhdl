@@ -792,6 +792,15 @@ _association_list_record_element_constraint:
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
+    // HACK, FIXME
+    | slice_name _after_slice_limited_array_constraint {
+        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION_AMBIG_WTF);
+        $$->piece_count = 1;
+        $$->pieces[0] = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
+        $$->pieces[0]->piece_count = 2;
+        $$->pieces[0]->pieces[0] = $1;
+        $$->pieces[0]->pieces[1] = $2;
+    }
 
 /// Section 5.4
 access_type_definition:
