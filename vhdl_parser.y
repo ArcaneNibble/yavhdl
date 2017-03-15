@@ -675,13 +675,20 @@ _one_or_more_discrete_range:
 
 // Really hacked up, must have two or more and not be a bare name
 _two_or_more_discrete_range:
-    _almost_discrete_range ',' _almost_discrete_range {
+    _almost_discrete_range ',' discrete_range {
         $$ = new VhdlParseTreeNode(PT_INDEX_CONSTRAINT);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
-    | _two_or_more_discrete_range ',' _almost_discrete_range {
+    // HACK
+    | _one_or_more_expressions ',' _almost_discrete_range {
+        $$ = new VhdlParseTreeNode(PT_INDEX_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    | _two_or_more_discrete_range ',' discrete_range {
         $$ = new VhdlParseTreeNode(PT_INDEX_CONSTRAINT);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
@@ -919,7 +926,7 @@ _association_list_subtype_indication:
         $$->pieces[2] = $3;
     }
     // HACK, FIXME
-    | slice_name _after_slice_limited_element_constraint {
+    | slice_name _after_slice_limited_array_constraint {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION_AMBIG_WTF);
         $$->piece_count = 1;
         $$->pieces[0] = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
@@ -983,11 +990,6 @@ _allocator_constraint:
 element_constraint:
     array_constraint
     | record_constraint
-
-// FIXME: Ugly hack
-_after_slice_limited_element_constraint:
-    // TODO
-    _after_slice_limited_array_constraint
 
 _association_list_for_record_element_constraint:
     _definitely_not_name_array_constraint
