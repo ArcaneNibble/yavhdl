@@ -173,6 +173,14 @@ const char *parse_tree_types[] = {
 
     "PT_USE_CLAUSE",
     "PT_SELECTED_NAME_LIST",
+
+    "PT_ATTRIBUTE_SPECIFICATION",
+    "PT_ENTITY_SPECIFICATION",
+    "PT_ENTITY_CLASS",
+    "PT_ENTITY_NAME_LIST",
+    "PT_ENTITY_NAME_LIST_OTHERS",
+    "PT_ENTITY_NAME_LIST_ALL",
+    "PT_ENTITY_DESIGNATOR",
 };
 
 const char *parse_operators[] = {
@@ -243,6 +251,28 @@ const char *subprogram_kinds[] = {
     nullptr,
     "procedure",
     "function",
+};
+
+const char *entity_classes[] = {
+    "entity",
+    "architecture",
+    "configuration",
+    "procedure",
+    "function",
+    "package",
+    "type",
+    "subtype",
+    "constant",
+    "signal",
+    "variable",
+    "component",
+    "label",
+    "literal",
+    "units",
+    "group",
+    "file",
+    "property",
+    "sequence",
 };
 
 // Escape values for JSON output
@@ -1130,6 +1160,37 @@ void VhdlParseTreeNode::debug_print() {
             this->pieces[0]->debug_print();
             break;
 
+        case PT_ATTRIBUTE_SPECIFICATION:
+            cout << ", \"designator\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"specification\": ";
+            this->pieces[1]->debug_print();
+            cout << ", \"expression\": ";
+            this->pieces[2]->debug_print();
+            break;
+
+        case PT_ENTITY_SPECIFICATION:
+            cout << ", \"name_list\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"entity_class\": ";
+            this->pieces[1]->debug_print();
+            break;
+
+        case PT_ENTITY_CLASS:
+            cout << ", \"entity_class\": \"";
+            cout << entity_classes[this->entity_class];
+            cout << "\"";
+            break;
+
+        case PT_ENTITY_DESIGNATOR:
+            cout << ", \"tag\": ";
+            this->pieces[0]->debug_print();
+            if (this->pieces[1]) {
+                cout << ", \"signature\": ";
+                this->pieces[1]->debug_print();
+            }
+            break;
+
         case PT_EXPRESSION_LIST:
         case PT_ID_LIST:
         case PT_RECORD_RESOLUTION:
@@ -1157,6 +1218,7 @@ void VhdlParseTreeNode::debug_print() {
         case PT_INTERFACE_LIST:
         case PT_ASSOCIATION_LIST:
         case PT_SELECTED_NAME_LIST:
+        case PT_ENTITY_NAME_LIST:
             if (this->pieces[0]) {
                 cout << ", \"rest\": ";
                 this->pieces[0]->debug_print();

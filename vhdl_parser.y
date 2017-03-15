@@ -353,6 +353,7 @@ subprogram_declarative_item:
     | file_declaration
     | alias_declaration
     | attribute_declaration
+    | attribute_specification
     | use_clause
     // TODO
 
@@ -1482,6 +1483,104 @@ attribute_declaration:
         $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
+    }
+
+////////////////////////// Specifications, section 7 //////////////////////////
+
+attribute_specification:
+    KW_ATTRIBUTE identifier KW_OF entity_specification KW_IS expression ';' {
+        $$ = new VhdlParseTreeNode(PT_ATTRIBUTE_SPECIFICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $6;
+    }
+
+entity_specification:
+    identifier ':' entity_class {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_SPECIFICATION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+    // TODO
+
+entity_class:
+    KW_ENTITY {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_CLASS);
+        $$->entity_class = ENTITY_ENTITY;
+    }
+    | KW_ARCHITECTURE {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_CLASS);
+        $$->entity_class = ENTITY_ARCHITECTURE;
+    }
+    | KW_CONFIGURATION {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_CLASS);
+        $$->entity_class = ENTITY_CONFIGURATION;
+    }
+    | KW_PROCEDURE {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_CLASS);
+        $$->entity_class = ENTITY_PROCEDURE;
+    }
+    | KW_FUNCTION {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_CLASS);
+        $$->entity_class = ENTITY_FUNCTION;
+    }
+    | KW_PACKAGE {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_CLASS);
+        $$->entity_class = ENTITY_PACKAGE;
+    }
+    | KW_TYPE {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_CLASS);
+        $$->entity_class = ENTITY_TYPE;
+    }
+    | KW_SUBTYPE {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_CLASS);
+        $$->entity_class = ENTITY_SUBTYPE;
+    }
+    | KW_CONSTANT {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_CLASS);
+        $$->entity_class = ENTITY_CONSTANT;
+    }
+    | KW_SIGNAL {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_CLASS);
+        $$->entity_class = ENTITY_SIGNAL;
+    }
+    | KW_VARIABLE {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_CLASS);
+        $$->entity_class = ENTITY_VARIABLE;
+    }
+    | KW_COMPONENT {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_CLASS);
+        $$->entity_class = ENTITY_COMPONENT;
+    }
+    | KW_LABEL {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_CLASS);
+        $$->entity_class = ENTITY_LABEL;
+    }
+    | KW_LITERAL {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_CLASS);
+        $$->entity_class = ENTITY_LITERAL;
+    }
+    | KW_UNITS {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_CLASS);
+        $$->entity_class = ENTITY_UNITS;
+    }
+    | KW_GROUP {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_CLASS);
+        $$->entity_class = ENTITY_GROUP;
+    }
+    | KW_FILE {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_CLASS);
+        $$->entity_class = ENTITY_FILE;
+    }
+    | KW_PROPERTY {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_CLASS);
+        $$->entity_class = ENTITY_PROPERTY;
+    }
+    | KW_SEQUENCE {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_CLASS);
+        $$->entity_class = ENTITY_SEQUENCE;
     }
 
 ////////////////////////////// Names, section 8 //////////////////////////////
@@ -3006,6 +3105,7 @@ process_declarative_item:
     | file_declaration
     | alias_declaration
     | attribute_declaration
+    | attribute_specification
     | use_clause
     // TODO
 

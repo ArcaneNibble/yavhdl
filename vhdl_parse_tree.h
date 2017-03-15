@@ -177,6 +177,14 @@ enum ParseTreeNodeType
 
     PT_USE_CLAUSE,
     PT_SELECTED_NAME_LIST,
+
+    PT_ATTRIBUTE_SPECIFICATION,
+    PT_ENTITY_SPECIFICATION,
+    PT_ENTITY_CLASS,
+    PT_ENTITY_NAME_LIST,
+    PT_ENTITY_NAME_LIST_OTHERS,
+    PT_ENTITY_NAME_LIST_ALL,
+    PT_ENTITY_DESIGNATOR,
 };
 
 // Operators, section 9.2
@@ -256,6 +264,29 @@ enum ParseTreeSubprogramKind
     SUBPROGRAM_FUNCTION,
 };
 
+enum ParseTreeEntityClass
+{
+    ENTITY_ENTITY,
+    ENTITY_ARCHITECTURE,
+    ENTITY_CONFIGURATION,
+    ENTITY_PROCEDURE,
+    ENTITY_FUNCTION,
+    ENTITY_PACKAGE,
+    ENTITY_TYPE,
+    ENTITY_SUBTYPE,
+    ENTITY_CONSTANT,
+    ENTITY_SIGNAL,
+    ENTITY_VARIABLE,
+    ENTITY_COMPONENT,
+    ENTITY_LABEL,
+    ENTITY_LITERAL,
+    ENTITY_UNITS,
+    ENTITY_GROUP,
+    ENTITY_FILE,
+    ENTITY_PROPERTY,
+    ENTITY_SEQUENCE,
+};
+
 // Definition of a parse tree node
 #define NUM_FIXED_PIECES 8
 
@@ -277,6 +308,7 @@ struct VhdlParseTreeNode {
     ParseTreeFunctionPurity purity;
     ParseTreeInterfaceObjectMode interface_mode;
     ParseTreeSubprogramKind subprogram_kind;
+    ParseTreeEntityClass entity_class;
 
     VhdlParseTreeNode(enum ParseTreeNodeType type);
     ~VhdlParseTreeNode();
