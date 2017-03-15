@@ -205,6 +205,8 @@ const char *parse_tree_types[] = {
 
     "PT_PROTECTED_TYPE_DECLARATION",
     "PT_PROTECTED_TYPE_BODY",
+
+    "PT_COMPONENT_DECLARATION",
 };
 
 const char *parse_operators[] = {
@@ -1327,6 +1329,23 @@ void VhdlParseTreeNode::debug_print() {
             if (this->pieces[1]) {
                 cout << ", \"end_label\": ";
                 this->pieces[1]->debug_print();
+            }
+            break;
+
+        case PT_COMPONENT_DECLARATION:
+            cout << ", \"identifier\": ";
+            this->pieces[0]->debug_print();
+            if (this->pieces[1]) {
+                cout << ", \"generic\": ";
+                this->pieces[1]->debug_print();
+            }
+            if (this->pieces[2]) {
+                cout << ", \"port\": ";
+                this->pieces[2]->debug_print();
+            }
+            if (this->pieces[3]) {
+                cout << ", \"end_label\": ";
+                this->pieces[3]->debug_print();
             }
             break;
 

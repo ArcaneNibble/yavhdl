@@ -209,6 +209,8 @@ enum ParseTreeNodeType
 
     PT_PROTECTED_TYPE_DECLARATION,
     PT_PROTECTED_TYPE_BODY,
+
+    PT_COMPONENT_DECLARATION,
 };
 
 // Operators, section 9.2

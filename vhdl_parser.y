@@ -507,6 +507,7 @@ package_declarative_item:
     | variable_declaration
     | file_declaration
     | alias_declaration
+    | component_declaration
     | attribute_declaration
     | attribute_specification
     | use_clause
@@ -1787,6 +1788,56 @@ attribute_declaration:
         $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
+    }
+
+/// Section 6.8
+// generic_clause is expanded because why not, and port_clause is following
+component_declaration:
+    _real_component_declaration ';'
+    | _real_component_declaration identifier ';' {
+        $$ = $1;
+        $$->pieces[3] = $2;
+    }
+
+_real_component_declaration:
+    KW_COMPONENT identifier __maybe_is KW_END KW_COMPONENT {
+        $$ = new VhdlParseTreeNode(PT_COMPONENT_DECLARATION);
+        $$->piece_count = 4;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = nullptr;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = nullptr;
+    }
+    | KW_COMPONENT identifier __maybe_is
+      KW_GENERIC '(' interface_list ')'
+      KW_END KW_COMPONENT {
+        $$ = new VhdlParseTreeNode(PT_COMPONENT_DECLARATION);
+        $$->piece_count = 4;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $6;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = nullptr;
+    }
+    | KW_COMPONENT identifier __maybe_is
+      KW_PORT '(' interface_list ')'
+      KW_END KW_COMPONENT {
+        $$ = new VhdlParseTreeNode(PT_COMPONENT_DECLARATION);
+        $$->piece_count = 4;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = nullptr;
+        $$->pieces[2] = $6;
+        $$->pieces[3] = nullptr;
+    }
+    | KW_COMPONENT identifier __maybe_is
+      KW_GENERIC '(' interface_list ')'
+      KW_PORT '(' interface_list ')'
+      KW_END KW_COMPONENT {
+        $$ = new VhdlParseTreeNode(PT_COMPONENT_DECLARATION);
+        $$->piece_count = 4;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $6;
+        $$->pieces[2] = $10;
+        $$->pieces[3] = nullptr;
     }
 
 /// Section 6.9
