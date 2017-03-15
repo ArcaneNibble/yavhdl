@@ -4136,7 +4136,7 @@ _real_if_generate_statement:
         $$->pieces[0] = $1;
         $$->pieces[1] = $6;
         $$->pieces[2] = $8;
-        $$->pieces[3] = $3;
+        $$->pieces[3] = $4;
         $$->pieces[4] = $9;
         // FIXME: Ugly wtf
         if ($10) {
@@ -4150,7 +4150,33 @@ _real_if_generate_statement:
     }
 
 _if_generate_elsifs:
-    // TODO
+    %empty
+    | _real_if_generate_elsifs
+
+_real_if_generate_elsifs:
+    _if_generate_elsif
+    | _real_if_generate_elsifs _if_generate_elsif {
+        $$ = new VhdlParseTreeNode(PT_IF_GENERATE_ELSIF_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
+
+_if_generate_elsif:
+    KW_ELSIF expression KW_GENERATE generate_statement_body {
+        $$ = new VhdlParseTreeNode(PT_IF_GENERATE_ELSIF);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = nullptr;
+        $$->pieces[2] = $4;
+    }
+    | KW_ELSIF identifier ':' expression KW_GENERATE generate_statement_body {
+        $$ = new VhdlParseTreeNode(PT_IF_GENERATE_ELSIF);
+        $$->piece_count = 3;
+        $$->pieces[0] = $4;
+        $$->pieces[1] = $2;
+        $$->pieces[2] = $6;
+    }
 
 _if_generate_else:
     %empty
