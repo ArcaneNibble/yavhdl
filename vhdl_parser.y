@@ -3773,7 +3773,96 @@ concurrent_selected_signal_assignment:
         $$->pieces[3] = nullptr;
         $$->pieces[4] = $2;
     }
-    // TODO
+    | KW_WITH expression KW_SELECT target delay_mechanism
+      DL_LEQ selected_waveforms {
+        $$ = new VhdlParseTreeNode(PT_CONCURRENT_SELECTED_SIGNAL_ASSIGNMENT);
+        $$->piece_count = 5;
+        $$->boolean = false;
+        $$->boolean2 = false;
+        $$->boolean3 = false;
+        $$->pieces[0] = $4;
+        $$->pieces[1] = $7;
+        $$->pieces[2] = $5;
+        $$->pieces[3] = nullptr;
+        $$->pieces[4] = $2;
+    }
+    | KW_WITH expression KW_SELECT target KW_GUARDED
+      DL_LEQ selected_waveforms {
+        $$ = new VhdlParseTreeNode(PT_CONCURRENT_SELECTED_SIGNAL_ASSIGNMENT);
+        $$->piece_count = 5;
+        $$->boolean = false;
+        $$->boolean2 = true;
+        $$->boolean3 = false;
+        $$->pieces[0] = $4;
+        $$->pieces[1] = $7;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = nullptr;
+        $$->pieces[4] = $2;
+    }
+    | KW_WITH expression KW_SELECT target KW_GUARDED delay_mechanism
+      DL_LEQ selected_waveforms {
+        $$ = new VhdlParseTreeNode(PT_CONCURRENT_SELECTED_SIGNAL_ASSIGNMENT);
+        $$->piece_count = 5;
+        $$->boolean = false;
+        $$->boolean2 = true;
+        $$->boolean3 = false;
+        $$->pieces[0] = $4;
+        $$->pieces[1] = $8;
+        $$->pieces[2] = $6;
+        $$->pieces[3] = nullptr;
+        $$->pieces[4] = $2;
+    }
+    | KW_WITH expression KW_SELECT '?' target DL_LEQ selected_waveforms {
+        $$ = new VhdlParseTreeNode(PT_CONCURRENT_SELECTED_SIGNAL_ASSIGNMENT);
+        $$->piece_count = 5;
+        $$->boolean = false;
+        $$->boolean2 = false;
+        $$->boolean3 = true;
+        $$->pieces[0] = $5;
+        $$->pieces[1] = $7;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = nullptr;
+        $$->pieces[4] = $2;
+    }
+    | KW_WITH expression KW_SELECT '?' target delay_mechanism
+      DL_LEQ selected_waveforms {
+        $$ = new VhdlParseTreeNode(PT_CONCURRENT_SELECTED_SIGNAL_ASSIGNMENT);
+        $$->piece_count = 5;
+        $$->boolean = false;
+        $$->boolean2 = false;
+        $$->boolean3 = true;
+        $$->pieces[0] = $5;
+        $$->pieces[1] = $8;
+        $$->pieces[2] = $6;
+        $$->pieces[3] = nullptr;
+        $$->pieces[4] = $2;
+    }
+    | KW_WITH expression KW_SELECT '?' target KW_GUARDED
+      DL_LEQ selected_waveforms {
+        $$ = new VhdlParseTreeNode(PT_CONCURRENT_SELECTED_SIGNAL_ASSIGNMENT);
+        $$->piece_count = 5;
+        $$->boolean = false;
+        $$->boolean2 = true;
+        $$->boolean3 = true;
+        $$->pieces[0] = $5;
+        $$->pieces[1] = $8;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = nullptr;
+        $$->pieces[4] = $2;
+    }
+    | KW_WITH expression KW_SELECT '?' target KW_GUARDED delay_mechanism
+      DL_LEQ selected_waveforms {
+        $$ = new VhdlParseTreeNode(PT_CONCURRENT_SELECTED_SIGNAL_ASSIGNMENT);
+        $$->piece_count = 5;
+        $$->boolean = false;
+        $$->boolean2 = true;
+        $$->boolean3 = true;
+        $$->pieces[0] = $5;
+        $$->pieces[1] = $9;
+        $$->pieces[2] = $7;
+        $$->pieces[3] = nullptr;
+        $$->pieces[4] = $2;
+    }
 
 /// Section 11.7
 // There is an ambiguity here when you have a bare name, so we are skipping
