@@ -198,6 +198,10 @@ const char *parse_tree_types[] = {
     "PT_PACKAGE_BODY",
 
     "PT_PACKAGE_INSTANTIATION_DECLARATION",
+
+    "PT_INTERFACE_PACKAGE_DECLARATION",
+    "PT_INTERFACE_PACKAGE_GENERIC_MAP_BOX",
+    "PT_INTERFACE_PACKAGE_GENERIC_MAP_DEFAULT",
 };
 
 const char *parse_operators[] = {
@@ -1300,6 +1304,15 @@ void VhdlParseTreeNode::debug_print() {
                 cout << ", \"generic_map\": ";
                 this->pieces[2]->debug_print();
             }
+            break;
+
+        case PT_INTERFACE_PACKAGE_DECLARATION:
+            cout << ", \"identifier\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"uninstantiated_name\": ";
+            this->pieces[1]->debug_print();
+            cout << ", \"generic_map\": ";
+            this->pieces[2]->debug_print();
             break;
 
         case PT_EXPRESSION_LIST:

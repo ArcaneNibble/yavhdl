@@ -1294,7 +1294,7 @@ interface_declaration:
     interface_object_declaration
     | interface_type_declaration
     | interface_subprogram_declaration
-    // TODO
+    | interface_package_declaration
 
 /// Section 6.5.2
 interface_object_declaration:
@@ -1433,9 +1433,10 @@ interface_file_declaration:
 
 /// Section 6.5.3
 interface_type_declaration:
-    incomplete_type_declaration {
-        $$ = $1;
-        $$->type = PT_INTERFACE_TYPE_DECLARATION;
+    KW_TYPE identifier {
+        $$ = new VhdlParseTreeNode(PT_INTERFACE_TYPE_DECLARATION);
+        $$->piece_count = 1;
+        $$->pieces[0] = $2;
     }
 
 /// Section 6.5.4
@@ -1518,6 +1519,26 @@ _real_interface_function_specification:
         $$->pieces[0] = $2;
         $$->pieces[1] = $8;
         $$->pieces[2] = $5;
+    }
+
+/// Section 6.5.5
+interface_package_declaration:
+    KW_PACKAGE identifier
+    KW_IS KW_NEW name interface_package_generic_map_aspect {
+        $$ = new VhdlParseTreeNode(PT_INTERFACE_PACKAGE_DECLARATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $5;
+        $$->pieces[2] = $6;
+    }
+
+interface_package_generic_map_aspect:
+    generic_map_aspect
+    | KW_GENERIC KW_MAP '(' DL_BOX ')' {
+        $$ = new VhdlParseTreeNode(PT_INTERFACE_PACKAGE_GENERIC_MAP_BOX);
+    }
+    | KW_GENERIC KW_MAP '(' KW_DEFAULT ')' {
+        $$ = new VhdlParseTreeNode(PT_INTERFACE_PACKAGE_GENERIC_MAP_DEFAULT);
     }
 
 /// Section 6.5.6
