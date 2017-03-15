@@ -982,6 +982,46 @@ file_type_definition:
 
     }
 
+/// Section 5.6
+protected_type_definition:
+    protected_type_declaration
+    // TODO
+
+/// Section 5.6.2
+protected_type_declaration:
+    _real_protected_type_declaration
+    | _real_protected_type_declaration identifier {
+        $$ = $1;
+        $$->pieces[1] = $2;
+    }
+
+_real_protected_type_declaration:
+    KW_PROTECTED protected_type_declarative_part KW_END KW_PROTECTED {
+        $$ = new VhdlParseTreeNode(PT_PROTECTED_TYPE_DECLARATION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = nullptr;
+    }
+
+protected_type_declarative_part:
+    %empty
+    | _real_protected_type_declarative_part
+
+_real_protected_type_declarative_part:
+    protected_type_declarative_item
+    | _real_protected_type_declarative_part protected_type_declarative_item {
+        $$ = new VhdlParseTreeNode(PT_DECLARATION_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
+
+protected_type_declarative_item:
+    subprogram_declaration
+    | subprogram_instantiation_declaration
+    | attribute_specification
+    | use_clause
+
 /////////////////////////// Declarations, section 6 ///////////////////////////
 
 /// Section 6.2
@@ -1002,7 +1042,7 @@ type_definition:
     | composite_type_definition
     | access_type_definition
     | file_type_definition
-    // TODO
+    | protected_type_definition
 
 /// Section 6.3
 subtype_declaration:

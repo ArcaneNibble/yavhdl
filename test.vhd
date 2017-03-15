@@ -1,6 +1,6 @@
 process
-    procedure p generic(
-        package aaa is new bbb generic map(default)
-    );
+    type t is protected
+        procedure p;
+    end protected u;
 begin
 end process;
