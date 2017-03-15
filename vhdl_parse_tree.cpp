@@ -244,6 +244,9 @@ const char *parse_tree_types[] = {
     "PT_INSTANTIATION_LIST_ALL",
     "PT_COMPONENT_SPECIFICATION",
     "PT_BINDING_INDICATION",
+    "PT_ENTITY_ASPECT_ENTITY",
+    "PT_ENTITY_ASPECT_CONFIGURATION",
+    "PT_ENTITY_ASPECT_OPEN",
 };
 
 const char *parse_operators[] = {
@@ -1627,6 +1630,20 @@ void VhdlParseTreeNode::debug_print() {
                 cout << ", \"port_map\": ";
                 this->pieces[2]->debug_print();
             }
+            break;
+
+        case PT_ENTITY_ASPECT_ENTITY:
+            cout << ", \"name\": ";
+            this->pieces[0]->debug_print();
+            if (this->pieces[1]) {
+                cout << ", \"architecture\": ";
+                this->pieces[1]->debug_print();
+            }
+            break;
+
+        case PT_ENTITY_ASPECT_CONFIGURATION:
+            cout << ", \"configuration\": ";
+            this->pieces[0]->debug_print();
             break;
 
         case PT_EXPRESSION_LIST:

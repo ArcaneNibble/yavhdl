@@ -2074,7 +2074,7 @@ component_specification:
     instantiation_list ':' name {
         $$ = new VhdlParseTreeNode(PT_SIMPLE_CONFIGURATION_SPECIFICATION);
         $$->piece_count = 2;
-        $$->pieces[0] = $2;
+        $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
 
@@ -2088,7 +2088,79 @@ instantiation_list:
     }
 
 binding_indication:
+    %empty {
+        $$ = new VhdlParseTreeNode(PT_BINDING_INDICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = nullptr;
+        $$->pieces[2] = nullptr;
+    }
+    | KW_USE entity_aspect {
+        $$ = new VhdlParseTreeNode(PT_BINDING_INDICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = nullptr;
+        $$->pieces[2] = nullptr;
+    }
+    | generic_map_aspect {
+        $$ = new VhdlParseTreeNode(PT_BINDING_INDICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = $1;
+        $$->pieces[2] = nullptr;
+    }
+    | KW_USE entity_aspect generic_map_aspect {
+        $$ = new VhdlParseTreeNode(PT_BINDING_INDICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = nullptr;
+    }
+    | port_map_aspect {
+        $$ = new VhdlParseTreeNode(PT_BINDING_INDICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = nullptr;
+        $$->pieces[2] = $1;
+    }
+    | KW_USE entity_aspect port_map_aspect {
+        $$ = new VhdlParseTreeNode(PT_BINDING_INDICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = nullptr;
+        $$->pieces[2] = $3;
+    }
+    | generic_map_aspect port_map_aspect {
+        $$ = new VhdlParseTreeNode(PT_BINDING_INDICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = $1;
+        $$->pieces[2] = $2;
+    }
+    | KW_USE entity_aspect generic_map_aspect port_map_aspect {
+        $$ = new VhdlParseTreeNode(PT_BINDING_INDICATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = $4;
+    }
+
+entity_aspect:
+    _entity_aspect_entity
     // TODO
+
+_entity_aspect_entity:
+    KW_ENTITY _simple_or_selected_name {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_ASPECT_ENTITY);
+        $$->piece_count = 1;
+        $$->pieces[0] = $2;
+    }
+    | KW_ENTITY _simple_or_selected_name '(' identifier ')' {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_ASPECT_ENTITY);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+    }
 
 /// Section 7.4
 disconnection_specification:
