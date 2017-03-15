@@ -206,7 +206,7 @@ block_declarative_item:
     | component_declaration
     | attribute_declaration
     | attribute_specification
-    // TODO
+    | configuration_specification
     | disconnection_specification
     | use_clause
     | group_template_declaration
@@ -2049,6 +2049,46 @@ entity_tag:
     identifier
     | character_literal
     | string_literal
+
+/// Section 7.3
+configuration_specification:
+    simple_configuration_specification
+    // TODO
+
+simple_configuration_specification:
+    KW_FOR component_specification binding_indication ';' {
+        $$ = new VhdlParseTreeNode(PT_SIMPLE_CONFIGURATION_SPECIFICATION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $3;
+    }
+    | KW_FOR component_specification binding_indication ';' 
+      KW_END KW_FOR ';' {
+        $$ = new VhdlParseTreeNode(PT_SIMPLE_CONFIGURATION_SPECIFICATION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $3;
+    }
+
+component_specification:
+    instantiation_list ':' name {
+        $$ = new VhdlParseTreeNode(PT_SIMPLE_CONFIGURATION_SPECIFICATION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $3;
+    }
+
+instantiation_list:
+    identifier_list     // was instantiation_label
+    | KW_OTHERS {
+        $$ = new VhdlParseTreeNode(PT_INSTANTIATION_LIST_OTHERS);
+    }
+    | KW_ALL {
+        $$ = new VhdlParseTreeNode(PT_INSTANTIATION_LIST_ALL);
+    }
+
+binding_indication:
+    // TODO
 
 /// Section 7.4
 disconnection_specification:

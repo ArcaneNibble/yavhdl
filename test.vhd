@@ -1,4 +1,3 @@
-l: case zzz generate
-    when a =>
-    when b =>
-end generate l2;
+l: block
+    for a : b;
+begin end block;

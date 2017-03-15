@@ -238,6 +238,12 @@ const char *parse_tree_types[] = {
     "PT_IF_GENERATE_ELSIF_LIST",
     "PT_CASE_GENERATE_ALTERNATIVE",
     "PT_CASE_GENERATE_ALTERNATIVE_LIST",
+
+    "PT_SIMPLE_CONFIGURATION_SPECIFICATION",
+    "PT_INSTANTIATION_LIST_OTHERS",
+    "PT_INSTANTIATION_LIST_ALL",
+    "PT_COMPONENT_SPECIFICATION",
+    "PT_BINDING_INDICATION",
 };
 
 const char *parse_operators[] = {
@@ -1590,6 +1596,35 @@ void VhdlParseTreeNode::debug_print() {
             this->pieces[1]->debug_print();
             if (this->pieces[2]) {
                 cout << ", \"label\": ";
+                this->pieces[2]->debug_print();
+            }
+            break;
+
+        case PT_SIMPLE_CONFIGURATION_SPECIFICATION:
+            cout << ", \"component\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"binding\": ";
+            this->pieces[1]->debug_print();
+            break;
+
+        case PT_COMPONENT_SPECIFICATION:
+            cout << ", \"instantiation_list\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"name\": ";
+            this->pieces[1]->debug_print();
+            break;
+
+        case PT_BINDING_INDICATION:
+            if (this->pieces[0]) {
+                cout << ", \"entity_aspect\": ";
+                this->pieces[0]->debug_print();
+            }
+            if (this->pieces[1]) {
+                cout << ", \"generic_map\": ";
+                this->pieces[1]->debug_print();
+            }
+            if (this->pieces[2]) {
+                cout << ", \"port_map\": ";
                 this->pieces[2]->debug_print();
             }
             break;
