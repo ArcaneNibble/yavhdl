@@ -1,1 +1,1 @@
-postponed a <= guarded transport b;
+postponed with asdf select a <= b when c, d when e;

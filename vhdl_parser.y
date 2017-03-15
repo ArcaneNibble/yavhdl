@@ -3669,7 +3669,8 @@ concurrent_signal_assignment_statement:
 
 _real_concurrent_signal_assignment_statement:
     concurrent_simple_signal_assignment
-    // TODO
+    | concurrent_conditional_signal_assignment
+    | concurrent_selected_signal_assignment
 
 concurrent_simple_signal_assignment:
     target DL_LEQ waveform {
@@ -3712,6 +3713,67 @@ concurrent_simple_signal_assignment:
         $$->pieces[2] = $4;
         $$->pieces[3] = nullptr;
     }
+
+concurrent_conditional_signal_assignment:
+    target DL_LEQ conditional_waveforms {
+        $$ = new VhdlParseTreeNode(
+            PT_CONCURRENT_CONDITIONAL_SIGNAL_ASSIGNMENT);
+        $$->piece_count = 4;
+        $$->boolean = false;
+        $$->boolean2 = false;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = nullptr;
+    }
+    | target DL_LEQ delay_mechanism conditional_waveforms {
+        $$ = new VhdlParseTreeNode(
+            PT_CONCURRENT_CONDITIONAL_SIGNAL_ASSIGNMENT);
+        $$->piece_count = 4;
+        $$->boolean = false;
+        $$->boolean2 = false;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $3;
+        $$->pieces[3] = nullptr;
+    }
+    | target DL_LEQ KW_GUARDED conditional_waveforms {
+        $$ = new VhdlParseTreeNode(
+            PT_CONCURRENT_CONDITIONAL_SIGNAL_ASSIGNMENT);
+        $$->piece_count = 4;
+        $$->boolean = false;
+        $$->boolean2 = true;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = nullptr;
+    }
+    | target DL_LEQ KW_GUARDED delay_mechanism conditional_waveforms {
+        $$ = new VhdlParseTreeNode(
+            PT_CONCURRENT_CONDITIONAL_SIGNAL_ASSIGNMENT);
+        $$->piece_count = 4;
+        $$->boolean = false;
+        $$->boolean2 = true;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $5;
+        $$->pieces[2] = $4;
+        $$->pieces[3] = nullptr;
+    }
+
+concurrent_selected_signal_assignment:
+    KW_WITH expression KW_SELECT target DL_LEQ selected_waveforms {
+        $$ = new VhdlParseTreeNode(PT_CONCURRENT_SELECTED_SIGNAL_ASSIGNMENT);
+        $$->piece_count = 5;
+        $$->boolean = false;
+        $$->boolean2 = false;
+        $$->boolean3 = false;
+        $$->pieces[0] = $4;
+        $$->pieces[1] = $6;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = nullptr;
+        $$->pieces[4] = $2;
+    }
+    // TODO
 
 /// Section 11.7
 // There is an ambiguity here when you have a bare name, so we are skipping
