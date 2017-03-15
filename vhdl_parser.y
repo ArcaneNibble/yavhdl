@@ -901,8 +901,6 @@ _allocator_subtype_indication:
     }
 
 // Does not have a bare name because that's ambiguous.
-// FIXME: This causes a reduce/reduce conflict. I believe it is due to
-// the need for too much lookahead to make this work.
 _association_list_subtype_indication:
     resolution_indication _simple_or_selected_name {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
@@ -938,14 +936,22 @@ _association_list_subtype_indication:
 resolution_indication:
     // The following two are for function names
     function_name
-    | '(' element_resolution ')' {
+    | _parens_element_resolution
+
+// Folding in the element_resolution eliminates a reduce/reduce conflict.
+_parens_element_resolution:
+    '(' function_name ')' {
         // FIXME: Do I need to store more information here?
         $$ = $2;
     }
-
-element_resolution:
-    resolution_indication   // was array_element_resolution
-    | record_resolution
+    | '(' _parens_element_resolution ')' {
+        // FIXME: Do I need to store more information here?
+        $$ = $2;
+    }
+    | '(' record_resolution ')' {
+        // FIXME: Do I need to store more information here?
+        $$ = $2;
+    }
 
 record_resolution:
     record_element_resolution
