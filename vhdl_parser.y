@@ -346,6 +346,7 @@ subprogram_declarative_item:
     subprogram_declaration
     | subprogram_body
     | subprogram_instantiation_declaration
+    | package_declaration
     | type_declaration
     | subtype_declaration
     | constant_declaration
@@ -439,6 +440,76 @@ _one_or_more_ids:
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
+
+/// Section 4.7
+package_declaration:
+    _real_package_declaration ';'
+    | _real_package_declaration KW_PACKAGE ';'
+    | _real_package_declaration identifier ';' {
+        $$ = $1;
+        $$->pieces[3] = $2;
+    }
+    | _real_package_declaration KW_PACKAGE identifier ';' {
+        $$ = $1;
+        $$->pieces[3] = $3;
+    }
+
+_real_package_declaration:
+    KW_PACKAGE identifier KW_IS
+    package_header package_declarative_part KW_END {
+        $$ = new VhdlParseTreeNode(PT_PACKAGE_DECLARATION);
+        $$->piece_count = 4;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $5;
+        $$->pieces[3] = nullptr;
+    }
+
+package_header:
+    %empty
+    // generic_clause got folded in because why not
+    | KW_GENERIC '(' interface_list ')' ';' {
+        $$ = new VhdlParseTreeNode(PT_PACKAGE_HEADER);
+        $$->piece_count = 2;
+        $$->pieces[0] = $3;
+        $$->pieces[1] = nullptr;
+    }
+    | KW_GENERIC '(' interface_list ')' ';' generic_map_aspect ';' {
+        $$ = new VhdlParseTreeNode(PT_PACKAGE_HEADER);
+        $$->piece_count = 2;
+        $$->pieces[0] = $3;
+        $$->pieces[1] = $6;
+    }
+
+package_declarative_part:
+    %empty
+    | _real_package_declarative_part
+
+_real_package_declarative_part:
+    package_declarative_item
+    | _real_package_declarative_part package_declarative_item {
+        $$ = new VhdlParseTreeNode(PT_DECLARATION_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
+
+package_declarative_item:
+    subprogram_declaration
+    | subprogram_instantiation_declaration
+    | package_declaration
+    | type_declaration
+    | subtype_declaration
+    | constant_declaration
+    | variable_declaration
+    | file_declaration
+    | alias_declaration
+    | attribute_declaration
+    | attribute_specification
+    | use_clause
+    | group_template_declaration
+    | group_declaration
+    // TODO
 
 ////////////////////////////// Types, section 5 //////////////////////////////
 
@@ -3187,6 +3258,7 @@ process_declarative_item:
     subprogram_declaration
     | subprogram_body
     | subprogram_instantiation_declaration
+    | package_declaration
     | type_declaration
     | subtype_declaration
     | constant_declaration

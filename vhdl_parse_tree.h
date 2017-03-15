@@ -192,6 +192,9 @@ enum ParseTreeNodeType
 
     PT_GROUP_DECLARATION,
     PT_GROUP_CONSTITUENT_LIST,
+
+    PT_PACKAGE_DECLARATION,
+    PT_PACKAGE_HEADER,
 };
 
 // Operators, section 9.2

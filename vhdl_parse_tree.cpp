@@ -188,6 +188,9 @@ const char *parse_tree_types[] = {
 
     "PT_GROUP_DECLARATION",
     "PT_GROUP_CONSTITUENT_LIST",
+
+    "PT_PACKAGE_DECLARATION",
+    "PT_PACKAGE_HEADER",
 };
 
 const char *parse_operators[] = {
@@ -1030,6 +1033,7 @@ void VhdlParseTreeNode::debug_print() {
             break;
 
         case PT_SUBPROGRAM_HEADER:
+        case PT_PACKAGE_HEADER:
             if (this->pieces[0]) {
                 cout << ", \"generic\": ";
                 this->pieces[0]->debug_print();
@@ -1219,6 +1223,23 @@ void VhdlParseTreeNode::debug_print() {
             this->pieces[1]->debug_print();
             cout << ", \"constituent\": ";
             this->pieces[2]->debug_print();
+            break;
+
+        case PT_PACKAGE_DECLARATION:
+            cout << ", \"identifier\": ";
+            this->pieces[0]->debug_print();
+            if (this->pieces[1]) {
+                cout << ", \"header\": ";
+                this->pieces[1]->debug_print();
+            }
+            if (this->pieces[2]) {
+                cout << ", \"declarations\": ";
+                this->pieces[2]->debug_print();
+            }
+            if (this->pieces[3]) {
+                cout << ", \"end_label\": ";
+                this->pieces[3]->debug_print();
+            }
             break;
 
         case PT_EXPRESSION_LIST:
