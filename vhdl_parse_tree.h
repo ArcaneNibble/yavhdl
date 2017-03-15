@@ -195,6 +195,9 @@ enum ParseTreeNodeType
 
     PT_PACKAGE_DECLARATION,
     PT_PACKAGE_HEADER,
+
+    PT_SIGNAL_DECLARATION,
+    PT_SIGNAL_KIND,
 };
 
 // Operators, section 9.2
@@ -297,6 +300,13 @@ enum ParseTreeEntityClass
     ENTITY_SEQUENCE,
 };
 
+enum ParseTreeSignalKind
+{
+    SIGKIND_UNSPEC,
+    SIGKIND_REGISTER,
+    SIGKIND_BUS,
+};
+
 // Definition of a parse tree node
 #define NUM_FIXED_PIECES 8
 
@@ -319,6 +329,7 @@ struct VhdlParseTreeNode {
     ParseTreeInterfaceObjectMode interface_mode;
     ParseTreeSubprogramKind subprogram_kind;
     ParseTreeEntityClass entity_class;
+    ParseTreeSignalKind signal_kind;
 
     VhdlParseTreeNode(enum ParseTreeNodeType type);
     ~VhdlParseTreeNode();

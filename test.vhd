@@ -1,9 +1,10 @@
 process
-    package test is generic(xxx:yyy); generic map (aaa => bbb); 
-        package aaa is end;
-        package bbb is end package;
-        package ccc is end ddd;
-        package eee is end package fff;
+    package test is
+        signal aaa : bbb;
+        signal ccc : ddd := eee;
+        signal fff : ggg register;
+        signal hhh : iii bus;
+        signal jjj : kkk bus := lll;
     end;
 begin
 end process;

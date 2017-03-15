@@ -501,6 +501,7 @@ package_declarative_item:
     | type_declaration
     | subtype_declaration
     | constant_declaration
+    | signal_declaration
     | variable_declaration
     | file_declaration
     | alias_declaration
@@ -1111,6 +1112,53 @@ constant_declaration:
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = $6;
+    }
+
+/// Section 6.4.2.3
+signal_declaration:
+    KW_SIGNAL identifier_list ':' subtype_indication ';' {
+        $$ = new VhdlParseTreeNode(PT_SIGNAL_DECLARATION);
+        $$->piece_count = 4;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = nullptr;
+    }
+    | KW_SIGNAL identifier_list ':' subtype_indication
+      DL_ASS expression ';' {
+        $$ = new VhdlParseTreeNode(PT_SIGNAL_DECLARATION);
+        $$->piece_count = 4;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = $6;
+    }
+    | KW_SIGNAL identifier_list ':' subtype_indication signal_kind ';' {
+        $$ = new VhdlParseTreeNode(PT_SIGNAL_DECLARATION);
+        $$->piece_count = 4;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $5;
+        $$->pieces[3] = nullptr;
+    }
+    | KW_SIGNAL identifier_list ':' subtype_indication signal_kind
+      DL_ASS expression ';' {
+        $$ = new VhdlParseTreeNode(PT_SIGNAL_DECLARATION);
+        $$->piece_count = 4;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $5;
+        $$->pieces[3] = $7;
+    }
+
+signal_kind:
+    KW_REGISTER {
+        $$ = new VhdlParseTreeNode(PT_SIGNAL_KIND);
+        $$->signal_kind = SIGKIND_REGISTER;
+    }
+    | KW_BUS {
+        $$ = new VhdlParseTreeNode(PT_SIGNAL_KIND);
+        $$->signal_kind = SIGKIND_BUS;
     }
 
 /// Section 6.4.2.4

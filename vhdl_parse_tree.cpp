@@ -191,6 +191,9 @@ const char *parse_tree_types[] = {
 
     "PT_PACKAGE_DECLARATION",
     "PT_PACKAGE_HEADER",
+
+    "PT_SIGNAL_DECLARATION",
+    "PT_SIGNAL_KIND",
 };
 
 const char *parse_operators[] = {
@@ -283,6 +286,12 @@ const char *entity_classes[] = {
     "file",
     "property",
     "sequence",
+};
+
+const char *signal_kinds[] = {
+    nullptr,
+    "register",
+    "bus",
 };
 
 // Escape values for JSON output
@@ -1239,6 +1248,29 @@ void VhdlParseTreeNode::debug_print() {
             if (this->pieces[3]) {
                 cout << ", \"end_label\": ";
                 this->pieces[3]->debug_print();
+            }
+            break;
+
+        case PT_SIGNAL_DECLARATION:
+            cout << ", \"identifiers\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"subtype\": ";
+            this->pieces[1]->debug_print();
+            if (this->pieces[2]) {
+                cout << ", \"kind\": ";
+                this->pieces[2]->debug_print();
+            }
+            if (this->pieces[3]) {
+                cout << ", \"expression\": ";
+                this->pieces[3]->debug_print();
+            }
+            break;
+
+        case PT_SIGNAL_KIND:
+            if (this->signal_kind != SIGKIND_UNSPEC) {
+                cout << ", \"kind\": \"";
+                cout << signal_kinds[this->signal_kind];
+                cout << "\"";
             }
             break;
 
