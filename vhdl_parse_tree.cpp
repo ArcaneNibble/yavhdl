@@ -260,6 +260,11 @@ const char *parse_tree_types[] = {
     "PT_CONTEXT_CLAUSE",
 
     "PT_CONFIGURATION_DECLARATION",
+
+    "PT_BLOCK_CONFIGURATION",
+    "PT_USE_CLAUSE_LIST",
+    "PT_CONFIGURATION_ITEM_LIST",
+    "PT_BLOCK_SPECIFICATION",
 };
 
 const char *parse_operators[] = {
@@ -1753,6 +1758,28 @@ void VhdlParseTreeNode::debug_print() {
             }
             break;
 
+        case PT_BLOCK_CONFIGURATION:
+            cout << ", \"specification\": ";
+            this->pieces[0]->debug_print();
+            if (this->pieces[1]) {
+                cout << ", \"use_clauses\": ";
+                this->pieces[1]->debug_print();
+            }
+            if (this->pieces[2]) {
+                cout << ", \"configuration_items\": ";
+                this->pieces[2]->debug_print();
+            }
+            break;
+
+        case PT_BLOCK_SPECIFICATION:
+            cout << ", \"name\": ";
+            this->pieces[0]->debug_print();
+            if (this->pieces[1]) {
+                cout << ", \"generate_specification\": ";
+                this->pieces[1]->debug_print();
+            }
+            break;
+
         case PT_EXPRESSION_LIST:
         case PT_ID_LIST:
         case PT_RECORD_RESOLUTION:
@@ -1787,6 +1814,8 @@ void VhdlParseTreeNode::debug_print() {
         case PT_CASE_GENERATE_ALTERNATIVE_LIST:
         case PT_VERIFICATION_UNIT_BINDING_INDICATION_LIST:
         case PT_CONTEXT_CLAUSE:
+        case PT_USE_CLAUSE_LIST:
+        case PT_CONFIGURATION_ITEM_LIST:
             if (this->pieces[0]) {
                 cout << ", \"rest\": ";
                 this->pieces[0]->debug_print();

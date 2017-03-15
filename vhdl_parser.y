@@ -330,7 +330,7 @@ block_declarative_item:
     | group_template_declaration
     | group_declaration
 
-/// Section 3.4
+/// Section 3.4.1
 configuration_declaration:
     _real_configuration_declaration ';'
     | _real_configuration_declaration KW_CONFIGURATION ';'
@@ -347,15 +347,14 @@ _real_configuration_declaration:
     KW_CONFIGURATION identifier KW_OF _simple_or_selected_name KW_IS
     configuration_declarative_part
     _zero_or_more_verification_unit_binding_indications
-    // TODO
-    KW_END {
+    block_configuration KW_END {
         $$ = new VhdlParseTreeNode(PT_CONFIGURATION_DECLARATION);
         $$->piece_count = 6;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = $6;
         $$->pieces[3] = $7;
-        $$->pieces[4] = nullptr;
+        $$->pieces[4] = $8;
         $$->pieces[5] = nullptr;
     }
 
@@ -380,6 +379,65 @@ configuration_declarative_item:
     use_clause
     | attribute_specification
     | group_declaration
+
+/// Section 3.4.2
+block_configuration:
+    KW_FOR block_specification _zero_or_more_use_clauses
+    _zero_or_more_configuration_items KW_END KW_FOR ';' {
+        $$ = new VhdlParseTreeNode(PT_BLOCK_CONFIGURATION);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = $4;
+    }
+
+block_specification:
+    _simple_or_selected_name {
+        $$ = new VhdlParseTreeNode(PT_BLOCK_SPECIFICATION);
+        $$->piece_count = 1;
+        $$->pieces[0] = $1;
+    }
+    | _simple_or_selected_name '(' generate_specification ')' {
+        $$ = new VhdlParseTreeNode(PT_BLOCK_SPECIFICATION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+generate_specification:
+    _almost_discrete_range
+    | expression
+    // label is included in expression
+
+configuration_item:
+    block_configuration
+    // TODO
+
+_zero_or_more_use_clauses:
+    %empty
+    | _one_or_more_use_clauses
+
+_one_or_more_use_clauses:
+    use_clause
+    | _one_or_more_use_clauses use_clause {
+        $$ = new VhdlParseTreeNode(PT_USE_CLAUSE_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
+
+_zero_or_more_configuration_items:
+    %empty
+    | _one_or_more_configuration_items
+
+_one_or_more_configuration_items:
+    configuration_item
+    | _one_or_more_configuration_items configuration_item {
+        $$ = new VhdlParseTreeNode(PT_CONFIGURATION_ITEM_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
 
 ///////////////////// Subprograms and packages, section 4 /////////////////////
 
