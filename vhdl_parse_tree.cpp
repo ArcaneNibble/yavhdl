@@ -187,7 +187,6 @@ const char *parse_tree_types[] = {
     "PT_ENTITY_CLASS_ENTRY",
 
     "PT_GROUP_DECLARATION",
-    "PT_GROUP_CONSTITUENT_LIST",
 
     "PT_PACKAGE_DECLARATION",
     "PT_PACKAGE_HEADER",
@@ -207,6 +206,11 @@ const char *parse_tree_types[] = {
     "PT_PROTECTED_TYPE_BODY",
 
     "PT_COMPONENT_DECLARATION",
+
+    "PT_DISCONNECTION_SPECIFICATION",
+    "PT_GUARDED_SIGNAL_SPECIFICATION",
+    "PT_SIGNAL_LIST_OTHERS",
+    "PT_SIGNAL_LIST_ALL",
 };
 
 const char *parse_operators[] = {
@@ -1349,6 +1353,20 @@ void VhdlParseTreeNode::debug_print() {
             }
             break;
 
+        case PT_DISCONNECTION_SPECIFICATION:
+            cout << ", \"signal_specification\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"time\": ";
+            this->pieces[1]->debug_print();
+            break;
+
+        case PT_GUARDED_SIGNAL_SPECIFICATION:
+            cout << ", \"signal_list\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"type_mark\": ";
+            this->pieces[1]->debug_print();
+            break;
+
         case PT_EXPRESSION_LIST:
         case PT_ID_LIST:
         case PT_RECORD_RESOLUTION:
@@ -1378,7 +1396,6 @@ void VhdlParseTreeNode::debug_print() {
         case PT_SELECTED_NAME_LIST:
         case PT_ENTITY_NAME_LIST:
         case PT_ENTITY_CLASS_ENTRY_LIST:
-        case PT_GROUP_CONSTITUENT_LIST:
             if (this->pieces[0]) {
                 cout << ", \"rest\": ";
                 this->pieces[0]->debug_print();

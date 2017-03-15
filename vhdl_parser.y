@@ -510,10 +510,10 @@ package_declarative_item:
     | component_declaration
     | attribute_declaration
     | attribute_specification
+    | disconnection_specification
     | use_clause
     | group_template_declaration
     | group_declaration
-    // TODO
 
 /// Section 4.8
 package_body:
@@ -1875,7 +1875,7 @@ entity_class_entry:
 /// Section 6.10
 group_declaration:
     KW_GROUP identifier ':' _simple_or_selected_name
-    '(' group_constituent_list ')' ';' {
+    '(' _list_of_names ')' ';' {
         $$ = new VhdlParseTreeNode(PT_GROUP_DECLARATION);
         $$->piece_count = 3;
         $$->pieces[0] = $2;
@@ -1883,17 +1883,9 @@ group_declaration:
         $$->pieces[2] = $6;
     }
 
-group_constituent_list:
-    name
-    | group_constituent_list ',' name {
-        $$ = new VhdlParseTreeNode(PT_GROUP_CONSTITUENT_LIST);
-        $$->piece_count = 2;
-        $$->pieces[0] = $1;
-        $$->pieces[1] = $3;
-    }
-
 ////////////////////////// Specifications, section 7 //////////////////////////
 
+/// Section 7.2
 attribute_specification:
     KW_ATTRIBUTE identifier KW_OF entity_specification KW_IS expression ';' {
         $$ = new VhdlParseTreeNode(PT_ATTRIBUTE_SPECIFICATION);
@@ -2024,6 +2016,32 @@ entity_tag:
     identifier
     | character_literal
     | string_literal
+
+/// Section 7.4
+disconnection_specification:
+    KW_DISCONNECT guarded_signal_specification KW_AFTER expression ';' {
+        $$ = new VhdlParseTreeNode(PT_DISCONNECTION_SPECIFICATION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+    }
+
+guarded_signal_specification:
+    signal_list ':' _simple_or_selected_name {
+        $$ = new VhdlParseTreeNode(PT_GUARDED_SIGNAL_SPECIFICATION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+signal_list:
+    _list_of_names
+    | KW_OTHERS {
+        $$ = new VhdlParseTreeNode(PT_SIGNAL_LIST_OTHERS);
+    }
+    | KW_ALL {
+        $$ = new VhdlParseTreeNode(PT_SIGNAL_LIST_ALL);
+    }
 
 ////////////////////////////// Names, section 8 //////////////////////////////
 
