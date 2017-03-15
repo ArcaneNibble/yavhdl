@@ -160,6 +160,7 @@ const char *parse_tree_types[] = {
     "PT_INTERFACE_SUBPROGRAM_DEFAULT_BOX",
 
     "PT_GENERIC_MAP_ASPECT",
+    "PT_PORT_MAP_ASPECT",
     "PT_ASSOCIATION_LIST",
     "PT_ASSOCIATION_ELEMENT",
     "PT_INERTIAL_EXPRESSION",
@@ -214,6 +215,11 @@ const char *parse_tree_types[] = {
 
     "PT_CONCURRENT_PROCEDURE_CALL",
     "PT_CONCURRENT_ASSERTION_STATEMENT",
+
+    "PT_COMPONENT_INSTANTIATION",
+    "PT_INSTANTIATED_UNIT_COMPONENT",
+    "PT_INSTANTIATED_UNIT_ENTITY",
+    "PT_INSTANTIATED_UNIT_CONFIGURATION",
 };
 
 const char *parse_operators[] = {
@@ -1136,6 +1142,7 @@ void VhdlParseTreeNode::debug_print() {
             break;
 
         case PT_GENERIC_MAP_ASPECT:
+        case PT_PORT_MAP_ASPECT:
             cout << ", \"association_list\": ";
             this->pieces[0]->debug_print();
             break;
@@ -1380,6 +1387,32 @@ void VhdlParseTreeNode::debug_print() {
             }
             cout << ", \"postponed\": ";
             cout << (this->boolean ? "true" : "false");
+            break;
+
+        case PT_COMPONENT_INSTANTIATION:
+            cout << ", \"label\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"instantiated_unit\": ";
+            this->pieces[1]->debug_print();
+            if (this->pieces[2]) {
+                cout << ", \"generic_map\": ";
+                this->pieces[2]->debug_print();
+            }
+            if (this->pieces[3]) {
+                cout << ", \"port_map\": ";
+                this->pieces[3]->debug_print();
+            }
+            break;
+
+        case PT_INSTANTIATED_UNIT_ENTITY:
+            if (this->pieces[1]) {
+                cout << ", \"architecture\": ";
+                this->pieces[1]->debug_print();
+            }
+        case PT_INSTANTIATED_UNIT_COMPONENT:
+        case PT_INSTANTIATED_UNIT_CONFIGURATION:
+            cout << ", \"name\": ";
+            this->pieces[0]->debug_print();
             break;
 
         case PT_EXPRESSION_LIST:

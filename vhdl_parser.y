@@ -1740,6 +1740,13 @@ generic_map_aspect:
         $$->pieces[0] = $4;
     }
 
+port_map_aspect:
+    KW_PORT KW_MAP '(' association_list ')' {
+        $$ = new VhdlParseTreeNode(PT_PORT_MAP_ASPECT);
+        $$->piece_count = 1;
+        $$->pieces[0] = $4;
+    }
+
 /// Section 6.6
 alias_declaration:
     KW_ALIAS alias_designator KW_IS name ';' {
@@ -3485,6 +3492,7 @@ concurrent_statement:
     process_statement
     | concurrent_procedure_call_statement
     | concurrent_assertion_statement
+    | component_instantiation_statement
     // TODO
 
 /// Section 11.3
@@ -3638,6 +3646,62 @@ _real_concurrent_assertion_statement:
         $$->boolean = true;
         $$->pieces[0] = $2;
         $$->pieces[1] = nullptr;
+    }
+
+/// Section 11.7
+// There is an ambiguity here when you have a bare name, so we are skipping
+// that. That will unfortunately parse into a procedure call.
+component_instantiation_statement:
+    identifier ':' _definitely_instantiated_unit ';' {
+        $$ = new VhdlParseTreeNode(PT_COMPONENT_INSTANTIATION);
+        $$->piece_count = 4;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = nullptr;
+    }
+    | identifier ':' instantiated_unit generic_map_aspect ';' {
+        $$ = new VhdlParseTreeNode(PT_COMPONENT_INSTANTIATION);
+        $$->piece_count = 4;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = $4;
+        $$->pieces[3] = nullptr;
+    }
+    | identifier ':' instantiated_unit port_map_aspect ';' {
+        $$ = new VhdlParseTreeNode(PT_COMPONENT_INSTANTIATION);
+        $$->piece_count = 4;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = $4;
+    }
+    | identifier ':' instantiated_unit generic_map_aspect port_map_aspect ';' {
+        $$ = new VhdlParseTreeNode(PT_COMPONENT_INSTANTIATION);
+        $$->piece_count = 4;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = $4;
+        $$->pieces[3] = $5;
+    }
+
+instantiated_unit:
+    _definitely_instantiated_unit
+    | name {
+        $$ = new VhdlParseTreeNode(PT_INSTANTIATED_UNIT_COMPONENT);
+        $$->piece_count = 1;
+        $$->pieces[0] = $1;
+    }
+
+_definitely_instantiated_unit:
+    _component_instantiated_unit
+    // TODO
+
+_component_instantiated_unit:
+    KW_COMPONENT name {
+        $$ = new VhdlParseTreeNode(PT_INSTANTIATED_UNIT_COMPONENT);
+        $$->piece_count = 1;
+        $$->pieces[0] = $2;
     }
 
 ////////////////////// Scope and visibility, section 12 //////////////////////

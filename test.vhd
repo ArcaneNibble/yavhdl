@@ -1,1 +1,1 @@
-mylabel: postponed assert asdf(fdsa, aaa => bbb);
+mylabel: component foo;
