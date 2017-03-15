@@ -198,6 +198,8 @@ enum ParseTreeNodeType
 
     PT_SIGNAL_DECLARATION,
     PT_SIGNAL_KIND,
+
+    PT_PACKAGE_BODY,
 };
 
 // Operators, section 9.2

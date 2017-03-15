@@ -194,6 +194,8 @@ const char *parse_tree_types[] = {
 
     "PT_SIGNAL_DECLARATION",
     "PT_SIGNAL_KIND",
+
+    "PT_PACKAGE_BODY",
 };
 
 const char *parse_operators[] = {
@@ -1271,6 +1273,19 @@ void VhdlParseTreeNode::debug_print() {
                 cout << ", \"kind\": \"";
                 cout << signal_kinds[this->signal_kind];
                 cout << "\"";
+            }
+            break;
+
+        case PT_PACKAGE_BODY:
+            cout << ", \"identifier\": ";
+            this->pieces[0]->debug_print();
+            if (this->pieces[1]) {
+                cout << ", \"declarations\": ";
+                this->pieces[1]->debug_print();
+            }
+            if (this->pieces[2]) {
+                cout << ", \"end_label\": ";
+                this->pieces[2]->debug_print();
             }
             break;
 

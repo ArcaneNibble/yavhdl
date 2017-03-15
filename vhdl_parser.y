@@ -347,6 +347,7 @@ subprogram_declarative_item:
     | subprogram_body
     | subprogram_instantiation_declaration
     | package_declaration
+    | package_body
     | type_declaration
     | subtype_declaration
     | constant_declaration
@@ -502,6 +503,60 @@ package_declarative_item:
     | subtype_declaration
     | constant_declaration
     | signal_declaration
+    | variable_declaration
+    | file_declaration
+    | alias_declaration
+    | attribute_declaration
+    | attribute_specification
+    | use_clause
+    | group_template_declaration
+    | group_declaration
+    // TODO
+
+/// Section 4.8
+package_body:
+    _real_package_body ';'
+    | _real_package_body KW_PACKAGE KW_BODY ';'
+    | _real_package_body identifier ';' {
+        $$ = $1;
+        $$->pieces[2] = $2;
+    }
+    | _real_package_body KW_PACKAGE KW_BODY identifier ';' {
+        $$ = $1;
+        $$->pieces[2] = $4;
+    }
+
+_real_package_body:
+    KW_PACKAGE KW_BODY identifier KW_IS package_body_declarative_part KW_END {
+        $$ = new VhdlParseTreeNode(PT_PACKAGE_BODY);
+        $$->piece_count = 3;
+        $$->pieces[0] = $3;
+        $$->pieces[1] = $5;
+        $$->pieces[2] = nullptr;
+    }
+
+package_body_declarative_part:
+    %empty
+    | _real_package_body_declarative_part
+
+_real_package_body_declarative_part:
+    package_body_declarative_item
+    | _real_package_body_declarative_part package_body_declarative_item {
+        $$ = new VhdlParseTreeNode(PT_DECLARATION_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
+
+package_body_declarative_item:
+    subprogram_declaration
+    | subprogram_body
+    | subprogram_instantiation_declaration
+    | package_declaration
+    | package_body
+    | type_declaration
+    | subtype_declaration
+    | constant_declaration
     | variable_declaration
     | file_declaration
     | alias_declaration
@@ -3307,6 +3362,7 @@ process_declarative_item:
     | subprogram_body
     | subprogram_instantiation_declaration
     | package_declaration
+    | package_body
     | type_declaration
     | subtype_declaration
     | constant_declaration
