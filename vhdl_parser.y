@@ -355,6 +355,7 @@ subprogram_declarative_item:
     | attribute_declaration
     | attribute_specification
     | use_clause
+    | group_template_declaration
     // TODO
 
 /// Section 4.4
@@ -1483,6 +1484,38 @@ attribute_declaration:
         $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
+    }
+
+/// Section 6.9
+group_template_declaration:
+    KW_GROUP identifier KW_IS '(' entity_class_entry_list ')' ';' {
+        $$ = new VhdlParseTreeNode(PT_GROUP_TEMPLATE_DECLARATION);
+        $$->piece_count = 2;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $5;
+    }
+
+entity_class_entry_list:
+    entity_class_entry
+    | entity_class_entry_list ',' entity_class_entry {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_CLASS_ENTRY_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+entity_class_entry:
+    entity_class {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_CLASS_ENTRY);
+        $$->piece_count = 1;
+        $$->boolean = false;
+        $$->pieces[0] = $1;
+    }
+    | entity_class DL_BOX {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_CLASS_ENTRY);
+        $$->piece_count = 1;
+        $$->boolean = true;
+        $$->pieces[0] = $1;
     }
 
 ////////////////////////// Specifications, section 7 //////////////////////////
@@ -3142,6 +3175,7 @@ process_declarative_item:
     | attribute_declaration
     | attribute_specification
     | use_clause
+    | group_template_declaration
     // TODO
 
 ////////////////////// Scope and visibility, section 12 //////////////////////

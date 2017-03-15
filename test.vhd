@@ -1,4 +1,8 @@
 process
-    attribute aaa of bbb [], ccc, "ddd", 'e' [fff, ggg return hhh]: property is zzz;
+    group aaa is (signal);
+    group bbb is (signal, label);
+    group ccc is (signal<>);
+    group ccc is (signal<>, label);
+    group ccc is (signal<>, label<>);
 begin
 end process;

@@ -181,6 +181,10 @@ const char *parse_tree_types[] = {
     "PT_ENTITY_NAME_LIST_OTHERS",
     "PT_ENTITY_NAME_LIST_ALL",
     "PT_ENTITY_DESIGNATOR",
+
+    "PT_GROUP_TEMPLATE_DECLARATION",
+    "PT_ENTITY_CLASS_ENTRY_LIST",
+    "PT_ENTITY_CLASS_ENTRY",
 };
 
 const char *parse_operators[] = {
@@ -1191,6 +1195,20 @@ void VhdlParseTreeNode::debug_print() {
             }
             break;
 
+        case PT_GROUP_TEMPLATE_DECLARATION:
+            cout << ", \"identifier\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"entity_class_entry_list\": ";
+            this->pieces[1]->debug_print();
+            break;
+
+        case PT_ENTITY_CLASS_ENTRY:
+            cout << ", \"designator\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"has_box\": ";
+            cout << (this->boolean ? "true" : "false");
+            break;
+
         case PT_EXPRESSION_LIST:
         case PT_ID_LIST:
         case PT_RECORD_RESOLUTION:
@@ -1219,6 +1237,7 @@ void VhdlParseTreeNode::debug_print() {
         case PT_ASSOCIATION_LIST:
         case PT_SELECTED_NAME_LIST:
         case PT_ENTITY_NAME_LIST:
+        case PT_ENTITY_CLASS_ENTRY_LIST:
             if (this->pieces[0]) {
                 cout << ", \"rest\": ";
                 this->pieces[0]->debug_print();
