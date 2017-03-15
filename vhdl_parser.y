@@ -2761,7 +2761,11 @@ timeout_clause:
     }
 
 /// Section 10.3
+// Label and semicolon factored out
 assertion_statement:
+    assertion
+
+assertion:
     KW_ASSERT expression {
         $$ = new VhdlParseTreeNode(PT_ASSERTION_STATEMENT);
         $$->piece_count = 3;
@@ -3480,6 +3484,7 @@ null_statement:
 concurrent_statement:
     process_statement
     | concurrent_procedure_call_statement
+    | concurrent_assertion_statement
     // TODO
 
 /// Section 11.3
@@ -3605,6 +3610,30 @@ _real_concurrent_procedure_call_statement:
     }
     | KW_POSTPONED procedure_call {
         $$ = new VhdlParseTreeNode(PT_CONCURRENT_PROCEDURE_CALL);
+        $$->piece_count = 2;
+        $$->boolean = true;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = nullptr;
+    }
+
+/// Section 11.5
+concurrent_assertion_statement:
+    _real_concurrent_assertion_statement ';'
+    | identifier ':' _real_concurrent_assertion_statement ';' {
+        $$ = $3;
+        $$->pieces[1] = $1;
+    }
+
+_real_concurrent_assertion_statement:
+    assertion {
+        $$ = new VhdlParseTreeNode(PT_CONCURRENT_ASSERTION_STATEMENT);
+        $$->piece_count = 2;
+        $$->boolean = false;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = nullptr;
+    }
+    | KW_POSTPONED assertion {
+        $$ = new VhdlParseTreeNode(PT_CONCURRENT_ASSERTION_STATEMENT);
         $$->piece_count = 2;
         $$->boolean = true;
         $$->pieces[0] = $2;

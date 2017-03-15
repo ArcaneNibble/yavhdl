@@ -1,1 +1,1 @@
-mylabel: postponed asdf(fdsa, aaa => bbb);
+mylabel: postponed assert asdf(fdsa, aaa => bbb);

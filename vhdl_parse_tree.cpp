@@ -213,6 +213,7 @@ const char *parse_tree_types[] = {
     "PT_SIGNAL_LIST_ALL",
 
     "PT_CONCURRENT_PROCEDURE_CALL",
+    "PT_CONCURRENT_ASSERTION_STATEMENT",
 };
 
 const char *parse_operators[] = {
@@ -1370,7 +1371,8 @@ void VhdlParseTreeNode::debug_print() {
             break;
 
         case PT_CONCURRENT_PROCEDURE_CALL:
-            cout << ", \"procedure_call\": ";
+        case PT_CONCURRENT_ASSERTION_STATEMENT:
+            cout << ", \"inner\": ";
             this->pieces[0]->debug_print();
             if (this->pieces[1]) {
                 cout << ", \"label\": ";

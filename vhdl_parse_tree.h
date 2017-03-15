@@ -217,6 +217,7 @@ enum ParseTreeNodeType
     PT_SIGNAL_LIST_ALL,
 
     PT_CONCURRENT_PROCEDURE_CALL,
+    PT_CONCURRENT_ASSERTION_STATEMENT,
 };
 
 // Operators, section 9.2
