@@ -616,10 +616,13 @@ array_constraint:
     }
 
 // We need this for association list disambiguation with name
+_definitely_not_name_array_constraint:
+    _array_constraint_open_and_element_constraint
+    | _array_constraint_definitely_multiple_ranges
+
 _after_slice_limited_array_constraint:
     _array_constraint_open
-    | _array_constraint_open_and_element_constraint
-    | _array_constraint_definitely_multiple_ranges
+    | _definitely_not_name_array_constraint
 
 _array_constraint_open:
     '(' KW_OPEN ')' {
@@ -753,6 +756,30 @@ _one_or_more_record_element_constraint:
 
 record_element_constraint:
     identifier element_constraint {
+        $$ = new VhdlParseTreeNode(PT_RECORD_ELEMENT_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
+
+// FIXME: Ugly hack to make association_list work
+_definitely_not_name_record_constraint:
+    '(' _one_or_more_association_list_record_element_constraint ')' {
+        $$ = $2;
+    }
+
+_one_or_more_association_list_record_element_constraint:
+    _association_list_record_element_constraint
+    | _one_or_more_association_list_record_element_constraint ','
+      _association_list_record_element_constraint {
+        $$ = new VhdlParseTreeNode(PT_RECORD_CONSTRAINT);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
+
+_association_list_record_element_constraint:
+    identifier _association_list_for_record_element_constraint {
         $$ = new VhdlParseTreeNode(PT_RECORD_ELEMENT_CONSTRAINT);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
@@ -939,9 +966,8 @@ constraint:
 // FIXME: Ugly, WTF is happening here?
 _association_list_definitely_constraint:
     range_constraint
-    | _array_constraint_open_and_element_constraint
-    | _array_constraint_definitely_multiple_ranges
-    // TODO
+    | _definitely_not_name_array_constraint
+    | _definitely_not_name_record_constraint
 
 // When a "discrete" subtype indication is needed, the _only_ type of
 // constraint we can have is a range constraint. Arrays and records aren't
@@ -962,6 +988,10 @@ element_constraint:
 _after_slice_limited_element_constraint:
     // TODO
     _after_slice_limited_array_constraint
+
+_association_list_for_record_element_constraint:
+    _definitely_not_name_array_constraint
+    // TODO
 
 /// Section 6.4.2.2
 constant_declaration:
