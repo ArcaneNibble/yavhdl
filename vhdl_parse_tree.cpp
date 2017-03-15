@@ -170,6 +170,9 @@ const char *parse_tree_types[] = {
     "PT_SUBTYPE_INDICATION_AMBIG_WTF",
 
     "PT_ELEMENT_RESOLUTION_NEST",
+
+    "PT_USE_CLAUSE",
+    "PT_SELECTED_NAME_LIST",
 };
 
 const char *parse_operators[] = {
@@ -1122,6 +1125,11 @@ void VhdlParseTreeNode::debug_print() {
             this->pieces[0]->debug_print();
             break;
 
+        case PT_USE_CLAUSE:
+            cout << ", \"used_names\": ";
+            this->pieces[0]->debug_print();
+            break;
+
         case PT_EXPRESSION_LIST:
         case PT_ID_LIST:
         case PT_RECORD_RESOLUTION:
@@ -1148,6 +1156,7 @@ void VhdlParseTreeNode::debug_print() {
         case PT_DECLARATION_LIST:
         case PT_INTERFACE_LIST:
         case PT_ASSOCIATION_LIST:
+        case PT_SELECTED_NAME_LIST:
             if (this->pieces[0]) {
                 cout << ", \"rest\": ";
                 this->pieces[0]->debug_print();

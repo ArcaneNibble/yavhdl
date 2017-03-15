@@ -353,6 +353,7 @@ subprogram_declarative_item:
     | file_declaration
     | alias_declaration
     | attribute_declaration
+    | use_clause
     // TODO
 
 /// Section 4.4
@@ -3005,7 +3006,26 @@ process_declarative_item:
     | file_declaration
     | alias_declaration
     | attribute_declaration
+    | use_clause
     // TODO
+
+////////////////////// Scope and visibility, section 12 //////////////////////
+
+use_clause:
+    KW_USE _one_or_more_selected_names ';' {
+        $$ = new VhdlParseTreeNode(PT_USE_CLAUSE);
+        $$->piece_count = 1;
+        $$->pieces[0] = $2;
+    }
+
+_one_or_more_selected_names:
+    selected_name
+    | _one_or_more_selected_names ',' selected_name {
+        $$ = new VhdlParseTreeNode(PT_SELECTED_NAME_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $3;
+    }
 
 //////////////////////// Lexical elements, section 15 ////////////////////////
 

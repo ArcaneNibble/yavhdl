@@ -174,6 +174,9 @@ enum ParseTreeNodeType
     PT_SUBTYPE_INDICATION_AMBIG_WTF,
 
     PT_ELEMENT_RESOLUTION_NEST,
+
+    PT_USE_CLAUSE,
+    PT_SELECTED_NAME_LIST,
 };
 
 // Operators, section 9.2
