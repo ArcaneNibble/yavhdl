@@ -2131,7 +2131,7 @@ _real_component_declaration:
         $$->pieces[3] = nullptr;
     }
     | KW_COMPONENT identifier __maybe_is
-      KW_GENERIC '(' interface_list ')'
+      KW_GENERIC '(' interface_list ')' ';'
       KW_END KW_COMPONENT {
         $$ = new VhdlParseTreeNode(PT_COMPONENT_DECLARATION);
         $$->piece_count = 4;
@@ -2141,7 +2141,7 @@ _real_component_declaration:
         $$->pieces[3] = nullptr;
     }
     | KW_COMPONENT identifier __maybe_is
-      KW_PORT '(' interface_list ')'
+      KW_PORT '(' interface_list ')' ';'
       KW_END KW_COMPONENT {
         $$ = new VhdlParseTreeNode(PT_COMPONENT_DECLARATION);
         $$->piece_count = 4;
@@ -2151,14 +2151,14 @@ _real_component_declaration:
         $$->pieces[3] = nullptr;
     }
     | KW_COMPONENT identifier __maybe_is
-      KW_GENERIC '(' interface_list ')'
-      KW_PORT '(' interface_list ')'
+      KW_GENERIC '(' interface_list ')' ';'
+      KW_PORT '(' interface_list ')' ';'
       KW_END KW_COMPONENT {
         $$ = new VhdlParseTreeNode(PT_COMPONENT_DECLARATION);
         $$->piece_count = 4;
         $$->pieces[0] = $2;
         $$->pieces[1] = $6;
-        $$->pieces[2] = $10;
+        $$->pieces[2] = $11;
         $$->pieces[3] = nullptr;
     }
 

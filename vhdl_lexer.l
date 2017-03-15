@@ -282,7 +282,7 @@ void frontend_vhdl_yyerror(const char *msg);
 // Bit string literals, section 15.8
 // Again similar logic as strings.
 %}
-[0-9](_?[0-9])*([US]?[BOX]|D)\"    { BEGIN(BITSTRING); yymore(); }
+([0-9](_?[0-9])*)?([USus]?[BOXbox]|[Dd])\"    { BEGIN(BITSTRING); yymore(); }
 <BITSTRING>\"\"                 { yymore(); }
 <BITSTRING>\"                   {
     BEGIN(0);
