@@ -1,2 +1,11 @@
-postponed with asdf select? a guarded transport <= b when c, d when e;
-postponed with asdf select? a guarded transport <= b when c, d when e;
+mylabel: block begin end block;
+mylabel2: block begin end block mylabel3;
+
+mylabel: block (123 + 456) begin end block;
+
+mylabel: block
+    procedure p;
+begin
+    mylabel: block begin end block;
+    mylabel2: block begin end block mylabel3;
+end block;

@@ -226,6 +226,9 @@ const char *parse_tree_types[] = {
     "PT_CONCURRENT_SELECTED_SIGNAL_ASSIGNMENT",
 
     "PT_SEQUENCE_OF_CONCURRENT_STATEMENTS",
+
+    "PT_BLOCK",
+    "PT_BLOCK_HEADER",
 };
 
 const char *parse_operators[] = {
@@ -1444,6 +1447,50 @@ void VhdlParseTreeNode::debug_print() {
             cout << (this->boolean ? "true" : "false");
             cout << ", \"guarded\": ";
             cout << (this->boolean2 ? "true" : "false");
+            break;
+
+        case PT_BLOCK:
+            cout << ", \"label\": ";
+            this->pieces[0]->debug_print();
+            if (this->pieces[1]) {
+                cout << ", \"header\": ";
+                this->pieces[1]->debug_print();
+            }
+            if (this->pieces[2]) {
+                cout << ", \"guard\": ";
+                this->pieces[2]->debug_print();
+            }
+            if (this->pieces[3]) {
+                cout << ", \"declarations\": ";
+                this->pieces[3]->debug_print();
+            }
+            if (this->pieces[4]) {
+                cout << ", \"statements\": ";
+                this->pieces[4]->debug_print();
+            }
+            if (this->pieces[5]) {
+                cout << ", \"end_label\": ";
+                this->pieces[5]->debug_print();
+            }
+            break;
+
+        case PT_BLOCK_HEADER:
+            if (this->pieces[0]) {
+                cout << ", \"generic\": ";
+                this->pieces[0]->debug_print();
+            }
+            if (this->pieces[1]) {
+                cout << ", \"generic_map\": ";
+                this->pieces[1]->debug_print();
+            }
+            if (this->pieces[2]) {
+                cout << ", \"port\": ";
+                this->pieces[2]->debug_print();
+            }
+            if (this->pieces[3]) {
+                cout << ", \"port_map\": ";
+                this->pieces[3]->debug_print();
+            }
             break;
 
         case PT_EXPRESSION_LIST:

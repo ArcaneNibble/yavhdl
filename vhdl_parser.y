@@ -3489,7 +3489,8 @@ null_statement:
 
 /// Section 11.1
 concurrent_statement:
-    process_statement
+    block_statement
+    | process_statement
     | concurrent_procedure_call_statement
     | concurrent_assertion_statement
     | concurrent_signal_assignment_statement
@@ -3509,6 +3510,77 @@ _real_sequence_of_concurrent_statements:
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
+
+/// Section 11.2
+block_statement:
+    _real_block_statement ';'
+    | _real_block_statement identifier ';' {
+        $$ = $1;
+        $$->pieces[5] = $2;
+    }
+
+_real_block_statement:
+    identifier ':' KW_BLOCK __maybe_is
+    block_header block_declarative_part KW_BEGIN
+    _sequence_of_concurrent_statements KW_END KW_BLOCK {
+        $$ = new VhdlParseTreeNode(PT_BLOCK);
+        $$->piece_count = 6;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $5;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = $6;
+        $$->pieces[4] = $8;
+    }
+    | identifier ':' KW_BLOCK '(' expression ')' __maybe_is
+      block_header block_declarative_part KW_BEGIN
+      _sequence_of_concurrent_statements KW_END KW_BLOCK {
+        $$ = new VhdlParseTreeNode(PT_BLOCK);
+        $$->piece_count = 6;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $8;
+        $$->pieces[2] = $5;
+        $$->pieces[3] = $9;
+        $$->pieces[4] = $11;
+    }
+
+block_declarative_part:
+    %empty
+    | _real_block_declarative_part
+
+_real_block_declarative_part:
+    block_declarative_item
+    | _real_block_declarative_part block_declarative_item {
+        $$ = new VhdlParseTreeNode(PT_DECLARATION_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
+
+block_declarative_item:
+    subprogram_declaration
+    | subprogram_body
+    | subprogram_instantiation_declaration
+    | package_declaration
+    | package_body
+    | package_instantiation_declaration
+    | type_declaration
+    | subtype_declaration
+    | constant_declaration
+    | signal_declaration
+    | variable_declaration
+    | file_declaration
+    | alias_declaration
+    | component_declaration
+    | attribute_declaration
+    | attribute_specification
+    // TODO
+    | disconnection_specification
+    | use_clause
+    | group_template_declaration
+    | group_declaration
+
+block_header:
+    // TODO
 
 /// Section 11.3
 process_statement:

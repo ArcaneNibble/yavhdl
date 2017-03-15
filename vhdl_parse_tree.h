@@ -230,6 +230,9 @@ enum ParseTreeNodeType
     PT_CONCURRENT_SELECTED_SIGNAL_ASSIGNMENT,
 
     PT_SEQUENCE_OF_CONCURRENT_STATEMENTS,
+
+    PT_BLOCK,
+    PT_BLOCK_HEADER,
 };
 
 // Operators, section 9.2
