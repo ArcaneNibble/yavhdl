@@ -3696,7 +3696,7 @@ instantiated_unit:
 _definitely_instantiated_unit:
     _component_instantiated_unit
     | _entity_instantiated_unit
-    // TODO
+    | _configuration_instantiated_unit
 
 _component_instantiated_unit:
     KW_COMPONENT _simple_or_selected_name {
@@ -3716,6 +3716,13 @@ _entity_instantiated_unit:
         $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
+    }
+
+_configuration_instantiated_unit:
+    KW_CONFIGURATION _simple_or_selected_name {
+        $$ = new VhdlParseTreeNode(PT_INSTANTIATED_UNIT_CONFIGURATION);
+        $$->piece_count = 1;
+        $$->pieces[0] = $2;
     }
 
 ////////////////////// Scope and visibility, section 12 //////////////////////
