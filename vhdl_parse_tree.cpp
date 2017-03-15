@@ -224,6 +224,8 @@ const char *parse_tree_types[] = {
     "PT_CONCURRENT_SIMPLE_SIGNAL_ASSIGNMENT",
     "PT_CONCURRENT_CONDITIONAL_SIGNAL_ASSIGNMENT",
     "PT_CONCURRENT_SELECTED_SIGNAL_ASSIGNMENT",
+
+    "PT_SEQUENCE_OF_CONCURRENT_STATEMENTS",
 };
 
 const char *parse_operators[] = {
@@ -1473,6 +1475,7 @@ void VhdlParseTreeNode::debug_print() {
         case PT_SELECTED_NAME_LIST:
         case PT_ENTITY_NAME_LIST:
         case PT_ENTITY_CLASS_ENTRY_LIST:
+        case PT_SEQUENCE_OF_CONCURRENT_STATEMENTS:
             if (this->pieces[0]) {
                 cout << ", \"rest\": ";
                 this->pieces[0]->debug_print();

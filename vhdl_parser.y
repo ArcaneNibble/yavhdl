@@ -184,7 +184,7 @@ _toplevel_token:
 
 // Fake start token for testing
 not_actualy_design_file:
-    concurrent_statement
+    _sequence_of_concurrent_statements
 
 ///////////////////// Subprograms and packages, section 4 /////////////////////
 
@@ -3495,6 +3495,20 @@ concurrent_statement:
     | concurrent_signal_assignment_statement
     | component_instantiation_statement
     // TODO
+
+_sequence_of_concurrent_statements:
+    %empty
+    | _real_sequence_of_concurrent_statements
+
+// We need this or else the %empty can cause ambiguity.
+_real_sequence_of_concurrent_statements:
+    concurrent_statement
+    | _real_sequence_of_concurrent_statements concurrent_statement {
+        $$ = new VhdlParseTreeNode(PT_SEQUENCE_OF_CONCURRENT_STATEMENTS);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
 
 /// Section 11.3
 process_statement:
