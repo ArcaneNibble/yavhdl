@@ -1,6 +1,6 @@
-l: block
-    for others : z;
-        use vunit a, b, c;
-        use vunit d;
-    end for;
-begin end block;
+entity zzz is
+    generic(aaa:bbb);
+    port(ccc:ddd);
+begin
+    assert a;
+end;

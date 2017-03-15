@@ -184,9 +184,126 @@ _toplevel_token:
 
 // Fake start token for testing
 not_actualy_design_file:
-    _sequence_of_concurrent_statements
+    entity_declaration
 
 //////////////// Design entities and configurations, section 3 ////////////////
+
+/// Section 3.2
+entity_declaration:
+    _real_entity_declaration ';'
+    | _real_entity_declaration KW_ENTITY ';'
+    | _real_entity_declaration identifier ';' {
+        $$ = $1;
+        $$->pieces[4] = $2;
+    }
+    | _real_entity_declaration KW_ENTITY identifier ';' {
+        $$ = $1;
+        $$->pieces[4] = $3;
+    }
+
+_real_entity_declaration:
+    KW_ENTITY identifier KW_IS entity_header entity_declarative_part KW_END {
+        $$ = new VhdlParseTreeNode(PT_ENTITY);
+        $$->piece_count = 5;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $5;
+        $$->pieces[3] = nullptr;
+        $$->pieces[4] = nullptr;
+    }
+    | KW_ENTITY identifier KW_IS entity_header entity_declarative_part
+      KW_BEGIN entity_statement_part KW_END {
+        $$ = new VhdlParseTreeNode(PT_ENTITY);
+        $$->piece_count = 5;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $5;
+        $$->pieces[3] = $7;
+        $$->pieces[4] = nullptr;
+    }
+
+/// Section 3.2.2
+entity_header:
+    %empty {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_HEADER);
+        $$->piece_count = 2;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = nullptr;
+    }
+    | KW_GENERIC '(' interface_list ')' ';' {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_HEADER);
+        $$->piece_count = 2;
+        $$->pieces[0] = $3;
+        $$->pieces[1] = nullptr;
+    }
+    | KW_PORT '(' interface_list ')' ';' {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_HEADER);
+        $$->piece_count = 2;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = $3;
+    }
+    | KW_GENERIC '(' interface_list ')' ';'
+      KW_PORT '(' interface_list ')' ';' {
+        $$ = new VhdlParseTreeNode(PT_ENTITY_HEADER);
+        $$->piece_count = 2;
+        $$->pieces[0] = $3;
+        $$->pieces[1] = $8;
+    }
+
+/// Section 3.2.3
+entity_declarative_part:
+    %empty
+    | _real_entity_declarative_part
+
+_real_entity_declarative_part:
+    entity_declarative_item
+    | _real_entity_declarative_part entity_declarative_item {
+        $$ = new VhdlParseTreeNode(PT_DECLARATION_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
+
+entity_declarative_item:
+    subprogram_declaration
+    | subprogram_body
+    | subprogram_instantiation_declaration
+    | package_declaration
+    | package_body
+    | package_instantiation_declaration
+    | type_declaration
+    | subtype_declaration
+    | constant_declaration
+    | signal_declaration
+    | variable_declaration
+    | file_declaration
+    | alias_declaration
+    | attribute_declaration
+    | attribute_specification
+    | disconnection_specification
+    | use_clause
+    | group_template_declaration
+    | group_declaration
+
+/// Section 3.2.4
+entity_statement_part:
+    %empty
+    | _real_entity_statement_part
+
+// We need this or else the %empty can cause ambiguity.
+_real_entity_statement_part:
+    entity_statement
+    | _real_entity_statement_part entity_statement {
+        $$ = new VhdlParseTreeNode(PT_SEQUENCE_OF_STATEMENTS);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $2;
+    }
+
+entity_statement:
+    concurrent_assertion_statement
+    | concurrent_procedure_call_statement
+    | process_statement
 
 /// Section 3.3.2
 block_declarative_item:
