@@ -186,6 +186,32 @@ _toplevel_token:
 not_actualy_design_file:
     _sequence_of_concurrent_statements
 
+//////////////// Design entities and configurations, section 3 ////////////////
+
+/// Section 3.3.2
+block_declarative_item:
+    subprogram_declaration
+    | subprogram_body
+    | subprogram_instantiation_declaration
+    | package_declaration
+    | package_body
+    | package_instantiation_declaration
+    | type_declaration
+    | subtype_declaration
+    | constant_declaration
+    | signal_declaration
+    | variable_declaration
+    | file_declaration
+    | alias_declaration
+    | component_declaration
+    | attribute_declaration
+    | attribute_specification
+    // TODO
+    | disconnection_specification
+    | use_clause
+    | group_template_declaration
+    | group_declaration
+
 ///////////////////// Subprograms and packages, section 4 /////////////////////
 
 /// Section 4.2
@@ -3556,31 +3582,55 @@ _real_block_declarative_part:
         $$->pieces[1] = $2;
     }
 
-block_declarative_item:
-    subprogram_declaration
-    | subprogram_body
-    | subprogram_instantiation_declaration
-    | package_declaration
-    | package_body
-    | package_instantiation_declaration
-    | type_declaration
-    | subtype_declaration
-    | constant_declaration
-    | signal_declaration
-    | variable_declaration
-    | file_declaration
-    | alias_declaration
-    | component_declaration
-    | attribute_declaration
-    | attribute_specification
-    // TODO
-    | disconnection_specification
-    | use_clause
-    | group_template_declaration
-    | group_declaration
-
 block_header:
-    // TODO
+    %empty
+    | _block_header_generic_part
+    | _block_header_port_part
+    | _block_header_generic_part _block_header_port_part {
+        // FIXME: Ugly
+        $$ = $1;
+        $$->pieces[2] = $2->pieces[2];
+        $$->pieces[3] = $2->pieces[3];
+        $2->pieces[2] = nullptr;
+        $2->pieces[3] = nullptr;
+        delete $2;
+    }
+
+_block_header_generic_part:
+    KW_GENERIC '(' interface_list ')' ';' {
+        $$ = new VhdlParseTreeNode(PT_BLOCK_HEADER);
+        $$->piece_count = 4;
+        $$->pieces[0] = $3;
+        $$->pieces[1] = nullptr;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = nullptr;
+    }
+    | KW_GENERIC '(' interface_list ')' ';' generic_map_aspect ';' {
+        $$ = new VhdlParseTreeNode(PT_BLOCK_HEADER);
+        $$->piece_count = 4;
+        $$->pieces[0] = $3;
+        $$->pieces[1] = $6;
+        $$->pieces[2] = nullptr;
+        $$->pieces[3] = nullptr;
+    }
+
+_block_header_port_part:
+    KW_PORT '(' interface_list ')' ';' {
+        $$ = new VhdlParseTreeNode(PT_BLOCK_HEADER);
+        $$->piece_count = 4;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = nullptr;
+        $$->pieces[2] = $3;
+        $$->pieces[3] = nullptr;
+    }
+    | KW_PORT '(' interface_list ')' ';' port_map_aspect ';' {
+        $$ = new VhdlParseTreeNode(PT_BLOCK_HEADER);
+        $$->piece_count = 4;
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = nullptr;
+        $$->pieces[2] = $3;
+        $$->pieces[3] = $6;
+    }
 
 /// Section 11.3
 process_statement:
