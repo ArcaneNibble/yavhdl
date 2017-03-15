@@ -236,6 +236,8 @@ const char *parse_tree_types[] = {
     "PT_GENERATE_BODY",
     "PT_IF_GENERATE_ELSIF",
     "PT_IF_GENERATE_ELSIF_LIST",
+    "PT_CASE_GENERATE_ALTERNATIVE",
+    "PT_CASE_GENERATE_ALTERNATIVE_LIST",
 };
 
 const char *parse_operators[] = {
@@ -1543,6 +1545,18 @@ void VhdlParseTreeNode::debug_print() {
             break;
 
         case PT_CASE_GENERATE:
+            cout << ", \"generate_label\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"expression\": ";
+            this->pieces[1]->debug_print();
+            cout << ", \"alternatives\": ";
+            this->pieces[2]->debug_print();
+            if (this->pieces[3]) {
+                cout << ", \"end_label\": ";
+                this->pieces[3]->debug_print();
+            }
+            break;
+
         case PT_GENERATE_BODY:
             if (this->pieces[0]) {
                 cout << ", \"declarations\": ";
@@ -1561,12 +1575,21 @@ void VhdlParseTreeNode::debug_print() {
         case PT_IF_GENERATE_ELSIF:
             cout << ", \"condition\": ";
             this->pieces[0]->debug_print();
-            if (this->pieces[1]) {
-                cout << ", \"label\": ";
-                this->pieces[1]->debug_print();
-            }
+            cout << ", \"body\": ";
+            this->pieces[1]->debug_print();
             if (this->pieces[2]) {
-                cout << ", \"body\": ";
+                cout << ", \"label\": ";
+                this->pieces[2]->debug_print();
+            }
+            break;
+
+        case PT_CASE_GENERATE_ALTERNATIVE:
+            cout << ", \"choices\": ";
+            this->pieces[0]->debug_print();
+            cout << ", \"body\": ";
+            this->pieces[1]->debug_print();
+            if (this->pieces[2]) {
+                cout << ", \"label\": ";
                 this->pieces[2]->debug_print();
             }
             break;
@@ -1602,6 +1625,7 @@ void VhdlParseTreeNode::debug_print() {
         case PT_ENTITY_CLASS_ENTRY_LIST:
         case PT_SEQUENCE_OF_CONCURRENT_STATEMENTS:
         case PT_IF_GENERATE_ELSIF_LIST:
+        case PT_CASE_GENERATE_ALTERNATIVE_LIST:
             if (this->pieces[0]) {
                 cout << ", \"rest\": ";
                 this->pieces[0]->debug_print();

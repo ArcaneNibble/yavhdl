@@ -4081,7 +4081,7 @@ _configuration_instantiated_unit:
 generate_statement:
     for_generate_statement
     | if_generate_statement
-    // TODO
+    | case_generate_statement
 
 for_generate_statement:
     _real_for_generate_statement ';'
@@ -4120,8 +4120,8 @@ _real_if_generate_statement:
         $$->pieces[4] = $7;
         // FIXME: Ugly wtf
         if ($8) {
-            $$->pieces[5] = $8->pieces[2];
-            $$->pieces[6] = $8->pieces[1];
+            $$->pieces[5] = $8->pieces[1];
+            $$->pieces[6] = $8->pieces[2];
             $8->pieces[1] = nullptr;
             $8->pieces[2] = nullptr;
             delete $8;
@@ -4140,8 +4140,8 @@ _real_if_generate_statement:
         $$->pieces[4] = $9;
         // FIXME: Ugly wtf
         if ($10) {
-            $$->pieces[5] = $10->pieces[2];
-            $$->pieces[6] = $10->pieces[1];
+            $$->pieces[5] = $10->pieces[1];
+            $$->pieces[6] = $10->pieces[2];
             $10->pieces[1] = nullptr;
             $10->pieces[2] = nullptr;
             delete $10;
@@ -4167,15 +4167,15 @@ _if_generate_elsif:
         $$ = new VhdlParseTreeNode(PT_IF_GENERATE_ELSIF);
         $$->piece_count = 3;
         $$->pieces[0] = $2;
-        $$->pieces[1] = nullptr;
-        $$->pieces[2] = $4;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = nullptr;
     }
     | KW_ELSIF identifier ':' expression KW_GENERATE generate_statement_body {
         $$ = new VhdlParseTreeNode(PT_IF_GENERATE_ELSIF);
         $$->piece_count = 3;
         $$->pieces[0] = $4;
-        $$->pieces[1] = $2;
-        $$->pieces[2] = $6;
+        $$->pieces[1] = $6;
+        $$->pieces[2] = $2;
     }
 
 _if_generate_else:
@@ -4185,16 +4185,59 @@ _if_generate_else:
         $$ = new VhdlParseTreeNode(PT_IF_GENERATE_ELSIF);
         $$->piece_count = 2;
         $$->pieces[0] = nullptr;
-        $$->pieces[1] = nullptr;
-        $$->pieces[2] = $3;
+        $$->pieces[1] = $3;
+        $$->pieces[2] = nullptr;
     }
     | KW_ELSE identifier ':' KW_GENERATE generate_statement_body {
         // FIXME: Hack
         $$ = new VhdlParseTreeNode(PT_IF_GENERATE_ELSIF);
         $$->piece_count = 2;
         $$->pieces[0] = nullptr;
+        $$->pieces[1] = $5;
+        $$->pieces[2] = $2;
+    }
+
+case_generate_statement:
+    _real_case_generate_statement ';'
+    | _real_case_generate_statement identifier ';' {
+        $$ = $1;
+        $$->pieces[3] = $2;
+    }
+
+_real_case_generate_statement:
+    identifier ':' KW_CASE expression KW_GENERATE
+    _one_or_more_case_generate_alternatives KW_END KW_GENERATE {
+        $$ = new VhdlParseTreeNode(PT_CASE_GENERATE);
+        $$->piece_count = 4;
+        $$->pieces[0] = $1;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = $6;
+        $$->pieces[3] = nullptr;
+    }
+
+_one_or_more_case_generate_alternatives:
+    case_generate_alternative
+    | _one_or_more_case_generate_alternatives case_generate_alternative {
+        $$ = new VhdlParseTreeNode(PT_CASE_GENERATE_ALTERNATIVE_LIST);
+        $$->piece_count = 2;
+        $$->pieces[0] = $1;
         $$->pieces[1] = $2;
-        $$->pieces[2] = $5;
+    }
+
+case_generate_alternative:
+    KW_WHEN choices DL_ARR generate_statement_body {
+        $$ = new VhdlParseTreeNode(PT_CASE_GENERATE_ALTERNATIVE);
+        $$->piece_count = 3;
+        $$->pieces[0] = $2;
+        $$->pieces[1] = $4;
+        $$->pieces[2] = nullptr;
+    }
+    | KW_WHEN identifier ':' choices DL_ARR generate_statement_body {
+        $$ = new VhdlParseTreeNode(PT_CASE_GENERATE_ALTERNATIVE);
+        $$->piece_count = 3;
+        $$->pieces[0] = $4;
+        $$->pieces[1] = $6;
+        $$->pieces[2] = $2;
     }
 
 // FIXME: Presumably begin/end need to match?
