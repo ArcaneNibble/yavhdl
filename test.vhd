@@ -1,9 +1,6 @@
-use foo.bar;
-use baz.qux;
-
-architecture aaa of bbb(ccc).ddd is
-    signal foo : bar;
-    signal baz : qux;
+architecture test of test is
 begin
-    asdf <= fdsa;
-end architecture eee;
+    l : x port map(
+        aaa => bbb(ccc)(ddd(0 to 2, 1 to 3), eee(2 to 4))
+    );
+end architecture;

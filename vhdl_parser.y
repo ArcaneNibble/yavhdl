@@ -1087,6 +1087,7 @@ _definitely_not_name_array_constraint:
 _after_slice_limited_array_constraint:
     _array_constraint_open
     | _definitely_not_name_array_constraint
+    | _definitely_not_name_record_constraint
 
 _array_constraint_open:
     '(' KW_OPEN ')' {
