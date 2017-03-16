@@ -7,4 +7,5 @@ architecture test of test is
     shared variable bbb : aaa'subtype;
 begin
     xxx <= yyy'subtype'(zzz);
+    www <= vvv(uuu range ttt'sss);
 end architecture;

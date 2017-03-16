@@ -4880,4 +4880,9 @@ int main(int argc, char **argv) {
 
 void frontend_vhdl_yyerror(const char *msg) {
     cout << "Error " << msg << " on line " << frontend_vhdl_yyget_lineno() << "\n";
+
+    // Hack for fuzzing?
+    if (strcmp(msg, "syntax is ambiguous") == 0) {
+        abort();
+    }
 }
