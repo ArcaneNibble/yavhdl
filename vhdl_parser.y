@@ -550,8 +550,7 @@ function_specification:
     }
 
 _real_function_specification:
-    KW_FUNCTION designator subprogram_header
-    KW_RETURN _simple_or_selected_name {
+    KW_FUNCTION designator subprogram_header KW_RETURN type_mark {
         $$ = new VhdlParseTreeNode(PT_FUNCTION_SPECIFICATION);
         $$->purity = PURITY_UNSPEC;
         $$->piece_count = 3;
@@ -560,7 +559,7 @@ _real_function_specification:
         $$->pieces[2] = $3;
     }
     | KW_FUNCTION designator subprogram_header '(' interface_list ')'
-      KW_RETURN _simple_or_selected_name {
+      KW_RETURN type_mark {
         $$ = new VhdlParseTreeNode(PT_FUNCTION_SPECIFICATION);
         $$->purity = PURITY_UNSPEC;
         $$->piece_count = 4;
@@ -570,8 +569,7 @@ _real_function_specification:
         $$->pieces[3] = $5;
     }
     | KW_FUNCTION designator subprogram_header
-      KW_PARAMETER '(' interface_list ')'
-      KW_RETURN _simple_or_selected_name {
+      KW_PARAMETER '(' interface_list ')' KW_RETURN type_mark {
         $$ = new VhdlParseTreeNode(PT_FUNCTION_SPECIFICATION);
         $$->purity = PURITY_UNSPEC;
         $$->piece_count = 4;
@@ -729,29 +727,29 @@ signature:
         $$->pieces[0] = nullptr;
         $$->pieces[1] = nullptr;
     }
-    | '[' _one_or_more_ids ']' {
+    | '[' _one_or_more_type_marks ']' {
         $$ = new VhdlParseTreeNode(PT_SIGNATURE);
         $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = nullptr;
     }
-    | '[' KW_RETURN _simple_or_selected_name ']' {
+    | '[' KW_RETURN type_mark ']' {
         $$ = new VhdlParseTreeNode(PT_SIGNATURE);
         $$->piece_count = 2;
         $$->pieces[0] = nullptr;
         $$->pieces[1] = $3;
     }
-    | '[' _one_or_more_ids KW_RETURN _simple_or_selected_name ']' {
+    | '[' _one_or_more_type_marks KW_RETURN type_mark ']' {
         $$ = new VhdlParseTreeNode(PT_SIGNATURE);
         $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
     }
 
-_one_or_more_ids:
-    _simple_or_selected_name
-    | _one_or_more_ids ',' _simple_or_selected_name {
-        $$ = new VhdlParseTreeNode(PT_ID_LIST);
+_one_or_more_type_marks:
+    type_mark
+    | _one_or_more_type_marks ',' type_mark {
+        $$ = new VhdlParseTreeNode(PT_TYPE_MARK_LIST);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
@@ -1059,7 +1057,7 @@ _one_or_more_index_subtype_definition:
     }
 
 index_subtype_definition:
-    _simple_or_selected_name KW_RANGE DL_BOX {
+    type_mark KW_RANGE DL_BOX {
         $$ = $1;
     }
 
@@ -1292,7 +1290,7 @@ incomplete_type_declaration:
 
 /// Section 5.5
 file_type_definition:
-    KW_FILE KW_OF _simple_or_selected_name {
+    KW_FILE KW_OF type_mark {
         $$ = new VhdlParseTreeNode(PT_FILE_TYPE_DEFINITION);
         $$->piece_count = 1;
         $$->pieces[0] = $3;
@@ -1421,22 +1419,22 @@ subtype_declaration:
     }
 
 subtype_indication:
-    _simple_or_selected_name
-    | resolution_indication _simple_or_selected_name {
+    type_mark
+    | resolution_indication type_mark {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
         $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $1;
         $$->pieces[2] = nullptr;
     }
-    | _simple_or_selected_name constraint {
+    | type_mark constraint {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
         $$->piece_count = 3;
         $$->pieces[0] = $1;
         $$->pieces[1] = nullptr;
         $$->pieces[2] = $2;
     }
-    | resolution_indication _simple_or_selected_name constraint {
+    | resolution_indication type_mark constraint {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
         $$->piece_count = 3;
         $$->pieces[0] = $2;
@@ -1448,7 +1446,7 @@ subtype_indication:
 // ambiguities. Does not allow a resolution indication because that isn't
 // actually permitted (see 5.3.2.1).
 _almost_discrete_subtype_indication:
-    _simple_or_selected_name _discrete_constraint {
+    type_mark _discrete_constraint {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
         $$->piece_count = 3;
         $$->pieces[0] = $1;
@@ -1456,15 +1454,17 @@ _almost_discrete_subtype_indication:
         $$->pieces[2] = $2;
     }
 
-// Reallow identifiers (a plain type_mark)
+// Reallow identifiers (a plain type_mark but not an attribute)
+// FIXME: Ugly, the reason attribute isn't allowed is because this is used in
+// discrete_range which can also be range which can be an attribute.
 discrete_subtype_indication:
     _simple_or_selected_name
     | _almost_discrete_subtype_indication
 
 _allocator_subtype_indication:
     // Resolution indications not allowed
-    _simple_or_selected_name
-    | _simple_or_selected_name _allocator_constraint {
+    type_mark
+    | type_mark _allocator_constraint {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
         $$->piece_count = 3;
         $$->pieces[0] = $1;
@@ -1474,21 +1474,21 @@ _allocator_subtype_indication:
 
 // Does not have a bare name because that's ambiguous.
 _association_list_subtype_indication:
-    resolution_indication _simple_or_selected_name {
+    resolution_indication type_mark {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
         $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $1;
         $$->pieces[2] = nullptr;
     }
-    | _simple_or_selected_name _association_list_definitely_constraint {
+    | type_mark _association_list_definitely_constraint {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
         $$->piece_count = 3;
         $$->pieces[0] = $1;
         $$->pieces[1] = nullptr;
         $$->pieces[2] = $2;
     }
-    | resolution_indication _simple_or_selected_name constraint {
+    | resolution_indication type_mark constraint {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
         $$->piece_count = 3;
         $$->pieces[0] = $2;
@@ -1544,6 +1544,12 @@ record_element_resolution:
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
+
+// A type can be the special attributes 'subtype or 'element (but not an
+// attribute with parentheses, because functions can't return types).
+type_mark:
+    _simple_or_selected_name
+    | _almost_attribute_name
 
 // FIXME: explain why there is a S/R conflict here
 constraint:
@@ -1902,15 +1908,14 @@ interface_function_specification:
     }
 
 _real_interface_function_specification:
-    KW_FUNCTION designator KW_RETURN _simple_or_selected_name {
+    KW_FUNCTION designator KW_RETURN type_mark {
         $$ = new VhdlParseTreeNode(PT_INTERFACE_FUNCTION_SPECIFICATION);
         $$->purity = PURITY_UNSPEC;
         $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
     }
-    | KW_FUNCTION designator '(' interface_list ')'
-      KW_RETURN _simple_or_selected_name {
+    | KW_FUNCTION designator '(' interface_list ')' KW_RETURN type_mark {
         $$ = new VhdlParseTreeNode(PT_INTERFACE_FUNCTION_SPECIFICATION);
         $$->purity = PURITY_UNSPEC;
         $$->piece_count = 3;
@@ -1919,7 +1924,7 @@ _real_interface_function_specification:
         $$->pieces[2] = $4;
     }
     | KW_FUNCTION designator KW_PARAMETER '(' interface_list ')'
-      KW_RETURN _simple_or_selected_name {
+      KW_RETURN type_mark {
         $$ = new VhdlParseTreeNode(PT_INTERFACE_FUNCTION_SPECIFICATION);
         $$->purity = PURITY_UNSPEC;
         $$->piece_count = 3;
@@ -2106,7 +2111,7 @@ alias_designator:
 
 /// Section 6.7
 attribute_declaration:
-    KW_ATTRIBUTE identifier ':' _simple_or_selected_name ';' {
+    KW_ATTRIBUTE identifier ':' type_mark ';' {
         $$ = new VhdlParseTreeNode(PT_ATTRIBUTE_DECLARATION);
         $$->piece_count = 2;
         $$->pieces[0] = $2;
@@ -2501,7 +2506,7 @@ disconnection_specification:
     }
 
 guarded_signal_specification:
-    signal_list ':' _simple_or_selected_name {
+    signal_list ':' type_mark {
         $$ = new VhdlParseTreeNode(PT_GUARDED_SIGNAL_SPECIFICATION);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
@@ -2680,7 +2685,7 @@ package_pathname:
 _one_or_more_ids_dots:
     identifier
     | _one_or_more_ids_dots '.' identifier {
-        $$ = new VhdlParseTreeNode(PT_ID_LIST);
+        $$ = new VhdlParseTreeNode(PT_ID_LIST_REAL);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
@@ -3140,13 +3145,13 @@ _definitely_function_call:
 
 /// Section 9.3.5
 qualified_expression:
-    _simple_or_selected_name '\'' '(' expression ')' {
+    type_mark '\'' '(' expression ')' {
         $$ = new VhdlParseTreeNode(PT_QUALIFIED_EXPRESSION);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $4;
     }
-    | _simple_or_selected_name '\'' aggregate {
+    | type_mark '\'' aggregate {
         $$ = new VhdlParseTreeNode(PT_QUALIFIED_EXPRESSION);
         $$->piece_count = 2;
         $$->pieces[0] = $1;

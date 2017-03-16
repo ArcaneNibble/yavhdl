@@ -46,7 +46,7 @@ const char *parse_tree_types[] = {
     "PT_RECORD_ELEMENT_CONSTRAINT",
 
     "PT_EXPRESSION_LIST",
-    "PT_ID_LIST",
+    "PT_TYPE_MARK_LIST",
     "PT_RECORD_RESOLUTION",
 
     "PT_TOK_ALL",
@@ -1832,7 +1832,7 @@ void VhdlParseTreeNode::debug_print() {
             break;
 
         case PT_EXPRESSION_LIST:
-        case PT_ID_LIST:
+        case PT_TYPE_MARK_LIST:
         case PT_RECORD_RESOLUTION:
         case PT_INDEX_CONSTRAINT:
         case PT_RECORD_CONSTRAINT:
