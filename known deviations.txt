@@ -1,3 +1,4 @@
 known deviations:
 
 tool directives
+you cannot use 'element or 'subtype attributes where a type_mark is expected
