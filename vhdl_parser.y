@@ -15,6 +15,8 @@ extern FILE *frontend_vhdl_yyin;
 
 struct VhdlParseTreeNode *parse_output;
 
+#define YYMAXDEPTH 10000000
+
 %}
 
 %name-prefix "frontend_vhdl_yy"

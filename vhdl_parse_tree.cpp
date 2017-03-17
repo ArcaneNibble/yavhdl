@@ -725,8 +725,10 @@ void VhdlParseTreeNode::debug_print() {
             break;
 
         case PT_LOOP_STATEMENT:
-            cout << ", \"statements\": ";
-            this->pieces[0]->debug_print();
+            if (this->pieces[0]) {
+                cout << ", \"statements\": ";
+                this->pieces[0]->debug_print();
+            }
             if (this->pieces[1]) {
                 cout << ", \"scheme\": ";
                 this->pieces[1]->debug_print();
