@@ -634,8 +634,10 @@ void VhdlParseTreeNode::debug_print() {
             break;
 
         case PT_RETURN_STATEMENT:
-            cout << ", \"expression\": ";
-            this->pieces[0]->debug_print();
+            if (this->pieces[0]) {
+                cout << ", \"expression\": ";
+                this->pieces[0]->debug_print();
+            }
             break;
 
         case PT_ASSERTION_STATEMENT:

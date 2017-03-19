@@ -3947,7 +3947,11 @@ exit_statement:
 
 /// Section 10.13
 return_statement:
-    KW_RETURN expression {
+    KW_RETURN {
+        $$ = new VhdlParseTreeNode(PT_RETURN_STATEMENT);
+        $$->piece_count = 0;
+    }
+    | KW_RETURN expression {
         $$ = new VhdlParseTreeNode(PT_RETURN_STATEMENT);
         $$->piece_count = 1;
         $$->pieces[0] = $2;
