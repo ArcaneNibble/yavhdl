@@ -33,6 +33,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 VhdlParseTreeNode *VhdlParserParseFile(const char *fn, std::string &errors);
 
 #if defined(VHDL_PARSER_IN_LEXER)
+#define YY_DECL int frontend_vhdl_yylex \
+    (YYSTYPE * yylval_param, YYLTYPE * yylloc_param , yyscan_t yyscanner, \
+     std::string &errors)
+
 #include "vhdl_parser.tab.h"
 #endif
 
@@ -42,11 +46,17 @@ VhdlParseTreeNode *VhdlParserParseFile(const char *fn, std::string &errors);
 #include "lex.frontend_vhdl_yy.h"
 #endif
 
+#if defined(VHDL_PARSER_IN_BISON)
+int frontend_vhdl_yylex
+    (YYSTYPE * yylval_param, YYLTYPE * yylloc_param , yyscan_t yyscanner,
+     std::string &errors);
+#endif
+
 #if defined(VHDL_PARSER_IN_LEXER) || \
     defined(VHDL_PARSER_IN_BISON) || \
     defined(VHDL_PARSER_IN_GLUE)
 void frontend_vhdl_yyerror(YYLTYPE *locp, yyscan_t scanner,
-    VhdlParseTreeNode **, const char *msg);
+    VhdlParseTreeNode **, std::string &errors, const char *msg);
 #endif
 
 #endif

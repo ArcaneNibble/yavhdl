@@ -268,12 +268,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 }
 <EXT_ID>[\x20-\x7E\xA0-\xFF]    { yymore(); }
 <EXT_ID>\n  {
-    frontend_vhdl_yyerror(yylloc, yyscanner, nullptr,
+    frontend_vhdl_yyerror(yylloc, yyscanner, nullptr, errors,
         "Illegal newline in extended identifier");
     throw 1;
 }
 <EXT_ID>.   {
-    frontend_vhdl_yyerror(yylloc, yyscanner, nullptr,
+    frontend_vhdl_yyerror(yylloc, yyscanner, nullptr, errors,
         "Illegal extended identifier contents");
     throw 1;
 }
@@ -307,12 +307,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 }
 <STRING>[\x20-\x7E\xA0-\xFF]    { yymore(); }
 <STRING>\n  {
-    frontend_vhdl_yyerror(yylloc, yyscanner, nullptr,
+    frontend_vhdl_yyerror(yylloc, yyscanner, nullptr, errors,
         "Illegal newline in string");
     throw 1;
 }
 <STRING>.   {
-    frontend_vhdl_yyerror(yylloc, yyscanner, nullptr,
+    frontend_vhdl_yyerror(yylloc, yyscanner, nullptr, errors,
         "Illegal string contents");
     throw 1;
 }
@@ -359,12 +359,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 }
 <BITSTRING>[\x20-\x7E\xA0-\xFF]    { yymore(); }
 <BITSTRING>\n  {
-    frontend_vhdl_yyerror(yylloc, yyscanner, nullptr,
+    frontend_vhdl_yyerror(yylloc, yyscanner, nullptr, errors,
         "Illegal newline in string");
     throw 1;
 }
 <BITSTRING>.   {
-    frontend_vhdl_yyerror(yylloc, yyscanner, nullptr,
+    frontend_vhdl_yyerror(yylloc, yyscanner, nullptr, errors,
         "Illegal string contents");
     throw 1;
 }

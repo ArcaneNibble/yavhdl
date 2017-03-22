@@ -41,20 +41,20 @@ int main(int argc, char **argv) {
     VhdlParseTreeNode *parse_output = VhdlParserParseFile(argv[1], errors);
     cout << errors;
     cout << "----------\n";
-    parse_output->debug_print();
+    if (parse_output) {
+        parse_output->debug_print();
+    }
     cout << "\n";
     delete parse_output;
 }
 
-void frontend_vhdl_yyerror(YYLTYPE *locp, yyscan_t scanner, VhdlParseTreeNode **, const char *msg) {
-    cout << "Error " << msg << " on line " << frontend_vhdl_yyget_lineno(scanner) << "\n";
-
-    // Hack for fuzzing?
-    if (strcmp(msg, "syntax is ambiguous") == 0) {
-        abort();
-    }
+void frontend_vhdl_yyerror(YYLTYPE *locp, yyscan_t scanner, VhdlParseTreeNode **, std::string &errors, const char *msg) {
+    errors += "Error ";
+    errors += msg;
+    errors += " on line ";
+    errors += std::to_string(frontend_vhdl_yyget_lineno(scanner));
+    errors += "\n";
 }
-
 
 VhdlParseTreeNode *VhdlParserParseFile(const char *fn, std::string &errors) {
     yyscan_t myscanner;
@@ -77,7 +77,11 @@ VhdlParseTreeNode *VhdlParserParseFile(const char *fn, std::string &errors) {
     }
 
     frontend_vhdl_yyset_in(f, myscanner);
-    ret = frontend_vhdl_yyparse(myscanner, &parse_output);
+    try {
+        ret = frontend_vhdl_yyparse(myscanner, &parse_output, errors);
+    } catch(int) {
+        ret = 1;
+    }
     frontend_vhdl_yylex_destroy(myscanner);
     fclose(f);
 

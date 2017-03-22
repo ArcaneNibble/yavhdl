@@ -53,8 +53,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Make the parser reentrant
 %define api.pure
-%lex-param {void *scanner}
-%parse-param {void *scanner} {VhdlParseTreeNode **parse_output}
+%lex-param {void *scanner} {std::string &errors}
+%parse-param {void *scanner}
+    {VhdlParseTreeNode **parse_output} {std::string &errors}
 %locations
 
 %glr-parser
