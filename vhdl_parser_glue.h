@@ -23,6 +23,9 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+// This file contains both the low-level interface to the lexer/parser as
+// well as the internal "stuff" needed to make the lexer/parser work together.
+
 #ifndef VHDL_PARSER_GLUE_H
 #define VHDL_PARSER_GLUE_H
 
@@ -30,8 +33,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "vhdl_parse_tree.h"
 
+// Main wrapper for low-level parser function.
 VhdlParseTreeNode *VhdlParserParseFile(const char *fn, std::string &errors);
 
+// All the code below here is miscellaneous junk needed for the lexer/parser
+// to talk to each other correctly.
 #if defined(VHDL_PARSER_IN_LEXER)
 #define YY_DECL int frontend_vhdl_yylex \
     (YYSTYPE * yylval_param, YYLTYPE * yylloc_param , yyscan_t yyscanner, \

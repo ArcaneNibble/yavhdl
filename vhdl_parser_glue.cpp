@@ -23,30 +23,8 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <cstdio>
-#include <iostream>
-#include <string>
-using namespace std;
-
 #define VHDL_PARSER_IN_GLUE
 #include "vhdl_parser_glue.h"
-
-int main(int argc, char **argv) {
-    if (argc < 2) {
-        cout << "Usage: " << argv[0] << " file.vhd\n";
-        return -1;
-    }
-
-    std::string errors = std::string();
-    VhdlParseTreeNode *parse_output = VhdlParserParseFile(argv[1], errors);
-    cout << errors;
-    cout << "----------\n";
-    if (parse_output) {
-        parse_output->debug_print();
-    }
-    cout << "\n";
-    delete parse_output;
-}
 
 void frontend_vhdl_yyerror(YYLTYPE *locp, yyscan_t scanner, VhdlParseTreeNode **, std::string &errors, const char *msg) {
     errors += "Error ";
@@ -88,3 +66,27 @@ VhdlParseTreeNode *VhdlParserParseFile(const char *fn, std::string &errors) {
 
     return parse_output;
 }
+
+#ifdef VHDL_PARSER_DEMO_MODE
+
+#include <iostream>
+using namespace std;
+
+int main(int argc, char **argv) {
+    if (argc < 2) {
+        cout << "Usage: " << argv[0] << " file.vhd\n";
+        return -1;
+    }
+
+    std::string errors = std::string();
+    VhdlParseTreeNode *parse_output = VhdlParserParseFile(argv[1], errors);
+    cout << errors;
+    cout << "----------\n";
+    if (parse_output) {
+        parse_output->debug_print();
+    }
+    cout << "\n";
+    delete parse_output;
+}
+
+#endif

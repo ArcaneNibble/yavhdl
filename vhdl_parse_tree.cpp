@@ -31,7 +31,7 @@ using namespace std;
 
 // Names, used for pretty-printing
 // Keep in sync with enum
-const char *parse_tree_types[] = {
+const char * const parse_tree_types[] = {
     "PT_LIT_NULL",
     "PT_LIT_STRING",
     "PT_LIT_BITSTRING",
@@ -298,7 +298,7 @@ const char *parse_tree_types[] = {
     "PT_DESIGN_FILE",
 };
 
-const char *parse_operators[] = {
+const char * const parse_operators[] = {
     "??",
     "and",
     "or",
@@ -336,24 +336,24 @@ const char *parse_operators[] = {
     "not",
 };
 
-const char *range_direction[] = {
+const char * const range_direction[] = {
     "downto",
     "to",
 };
 
-const char *force_modes[] = {
+const char * const force_modes[] = {
     nullptr,
     "in",
     "out",
 };
 
-const char *func_purity[] = {
+const char * const func_purity[] = {
     nullptr,
     "pure",
     "impure",
 };
 
-const char *interface_modes[] = {
+const char * const interface_modes[] = {
     nullptr,
     "in",
     "out",
@@ -362,13 +362,13 @@ const char *interface_modes[] = {
     "linkage",
 };
 
-const char *subprogram_kinds[] = {
+const char * const subprogram_kinds[] = {
     nullptr,
     "procedure",
     "function",
 };
 
-const char *entity_classes[] = {
+const char * const entity_classes[] = {
     "entity",
     "architecture",
     "configuration",
@@ -390,7 +390,7 @@ const char *entity_classes[] = {
     "sequence",
 };
 
-const char *signal_kinds[] = {
+const char * const signal_kinds[] = {
     nullptr,
     "register",
     "bus",
