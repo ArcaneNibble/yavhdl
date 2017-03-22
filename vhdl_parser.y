@@ -244,7 +244,6 @@ entity_declaration:
 _real_entity_declaration:
     KW_ENTITY identifier KW_IS entity_header entity_declarative_part KW_END {
         $$ = new VhdlParseTreeNode(PT_ENTITY);
-        $$->piece_count = 5;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = $5;
@@ -254,7 +253,6 @@ _real_entity_declaration:
     | KW_ENTITY identifier KW_IS entity_header entity_declarative_part
       KW_BEGIN entity_statement_part KW_END {
         $$ = new VhdlParseTreeNode(PT_ENTITY);
-        $$->piece_count = 5;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = $5;
@@ -266,26 +264,22 @@ _real_entity_declaration:
 entity_header:
     %empty {
         $$ = new VhdlParseTreeNode(PT_ENTITY_HEADER);
-        $$->piece_count = 2;
         $$->pieces[0] = nullptr;
         $$->pieces[1] = nullptr;
     }
     | KW_GENERIC '(' interface_list ')' ';' {
         $$ = new VhdlParseTreeNode(PT_ENTITY_HEADER);
-        $$->piece_count = 2;
         $$->pieces[0] = $3;
         $$->pieces[1] = nullptr;
     }
     | KW_PORT '(' interface_list ')' ';' {
         $$ = new VhdlParseTreeNode(PT_ENTITY_HEADER);
-        $$->piece_count = 2;
         $$->pieces[0] = nullptr;
         $$->pieces[1] = $3;
     }
     | KW_GENERIC '(' interface_list ')' ';'
       KW_PORT '(' interface_list ')' ';' {
         $$ = new VhdlParseTreeNode(PT_ENTITY_HEADER);
-        $$->piece_count = 2;
         $$->pieces[0] = $3;
         $$->pieces[1] = $8;
     }
@@ -299,7 +293,6 @@ _real_entity_declarative_part:
     entity_declarative_item
     | _real_entity_declarative_part entity_declarative_item {
         $$ = new VhdlParseTreeNode(PT_DECLARATION_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
@@ -335,7 +328,6 @@ _real_entity_statement_part:
     entity_statement
     | _real_entity_statement_part entity_statement {
         $$ = new VhdlParseTreeNode(PT_SEQUENCE_OF_STATEMENTS);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
@@ -363,7 +355,6 @@ _real_architecture_body:
     block_declarative_part KW_BEGIN _sequence_of_concurrent_statements
     KW_END {
         $$ = new VhdlParseTreeNode(PT_ARCHITECTURE);
-        $$->piece_count = 5;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = $6;
@@ -414,7 +405,6 @@ _real_configuration_declaration:
     _zero_or_more_verification_unit_binding_indications
     block_configuration KW_END {
         $$ = new VhdlParseTreeNode(PT_CONFIGURATION_DECLARATION);
-        $$->piece_count = 6;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = $6;
@@ -435,7 +425,6 @@ _real_configuration_declarative_part:
     configuration_declarative_item
     | _real_configuration_declarative_part configuration_declarative_item {
         $$ = new VhdlParseTreeNode(PT_DECLARATION_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
@@ -450,7 +439,6 @@ block_configuration:
     KW_FOR block_specification _zero_or_more_use_clauses
     _zero_or_more_configuration_items KW_END KW_FOR ';' {
         $$ = new VhdlParseTreeNode(PT_BLOCK_CONFIGURATION);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $3;
         $$->pieces[2] = $4;
@@ -459,12 +447,10 @@ block_configuration:
 block_specification:
     _simple_or_selected_name {
         $$ = new VhdlParseTreeNode(PT_BLOCK_SPECIFICATION);
-        $$->piece_count = 1;
         $$->pieces[0] = $1;
     }
     | _simple_or_selected_name '(' generate_specification ')' {
         $$ = new VhdlParseTreeNode(PT_BLOCK_SPECIFICATION);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -486,7 +472,6 @@ _one_or_more_use_clauses:
     use_clause
     | _one_or_more_use_clauses use_clause {
         $$ = new VhdlParseTreeNode(PT_USE_CLAUSE_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
@@ -499,7 +484,6 @@ _one_or_more_configuration_items:
     configuration_item
     | _one_or_more_configuration_items configuration_item {
         $$ = new VhdlParseTreeNode(PT_CONFIGURATION_ITEM_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
@@ -509,7 +493,6 @@ component_configuration:
     KW_FOR component_specification
     _zero_or_more_verification_unit_binding_indications KW_END KW_FOR ';' {
         $$ = new VhdlParseTreeNode(PT_COMPONENT_CONFIGURATION);
-        $$->piece_count = 4;
         $$->pieces[0] = $2;
         $$->pieces[1] = nullptr;
         $$->pieces[2] = $3;
@@ -518,7 +501,6 @@ component_configuration:
     | KW_FOR component_specification binding_indication ';'
       _zero_or_more_verification_unit_binding_indications KW_END KW_FOR ';' {
         $$ = new VhdlParseTreeNode(PT_COMPONENT_CONFIGURATION);
-        $$->piece_count = 4;
         $$->pieces[0] = $2;
         $$->pieces[1] = $3;
         $$->pieces[2] = $5;
@@ -528,7 +510,6 @@ component_configuration:
       _zero_or_more_verification_unit_binding_indications
       block_configuration KW_END KW_FOR ';' {
         $$ = new VhdlParseTreeNode(PT_COMPONENT_CONFIGURATION);
-        $$->piece_count = 4;
         $$->pieces[0] = $2;
         $$->pieces[1] = nullptr;
         $$->pieces[2] = $3;
@@ -538,7 +519,6 @@ component_configuration:
       _zero_or_more_verification_unit_binding_indications
       block_configuration KW_END KW_FOR ';' {
         $$ = new VhdlParseTreeNode(PT_COMPONENT_CONFIGURATION);
-        $$->piece_count = 4;
         $$->pieces[0] = $2;
         $$->pieces[1] = $3;
         $$->pieces[2] = $5;
@@ -551,7 +531,6 @@ component_configuration:
 subprogram_declaration:
     subprogram_specification ';' {
         $$ = new VhdlParseTreeNode(PT_SUBPROGRAM_DECLARATION);
-        $$->piece_count = 1;
         $$->pieces[0] = $1;
     }
 
@@ -562,13 +541,11 @@ subprogram_specification:
 procedure_specification:
     KW_PROCEDURE designator subprogram_header {
         $$ = new VhdlParseTreeNode(PT_PROCEDURE_SPECIFICATION);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $3;
     }
     | KW_PROCEDURE designator subprogram_header '(' interface_list ')' {
         $$ = new VhdlParseTreeNode(PT_PROCEDURE_SPECIFICATION);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $3;
         $$->pieces[2] = $5;
@@ -576,7 +553,6 @@ procedure_specification:
     | KW_PROCEDURE designator subprogram_header
       KW_PARAMETER '(' interface_list ')' {
         $$ = new VhdlParseTreeNode(PT_PROCEDURE_SPECIFICATION);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $3;
         $$->pieces[2] = $6;
@@ -597,7 +573,6 @@ _real_function_specification:
     KW_FUNCTION designator subprogram_header KW_RETURN type_mark {
         $$ = new VhdlParseTreeNode(PT_FUNCTION_SPECIFICATION);
         $$->purity = PURITY_UNSPEC;
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $5;
         $$->pieces[2] = $3;
@@ -606,7 +581,6 @@ _real_function_specification:
       KW_RETURN type_mark {
         $$ = new VhdlParseTreeNode(PT_FUNCTION_SPECIFICATION);
         $$->purity = PURITY_UNSPEC;
-        $$->piece_count = 4;
         $$->pieces[0] = $2;
         $$->pieces[1] = $8;
         $$->pieces[2] = $3;
@@ -616,7 +590,6 @@ _real_function_specification:
       KW_PARAMETER '(' interface_list ')' KW_RETURN type_mark {
         $$ = new VhdlParseTreeNode(PT_FUNCTION_SPECIFICATION);
         $$->purity = PURITY_UNSPEC;
-        $$->piece_count = 4;
         $$->pieces[0] = $2;
         $$->pieces[1] = $9;
         $$->pieces[2] = $3;
@@ -627,19 +600,16 @@ subprogram_header:
     %empty
     | KW_GENERIC '(' interface_list ')' {
         $$ = new VhdlParseTreeNode(PT_SUBPROGRAM_HEADER);
-        $$->piece_count = 2;
         $$->pieces[0] = $3;
         $$->pieces[1] = nullptr;
     }
     | generic_map_aspect {
         $$ = new VhdlParseTreeNode(PT_SUBPROGRAM_HEADER);
-        $$->piece_count = 2;
         $$->pieces[0] = nullptr;
         $$->pieces[1] = $1;
     }
     | KW_GENERIC '(' interface_list ')' generic_map_aspect {
         $$ = new VhdlParseTreeNode(PT_SUBPROGRAM_HEADER);
-        $$->piece_count = 2;
         $$->pieces[0] = $3;
         $$->pieces[1] = $5;
     }
@@ -679,7 +649,6 @@ _real_subprogram_body:
     KW_BEGIN sequence_of_statements KW_END {
         $$ = new VhdlParseTreeNode(PT_SUBPROGRAM_BODY);
         $$->subprogram_kind = SUBPROGRAM_UNSPEC;
-        $$->piece_count = 4;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
         $$->pieces[2] = $5;
@@ -694,7 +663,6 @@ _real_subprogram_declarative_part:
     subprogram_declarative_item
     | _real_subprogram_declarative_part subprogram_declarative_item {
         $$ = new VhdlParseTreeNode(PT_DECLARATION_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
@@ -732,7 +700,6 @@ subprogram_instantiation_declaration:
 _real_subprogram_instantiation_declaration:
     designator KW_IS KW_NEW name {
         $$ = new VhdlParseTreeNode(PT_SUBPROGRAM_INSTANTIATION_DECLARATION);
-        $$->piece_count = 4;
         $$->pieces[0] = $1;
         $$->pieces[1] = $4;
         $$->pieces[2] = nullptr;
@@ -740,7 +707,6 @@ _real_subprogram_instantiation_declaration:
     }
     | designator KW_IS KW_NEW name signature {
         $$ = new VhdlParseTreeNode(PT_SUBPROGRAM_INSTANTIATION_DECLARATION);
-        $$->piece_count = 4;
         $$->pieces[0] = $1;
         $$->pieces[1] = $4;
         $$->pieces[2] = $5;
@@ -748,7 +714,6 @@ _real_subprogram_instantiation_declaration:
     }
     | designator KW_IS KW_NEW name generic_map_aspect {
         $$ = new VhdlParseTreeNode(PT_SUBPROGRAM_INSTANTIATION_DECLARATION);
-        $$->piece_count = 4;
         $$->pieces[0] = $1;
         $$->pieces[1] = $4;
         $$->pieces[2] = nullptr;
@@ -756,7 +721,6 @@ _real_subprogram_instantiation_declaration:
     }
     | designator KW_IS KW_NEW name signature generic_map_aspect {
         $$ = new VhdlParseTreeNode(PT_SUBPROGRAM_INSTANTIATION_DECLARATION);
-        $$->piece_count = 4;
         $$->pieces[0] = $1;
         $$->pieces[1] = $4;
         $$->pieces[2] = $5;
@@ -767,25 +731,21 @@ _real_subprogram_instantiation_declaration:
 signature:
     '[' ']' {
         $$ = new VhdlParseTreeNode(PT_SIGNATURE);
-        $$->piece_count = 2;
         $$->pieces[0] = nullptr;
         $$->pieces[1] = nullptr;
     }
     | '[' _one_or_more_type_marks ']' {
         $$ = new VhdlParseTreeNode(PT_SIGNATURE);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = nullptr;
     }
     | '[' KW_RETURN type_mark ']' {
         $$ = new VhdlParseTreeNode(PT_SIGNATURE);
-        $$->piece_count = 2;
         $$->pieces[0] = nullptr;
         $$->pieces[1] = $3;
     }
     | '[' _one_or_more_type_marks KW_RETURN type_mark ']' {
         $$ = new VhdlParseTreeNode(PT_SIGNATURE);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
     }
@@ -794,7 +754,6 @@ _one_or_more_type_marks:
     type_mark
     | _one_or_more_type_marks ',' type_mark {
         $$ = new VhdlParseTreeNode(PT_TYPE_MARK_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -816,7 +775,6 @@ _real_package_declaration:
     KW_PACKAGE identifier KW_IS
     package_header package_declarative_part KW_END {
         $$ = new VhdlParseTreeNode(PT_PACKAGE_DECLARATION);
-        $$->piece_count = 4;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = $5;
@@ -828,13 +786,11 @@ package_header:
     // generic_clause got folded in because why not
     | KW_GENERIC '(' interface_list ')' ';' {
         $$ = new VhdlParseTreeNode(PT_PACKAGE_HEADER);
-        $$->piece_count = 2;
         $$->pieces[0] = $3;
         $$->pieces[1] = nullptr;
     }
     | KW_GENERIC '(' interface_list ')' ';' generic_map_aspect ';' {
         $$ = new VhdlParseTreeNode(PT_PACKAGE_HEADER);
-        $$->piece_count = 2;
         $$->pieces[0] = $3;
         $$->pieces[1] = $6;
     }
@@ -847,7 +803,6 @@ _real_package_declarative_part:
     package_declarative_item
     | _real_package_declarative_part package_declarative_item {
         $$ = new VhdlParseTreeNode(PT_DECLARATION_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
@@ -888,7 +843,6 @@ package_body:
 _real_package_body:
     KW_PACKAGE KW_BODY identifier KW_IS package_body_declarative_part KW_END {
         $$ = new VhdlParseTreeNode(PT_PACKAGE_BODY);
-        $$->piece_count = 3;
         $$->pieces[0] = $3;
         $$->pieces[1] = $5;
         $$->pieces[2] = nullptr;
@@ -902,7 +856,6 @@ _real_package_body_declarative_part:
     package_body_declarative_item
     | _real_package_body_declarative_part package_body_declarative_item {
         $$ = new VhdlParseTreeNode(PT_DECLARATION_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
@@ -930,13 +883,11 @@ package_body_declarative_item:
 package_instantiation_declaration:
     KW_PACKAGE identifier KW_IS KW_NEW name ';' {
         $$ = new VhdlParseTreeNode(PT_PACKAGE_INSTANTIATION_DECLARATION);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $5;
     }
     | KW_PACKAGE identifier KW_IS KW_NEW name generic_map_aspect ';' {
         $$ = new VhdlParseTreeNode(PT_PACKAGE_INSTANTIATION_DECLARATION);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $5;
         $$->pieces[2] = $6;
@@ -980,7 +931,6 @@ _almost_range:
 enumeration_type_definition:
     '(' _one_or_more_enumeration_literals ')' {
         $$ = new VhdlParseTreeNode(PT_ENUMERATION_TYPE_DEFINITION);
-        $$->piece_count = 1;
         $$->pieces[0] = $2;
     }
 
@@ -988,7 +938,6 @@ _one_or_more_enumeration_literals:
     enumeration_literal
     | _one_or_more_enumeration_literals ',' enumeration_literal {
         $$ = new VhdlParseTreeNode(PT_ENUM_LITERAL_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -1001,7 +950,6 @@ enumeration_literal:
 _integer_or_floating_type_definition:
     range_constraint {
         $$ = new VhdlParseTreeNode(PT_INTEGER_FLOAT_TYPE_DEFINITION);
-        $$->piece_count = 1;
         $$->pieces[0] = $1;
     }
 
@@ -1016,7 +964,6 @@ physical_type_definition:
 _real_physical_type_definition:
     range_constraint KW_UNITS identifier ';' KW_END KW_UNITS {
         $$ = new VhdlParseTreeNode(PT_PHYSICAL_TYPE_DEFINITION);
-        $$->piece_count = 4;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
         $$->pieces[2] = nullptr;
@@ -1025,7 +972,6 @@ _real_physical_type_definition:
     | range_constraint KW_UNITS identifier ';'
       _one_or_more_secondary_unit_declarations KW_END KW_UNITS {
         $$ = new VhdlParseTreeNode(PT_PHYSICAL_TYPE_DEFINITION);
-        $$->piece_count = 4;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
         $$->pieces[2] = $5;
@@ -1036,7 +982,6 @@ _one_or_more_secondary_unit_declarations:
     secondary_unit_declaration
     | _one_or_more_secondary_unit_declarations secondary_unit_declaration {
         $$ = new VhdlParseTreeNode(PT_SECONDARY_UNIT_DECLARATION_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
@@ -1044,7 +989,6 @@ _one_or_more_secondary_unit_declarations:
 secondary_unit_declaration:
     identifier '=' physical_literal ';' {
         $$ = new VhdlParseTreeNode(PT_SECONDARY_UNIT_DECLARATION);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -1058,7 +1002,6 @@ physical_literal:
 _almost_physical_literal:
     abstract_literal _simple_or_selected_name {
         $$ = new VhdlParseTreeNode(PT_LIT_PHYS);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $1;
     }
@@ -1078,7 +1021,6 @@ unbounded_array_definition:
     KW_ARRAY '(' _one_or_more_index_subtype_definition ')'
     KW_OF subtype_indication {
         $$ = new VhdlParseTreeNode(PT_UNBOUNDED_ARRAY_DEFINITION);
-        $$->piece_count = 2;
         $$->pieces[0] = $3;
         $$->pieces[1] = $6;
     }
@@ -1086,7 +1028,6 @@ unbounded_array_definition:
 constrained_array_definition:
     KW_ARRAY index_constraint KW_OF subtype_indication {
         $$ = new VhdlParseTreeNode(PT_CONSTRAINED_ARRAY_DEFINITION);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
     }
@@ -1095,7 +1036,6 @@ _one_or_more_index_subtype_definition:
     index_subtype_definition
     | _one_or_more_index_subtype_definition ',' index_subtype_definition {
         $$ = new VhdlParseTreeNode(PT_INDEX_SUBTYPE_DEFINITION_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -1110,13 +1050,11 @@ array_constraint:
     | _array_constraint_open_and_element_constraint
     | index_constraint {
         $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = nullptr;
     }
     | index_constraint element_constraint {
         $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
@@ -1134,7 +1072,6 @@ _after_slice_limited_array_constraint:
 _array_constraint_open:
     '(' KW_OPEN ')' {
         $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
-        $$->piece_count = 2;
         $$->pieces[0] = nullptr;
         $$->pieces[1] = nullptr;
     }
@@ -1142,7 +1079,6 @@ _array_constraint_open:
 _array_constraint_open_and_element_constraint:
     '(' KW_OPEN ')' element_constraint {
         $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
-        $$->piece_count = 2;
         $$->pieces[0] = nullptr;
         $$->pieces[1] = $4;
     }
@@ -1150,13 +1086,11 @@ _array_constraint_open_and_element_constraint:
 _array_constraint_definitely_multiple_ranges:
     _definitely_index_constraint {
         $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = nullptr;
     }
     | _definitely_index_constraint element_constraint {
         $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
@@ -1175,7 +1109,6 @@ _one_or_more_discrete_range:
     discrete_range
     | _one_or_more_discrete_range ',' discrete_range {
         $$ = new VhdlParseTreeNode(PT_INDEX_CONSTRAINT);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -1184,20 +1117,17 @@ _one_or_more_discrete_range:
 _two_or_more_discrete_range:
     _almost_discrete_range ',' discrete_range {
         $$ = new VhdlParseTreeNode(PT_INDEX_CONSTRAINT);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
     // HACK
     | _one_or_more_expressions ',' _almost_discrete_range {
         $$ = new VhdlParseTreeNode(PT_INDEX_CONSTRAINT);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
     | _two_or_more_discrete_range ',' discrete_range {
         $$ = new VhdlParseTreeNode(PT_INDEX_CONSTRAINT);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -1223,7 +1153,6 @@ record_type_definition:
 _real_record_type_definition:
     KW_RECORD _one_or_more_element_declarations KW_END KW_RECORD {
         $$ = new VhdlParseTreeNode(PT_RECORD_TYPE_DEFINITION);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = nullptr;
     }
@@ -1232,7 +1161,6 @@ _one_or_more_element_declarations:
     element_declaration
     | _one_or_more_element_declarations element_declaration {
         $$ = new VhdlParseTreeNode(PT_ELEMENT_DECLARATION_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
@@ -1240,7 +1168,6 @@ _one_or_more_element_declarations:
 element_declaration:
     identifier_list ':' subtype_indication ';' {
         $$ = new VhdlParseTreeNode(PT_ELEMENT_DECLARATION);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -1249,7 +1176,6 @@ identifier_list:
     identifier
     | identifier_list ',' identifier {
         $$ = new VhdlParseTreeNode(PT_ID_LIST_REAL);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -1263,7 +1189,6 @@ _one_or_more_record_element_constraint:
     record_element_constraint
     | _one_or_more_record_element_constraint ',' record_element_constraint {
         $$ = new VhdlParseTreeNode(PT_RECORD_CONSTRAINT);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -1271,7 +1196,6 @@ _one_or_more_record_element_constraint:
 record_element_constraint:
     identifier element_constraint {
         $$ = new VhdlParseTreeNode(PT_RECORD_ELEMENT_CONSTRAINT);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
@@ -1287,7 +1211,6 @@ _one_or_more_association_list_record_element_constraint:
     | _one_or_more_association_list_record_element_constraint ','
       record_element_constraint {
         $$ = new VhdlParseTreeNode(PT_RECORD_CONSTRAINT);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -1295,7 +1218,6 @@ _one_or_more_association_list_record_element_constraint:
     | _one_or_more_expressions ','
       _association_list_record_element_constraint {
         $$ = new VhdlParseTreeNode(PT_RECORD_CONSTRAINT);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -1303,16 +1225,13 @@ _one_or_more_association_list_record_element_constraint:
 _association_list_record_element_constraint:
     identifier _association_list_for_record_element_constraint {
         $$ = new VhdlParseTreeNode(PT_RECORD_ELEMENT_CONSTRAINT);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
     // HACK, FIXME
     | _hack_name_for_association_list _after_slice_limited_array_constraint {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION_AMBIG_WTF);
-        $$->piece_count = 1;
         $$->pieces[0] = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
-        $$->pieces[0]->piece_count = 2;
         $$->pieces[0]->pieces[0] = $1;
         $$->pieces[0]->pieces[1] = $2;
     }
@@ -1321,14 +1240,12 @@ _association_list_record_element_constraint:
 access_type_definition:
     KW_ACCESS subtype_indication {
         $$ = new VhdlParseTreeNode(PT_ACCESS_TYPE_DEFINITION);
-        $$->piece_count = 1;
         $$->pieces[0] = $2;
     }
 
 incomplete_type_declaration:
     KW_TYPE identifier ';' {
         $$ = new VhdlParseTreeNode(PT_INCOMPLETE_TYPE_DECLARATION);
-        $$->piece_count = 1;
         $$->pieces[0] = $2;
     }
 
@@ -1336,7 +1253,6 @@ incomplete_type_declaration:
 file_type_definition:
     KW_FILE KW_OF type_mark {
         $$ = new VhdlParseTreeNode(PT_FILE_TYPE_DEFINITION);
-        $$->piece_count = 1;
         $$->pieces[0] = $3;
 
     }
@@ -1357,7 +1273,6 @@ protected_type_declaration:
 _real_protected_type_declaration:
     KW_PROTECTED protected_type_declarative_part KW_END KW_PROTECTED {
         $$ = new VhdlParseTreeNode(PT_PROTECTED_TYPE_DECLARATION);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = nullptr;
     }
@@ -1370,7 +1285,6 @@ _real_protected_type_declarative_part:
     protected_type_declarative_item
     | _real_protected_type_declarative_part protected_type_declarative_item {
         $$ = new VhdlParseTreeNode(PT_DECLARATION_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
@@ -1393,7 +1307,6 @@ _real_protected_type_body:
     KW_PROTECTED KW_BODY protected_type_body_declarative_part
     KW_END KW_PROTECTED KW_BODY {
         $$ = new VhdlParseTreeNode(PT_PROTECTED_TYPE_BODY);
-        $$->piece_count = 2;
         $$->pieces[0] = $3;
         $$->pieces[1] = nullptr;
     }
@@ -1407,7 +1320,6 @@ _real_protected_type_body_declarative_part:
     | _real_protected_type_body_declarative_part
       protected_type_body_declarative_item {
         $$ = new VhdlParseTreeNode(PT_DECLARATION_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
@@ -1441,7 +1353,6 @@ type_declaration:
 full_type_declaration:
     KW_TYPE identifier KW_IS type_definition ';' {
         $$ = new VhdlParseTreeNode(PT_FULL_TYPE_DECLARATION);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
     }
@@ -1457,7 +1368,6 @@ type_definition:
 subtype_declaration:
     KW_SUBTYPE identifier KW_IS subtype_indication ';' {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_DECLARATION);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
     }
@@ -1466,21 +1376,18 @@ subtype_indication:
     type_mark
     | resolution_indication type_mark {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $1;
         $$->pieces[2] = nullptr;
     }
     | type_mark constraint {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
-        $$->piece_count = 3;
         $$->pieces[0] = $1;
         $$->pieces[1] = nullptr;
         $$->pieces[2] = $2;
     }
     | resolution_indication type_mark constraint {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $1;
         $$->pieces[2] = $3;
@@ -1492,7 +1399,6 @@ subtype_indication:
 _almost_discrete_subtype_indication:
     type_mark _discrete_constraint {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
-        $$->piece_count = 3;
         $$->pieces[0] = $1;
         $$->pieces[1] = nullptr;
         $$->pieces[2] = $2;
@@ -1510,7 +1416,6 @@ _allocator_subtype_indication:
     type_mark
     | type_mark _allocator_constraint {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
-        $$->piece_count = 3;
         $$->pieces[0] = $1;
         $$->pieces[1] = nullptr;
         $$->pieces[2] = $2;
@@ -1520,21 +1425,18 @@ _allocator_subtype_indication:
 _association_list_subtype_indication:
     resolution_indication type_mark {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $1;
         $$->pieces[2] = nullptr;
     }
     | type_mark _association_list_definitely_constraint {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
-        $$->piece_count = 3;
         $$->pieces[0] = $1;
         $$->pieces[1] = nullptr;
         $$->pieces[2] = $2;
     }
     | resolution_indication type_mark constraint {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $1;
         $$->pieces[2] = $3;
@@ -1542,9 +1444,7 @@ _association_list_subtype_indication:
     // HACK, FIXME
     | _hack_name_for_association_list _after_slice_limited_array_constraint {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION_AMBIG_WTF);
-        $$->piece_count = 1;
         $$->pieces[0] = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
-        $$->pieces[0]->piece_count = 2;
         $$->pieces[0]->pieces[0] = $1;
         $$->pieces[0]->pieces[1] = $2;
     }
@@ -1558,17 +1458,14 @@ resolution_indication:
 _parens_element_resolution:
     '(' function_name ')' {
         $$ = new VhdlParseTreeNode(PT_ELEMENT_RESOLUTION_NEST);
-        $$->piece_count = 1;
         $$->pieces[0] = $2;
     }
     | '(' _parens_element_resolution ')' {
         $$ = new VhdlParseTreeNode(PT_ELEMENT_RESOLUTION_NEST);
-        $$->piece_count = 1;
         $$->pieces[0] = $2;
     }
     | '(' record_resolution ')' {
         $$ = new VhdlParseTreeNode(PT_ELEMENT_RESOLUTION_NEST);
-        $$->piece_count = 1;
         $$->pieces[0] = $2;
     }
 
@@ -1576,7 +1473,6 @@ record_resolution:
     record_element_resolution
     | record_resolution ',' record_element_resolution {
         $$ = new VhdlParseTreeNode(PT_RECORD_RESOLUTION);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -1584,7 +1480,6 @@ record_resolution:
 record_element_resolution:
     identifier resolution_indication {
         $$ = new VhdlParseTreeNode(PT_RECORD_ELEMENT_RESOLUTION);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
@@ -1630,14 +1525,12 @@ _association_list_for_record_element_constraint:
 constant_declaration:
     KW_CONSTANT identifier_list ':' subtype_indication ';' {
         $$ = new VhdlParseTreeNode(PT_CONSTANT_DECLARATION);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
     }
     | KW_CONSTANT identifier_list ':' subtype_indication
       DL_ASS expression ';' {
         $$ = new VhdlParseTreeNode(PT_CONSTANT_DECLARATION);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = $6;
@@ -1647,7 +1540,6 @@ constant_declaration:
 signal_declaration:
     KW_SIGNAL identifier_list ':' subtype_indication ';' {
         $$ = new VhdlParseTreeNode(PT_SIGNAL_DECLARATION);
-        $$->piece_count = 4;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = nullptr;
@@ -1656,7 +1548,6 @@ signal_declaration:
     | KW_SIGNAL identifier_list ':' subtype_indication
       DL_ASS expression ';' {
         $$ = new VhdlParseTreeNode(PT_SIGNAL_DECLARATION);
-        $$->piece_count = 4;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = nullptr;
@@ -1664,7 +1555,6 @@ signal_declaration:
     }
     | KW_SIGNAL identifier_list ':' subtype_indication signal_kind ';' {
         $$ = new VhdlParseTreeNode(PT_SIGNAL_DECLARATION);
-        $$->piece_count = 4;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = $5;
@@ -1673,7 +1563,6 @@ signal_declaration:
     | KW_SIGNAL identifier_list ':' subtype_indication signal_kind
       DL_ASS expression ';' {
         $$ = new VhdlParseTreeNode(PT_SIGNAL_DECLARATION);
-        $$->piece_count = 4;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = $5;
@@ -1701,7 +1590,6 @@ variable_declaration:
 _real_variable_declaration:
     KW_VARIABLE identifier_list ':' subtype_indication ';' {
         $$ = new VhdlParseTreeNode(PT_VARIABLE_DECLARATION);
-        $$->piece_count = 2;
         $$->boolean = false;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
@@ -1709,7 +1597,6 @@ _real_variable_declaration:
     | KW_VARIABLE identifier_list ':' subtype_indication
       DL_ASS expression ';' {
         $$ = new VhdlParseTreeNode(PT_VARIABLE_DECLARATION);
-        $$->piece_count = 3;
         $$->boolean = false;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
@@ -1720,14 +1607,12 @@ _real_variable_declaration:
 file_declaration:
     KW_FILE identifier_list ':' subtype_indication ';' {
         $$ = new VhdlParseTreeNode(PT_FILE_DECLARATION);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
     }
     | KW_FILE identifier_list ':' subtype_indication
       file_open_information ';' {
         $$ = new VhdlParseTreeNode(PT_FILE_DECLARATION);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = $5;
@@ -1736,12 +1621,10 @@ file_declaration:
 file_open_information:
     KW_IS expression {
         $$ = new VhdlParseTreeNode(PT_FILE_OPEN_INFORMATION);
-        $$->piece_count = 1;
         $$->pieces[0] = $2;
     }
     | KW_OPEN expression KW_IS expression {
         $$ = new VhdlParseTreeNode(PT_FILE_OPEN_INFORMATION);
-        $$->piece_count = 2;
         $$->pieces[0] = $4;
         $$->pieces[1] = $2;
     }
@@ -1788,7 +1671,6 @@ _definitely_interface_variable_declaration:
 _interface_ambig_obj_declaration:
     identifier_list ':' subtype_indication {
         $$ = new VhdlParseTreeNode(PT_INTERFACE_AMBIG_OBJ_DECLARATION);
-        $$->piece_count = 4;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
         $$->pieces[2] = nullptr;
@@ -1796,7 +1678,6 @@ _interface_ambig_obj_declaration:
     }
     | identifier_list ':' mode subtype_indication {
         $$ = new VhdlParseTreeNode(PT_INTERFACE_AMBIG_OBJ_DECLARATION);
-        $$->piece_count = 4;
         $$->pieces[0] = $1;
         $$->pieces[1] = $4;
         $$->pieces[2] = nullptr;
@@ -1804,7 +1685,6 @@ _interface_ambig_obj_declaration:
     }
     | identifier_list ':' subtype_indication DL_ASS expression {
         $$ = new VhdlParseTreeNode(PT_INTERFACE_AMBIG_OBJ_DECLARATION);
-        $$->piece_count = 4;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
         $$->pieces[2] = $5;
@@ -1812,7 +1692,6 @@ _interface_ambig_obj_declaration:
     }
     | identifier_list ':' mode subtype_indication DL_ASS expression {
         $$ = new VhdlParseTreeNode(PT_INTERFACE_AMBIG_OBJ_DECLARATION);
-        $$->piece_count = 4;
         $$->pieces[0] = $1;
         $$->pieces[1] = $4;
         $$->pieces[2] = $6;
@@ -1823,7 +1702,6 @@ _interface_ambig_obj_declaration:
 _interface_signal_bus_declaration:
     identifier_list ':' subtype_indication KW_BUS {
         $$ = new VhdlParseTreeNode(PT_INTERFACE_SIGNAL_DECLARATION);
-        $$->piece_count = 4;
         $$->boolean = true;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
@@ -1832,7 +1710,6 @@ _interface_signal_bus_declaration:
     }
     | identifier_list ':' mode subtype_indication KW_BUS {
         $$ = new VhdlParseTreeNode(PT_INTERFACE_SIGNAL_DECLARATION);
-        $$->piece_count = 4;
         $$->boolean = true;
         $$->pieces[0] = $1;
         $$->pieces[1] = $4;
@@ -1841,7 +1718,6 @@ _interface_signal_bus_declaration:
     }
     | identifier_list ':' subtype_indication KW_BUS DL_ASS expression {
         $$ = new VhdlParseTreeNode(PT_INTERFACE_SIGNAL_DECLARATION);
-        $$->piece_count = 4;
         $$->boolean = true;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
@@ -1850,7 +1726,6 @@ _interface_signal_bus_declaration:
     }
     | identifier_list ':' mode subtype_indication KW_BUS DL_ASS expression {
         $$ = new VhdlParseTreeNode(PT_INTERFACE_SIGNAL_DECLARATION);
-        $$->piece_count = 4;
         $$->boolean = true;
         $$->pieces[0] = $1;
         $$->pieces[1] = $4;
@@ -1883,7 +1758,6 @@ mode:
 interface_file_declaration:
     KW_FILE identifier_list ':' subtype_indication {
         $$ = new VhdlParseTreeNode(PT_INTERFACE_FILE_DECLARATION);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
     }
@@ -1892,7 +1766,6 @@ interface_file_declaration:
 interface_type_declaration:
     KW_TYPE identifier {
         $$ = new VhdlParseTreeNode(PT_INTERFACE_TYPE_DECLARATION);
-        $$->piece_count = 1;
         $$->pieces[0] = $2;
     }
 
@@ -1900,18 +1773,15 @@ interface_type_declaration:
 interface_subprogram_declaration:
     interface_subprogram_specification {
         $$ = new VhdlParseTreeNode(PT_INTERFACE_SUBPROGRAM_DECLARATION);
-        $$->piece_count = 1;
         $$->pieces[0] = $1;
     }
     | interface_subprogram_specification KW_IS name {
         $$ = new VhdlParseTreeNode(PT_INTERFACE_SUBPROGRAM_DECLARATION);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
     | interface_subprogram_specification KW_IS DL_BOX {
         $$ = new VhdlParseTreeNode(PT_INTERFACE_SUBPROGRAM_DECLARATION);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] =
             new VhdlParseTreeNode(PT_INTERFACE_SUBPROGRAM_DEFAULT_BOX);
@@ -1924,18 +1794,15 @@ interface_subprogram_specification:
 interface_procedure_specification:
     KW_PROCEDURE designator {
         $$ = new VhdlParseTreeNode(PT_INTERFACE_PROCEDURE_SPECIFICATION);
-        $$->piece_count = 1;
         $$->pieces[0] = $2;
     }
     | KW_PROCEDURE designator '(' interface_list ')' {
         $$ = new VhdlParseTreeNode(PT_INTERFACE_PROCEDURE_SPECIFICATION);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
     }
     | KW_PROCEDURE designator KW_PARAMETER '(' interface_list ')' {
         $$ = new VhdlParseTreeNode(PT_INTERFACE_PROCEDURE_SPECIFICATION);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $5;
     }
@@ -1955,14 +1822,12 @@ _real_interface_function_specification:
     KW_FUNCTION designator KW_RETURN type_mark {
         $$ = new VhdlParseTreeNode(PT_INTERFACE_FUNCTION_SPECIFICATION);
         $$->purity = PURITY_UNSPEC;
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
     }
     | KW_FUNCTION designator '(' interface_list ')' KW_RETURN type_mark {
         $$ = new VhdlParseTreeNode(PT_INTERFACE_FUNCTION_SPECIFICATION);
         $$->purity = PURITY_UNSPEC;
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $7;
         $$->pieces[2] = $4;
@@ -1971,7 +1836,6 @@ _real_interface_function_specification:
       KW_RETURN type_mark {
         $$ = new VhdlParseTreeNode(PT_INTERFACE_FUNCTION_SPECIFICATION);
         $$->purity = PURITY_UNSPEC;
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $8;
         $$->pieces[2] = $5;
@@ -1982,7 +1846,6 @@ interface_package_declaration:
     KW_PACKAGE identifier
     KW_IS KW_NEW name interface_package_generic_map_aspect {
         $$ = new VhdlParseTreeNode(PT_INTERFACE_PACKAGE_DECLARATION);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $5;
         $$->pieces[2] = $6;
@@ -2002,7 +1865,6 @@ interface_list:
     interface_declaration
     | interface_list ';' interface_declaration {
         $$ = new VhdlParseTreeNode(PT_INTERFACE_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -2017,28 +1879,24 @@ _definitely_parameter_association_list:
     }
     | _one_or_more_expressions ',' _definitely_parameter_association_element {
         $$ = new VhdlParseTreeNode(PT_PARAMETER_ASSOCIATION_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
     // HACK
     | _one_or_more_expressions ',' KW_OPEN {
         $$ = new VhdlParseTreeNode(PT_PARAMETER_ASSOCIATION_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = new VhdlParseTreeNode(PT_TOK_OPEN);
     }
     | _definitely_parameter_association_list ','
       _definitely_parameter_association_element {
         $$ = new VhdlParseTreeNode(PT_PARAMETER_ASSOCIATION_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
     // HACK
     | _definitely_parameter_association_list ',' _function_actual_part {
         $$ = new VhdlParseTreeNode(PT_PARAMETER_ASSOCIATION_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -2047,7 +1905,6 @@ _definitely_parameter_association_list:
 _definitely_parameter_association_element:
     name DL_ARR _function_actual_part {
         $$ = new VhdlParseTreeNode(PT_PARAMETER_ASSOCIATION_ELEMENT);
-        $$->piece_count = 2;
         $$->pieces[0] = $3;
         $$->pieces[1] = $1;
     }
@@ -2066,7 +1923,6 @@ association_list:
     association_element
     | association_list ',' association_element {
         $$ = new VhdlParseTreeNode(PT_ASSOCIATION_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -2074,12 +1930,10 @@ association_list:
 association_element:
     actual_part {
         $$ = new VhdlParseTreeNode(PT_ASSOCIATION_ELEMENT);
-        $$->piece_count = 1;
         $$->pieces[0] = $1;
     }
     | name DL_ARR actual_part {
         $$ = new VhdlParseTreeNode(PT_ASSOCIATION_ELEMENT);
-        $$->piece_count = 2;
         $$->pieces[0] = $3;
         $$->pieces[1] = $1;
     }
@@ -2089,7 +1943,6 @@ actual_part:
     expression
     | KW_INERTIAL expression {
         $$ = new VhdlParseTreeNode(PT_INERTIAL_EXPRESSION);
-        $$->piece_count = 1;
         $$->pieces[0] = $2;
     }
     // expression includes all the possible types of names
@@ -2101,14 +1954,12 @@ actual_part:
 generic_map_aspect:
     KW_GENERIC KW_MAP '(' association_list ')' {
         $$ = new VhdlParseTreeNode(PT_GENERIC_MAP_ASPECT);
-        $$->piece_count = 1;
         $$->pieces[0] = $4;
     }
 
 port_map_aspect:
     KW_PORT KW_MAP '(' association_list ')' {
         $$ = new VhdlParseTreeNode(PT_PORT_MAP_ASPECT);
-        $$->piece_count = 1;
         $$->pieces[0] = $4;
     }
 
@@ -2116,7 +1967,6 @@ port_map_aspect:
 alias_declaration:
     KW_ALIAS alias_designator KW_IS name ';' {
         $$ = new VhdlParseTreeNode(PT_ALIAS_DECLARATION);
-        $$->piece_count = 4;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = nullptr;
@@ -2124,7 +1974,6 @@ alias_declaration:
     }
     | KW_ALIAS alias_designator ':' subtype_indication KW_IS name ';' {
         $$ = new VhdlParseTreeNode(PT_ALIAS_DECLARATION);
-        $$->piece_count = 4;
         $$->pieces[0] = $2;
         $$->pieces[1] = $6;
         $$->pieces[2] = $4;
@@ -2132,7 +1981,6 @@ alias_declaration:
     }
     | KW_ALIAS alias_designator KW_IS name signature ';' {
         $$ = new VhdlParseTreeNode(PT_ALIAS_DECLARATION);
-        $$->piece_count = 4;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = nullptr;
@@ -2141,7 +1989,6 @@ alias_declaration:
     | KW_ALIAS alias_designator ':' subtype_indication
       KW_IS name signature ';' {
         $$ = new VhdlParseTreeNode(PT_ALIAS_DECLARATION);
-        $$->piece_count = 4;
         $$->pieces[0] = $2;
         $$->pieces[1] = $6;
         $$->pieces[2] = $4;
@@ -2157,7 +2004,6 @@ alias_designator:
 attribute_declaration:
     KW_ATTRIBUTE identifier ':' type_mark ';' {
         $$ = new VhdlParseTreeNode(PT_ATTRIBUTE_DECLARATION);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
     }
@@ -2174,7 +2020,6 @@ component_declaration:
 _real_component_declaration:
     KW_COMPONENT identifier __maybe_is KW_END KW_COMPONENT {
         $$ = new VhdlParseTreeNode(PT_COMPONENT_DECLARATION);
-        $$->piece_count = 4;
         $$->pieces[0] = $2;
         $$->pieces[1] = nullptr;
         $$->pieces[2] = nullptr;
@@ -2184,7 +2029,6 @@ _real_component_declaration:
       KW_GENERIC '(' interface_list ')' ';'
       KW_END KW_COMPONENT {
         $$ = new VhdlParseTreeNode(PT_COMPONENT_DECLARATION);
-        $$->piece_count = 4;
         $$->pieces[0] = $2;
         $$->pieces[1] = $6;
         $$->pieces[2] = nullptr;
@@ -2194,7 +2038,6 @@ _real_component_declaration:
       KW_PORT '(' interface_list ')' ';'
       KW_END KW_COMPONENT {
         $$ = new VhdlParseTreeNode(PT_COMPONENT_DECLARATION);
-        $$->piece_count = 4;
         $$->pieces[0] = $2;
         $$->pieces[1] = nullptr;
         $$->pieces[2] = $6;
@@ -2205,7 +2048,6 @@ _real_component_declaration:
       KW_PORT '(' interface_list ')' ';'
       KW_END KW_COMPONENT {
         $$ = new VhdlParseTreeNode(PT_COMPONENT_DECLARATION);
-        $$->piece_count = 4;
         $$->pieces[0] = $2;
         $$->pieces[1] = $6;
         $$->pieces[2] = $11;
@@ -2216,7 +2058,6 @@ _real_component_declaration:
 group_template_declaration:
     KW_GROUP identifier KW_IS '(' entity_class_entry_list ')' ';' {
         $$ = new VhdlParseTreeNode(PT_GROUP_TEMPLATE_DECLARATION);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $5;
     }
@@ -2225,7 +2066,6 @@ entity_class_entry_list:
     entity_class_entry
     | entity_class_entry_list ',' entity_class_entry {
         $$ = new VhdlParseTreeNode(PT_ENTITY_CLASS_ENTRY_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -2233,13 +2073,11 @@ entity_class_entry_list:
 entity_class_entry:
     entity_class {
         $$ = new VhdlParseTreeNode(PT_ENTITY_CLASS_ENTRY);
-        $$->piece_count = 1;
         $$->boolean = false;
         $$->pieces[0] = $1;
     }
     | entity_class DL_BOX {
         $$ = new VhdlParseTreeNode(PT_ENTITY_CLASS_ENTRY);
-        $$->piece_count = 1;
         $$->boolean = true;
         $$->pieces[0] = $1;
     }
@@ -2249,7 +2087,6 @@ group_declaration:
     KW_GROUP identifier ':' _simple_or_selected_name
     '(' _list_of_names ')' ';' {
         $$ = new VhdlParseTreeNode(PT_GROUP_DECLARATION);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = $6;
@@ -2261,7 +2098,6 @@ group_declaration:
 attribute_specification:
     KW_ATTRIBUTE identifier KW_OF entity_specification KW_IS expression ';' {
         $$ = new VhdlParseTreeNode(PT_ATTRIBUTE_SPECIFICATION);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = $6;
@@ -2270,7 +2106,6 @@ attribute_specification:
 entity_specification:
     entity_name_list ':' entity_class {
         $$ = new VhdlParseTreeNode(PT_ENTITY_SPECIFICATION);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -2366,7 +2201,6 @@ _one_or_more_entity_designators:
     entity_designator
     | _one_or_more_entity_designators ',' entity_designator {
         $$ = new VhdlParseTreeNode(PT_ENTITY_NAME_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -2374,12 +2208,10 @@ _one_or_more_entity_designators:
 entity_designator:
     entity_tag {
         $$ = new VhdlParseTreeNode(PT_ENTITY_DESIGNATOR);
-        $$->piece_count = 1;
         $$->pieces[0] = $1;
     }
     | entity_tag signature {
         $$ = new VhdlParseTreeNode(PT_ENTITY_DESIGNATOR);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
@@ -2397,14 +2229,12 @@ configuration_specification:
 simple_configuration_specification:
     KW_FOR component_specification binding_indication ';' {
         $$ = new VhdlParseTreeNode(PT_SIMPLE_CONFIGURATION_SPECIFICATION);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $3;
     }
     | KW_FOR component_specification binding_indication ';' 
       KW_END KW_FOR ';' {
         $$ = new VhdlParseTreeNode(PT_SIMPLE_CONFIGURATION_SPECIFICATION);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $3;
     }
@@ -2414,7 +2244,6 @@ compound_configuration_specification:
     _one_or_more_verification_unit_binding_indications
     KW_END KW_FOR ';' {
         $$ = new VhdlParseTreeNode(PT_COMPOUND_CONFIGURATION_SPECIFICATION);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $3;
         $$->pieces[2] = $5;
@@ -2423,7 +2252,6 @@ compound_configuration_specification:
 component_specification:
     instantiation_list ':' name {
         $$ = new VhdlParseTreeNode(PT_COMPONENT_SPECIFICATION);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -2440,56 +2268,48 @@ instantiation_list:
 binding_indication:
     %empty {
         $$ = new VhdlParseTreeNode(PT_BINDING_INDICATION);
-        $$->piece_count = 3;
         $$->pieces[0] = nullptr;
         $$->pieces[1] = nullptr;
         $$->pieces[2] = nullptr;
     }
     | KW_USE entity_aspect {
         $$ = new VhdlParseTreeNode(PT_BINDING_INDICATION);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = nullptr;
         $$->pieces[2] = nullptr;
     }
     | generic_map_aspect {
         $$ = new VhdlParseTreeNode(PT_BINDING_INDICATION);
-        $$->piece_count = 3;
         $$->pieces[0] = nullptr;
         $$->pieces[1] = $1;
         $$->pieces[2] = nullptr;
     }
     | KW_USE entity_aspect generic_map_aspect {
         $$ = new VhdlParseTreeNode(PT_BINDING_INDICATION);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $3;
         $$->pieces[2] = nullptr;
     }
     | port_map_aspect {
         $$ = new VhdlParseTreeNode(PT_BINDING_INDICATION);
-        $$->piece_count = 3;
         $$->pieces[0] = nullptr;
         $$->pieces[1] = nullptr;
         $$->pieces[2] = $1;
     }
     | KW_USE entity_aspect port_map_aspect {
         $$ = new VhdlParseTreeNode(PT_BINDING_INDICATION);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = nullptr;
         $$->pieces[2] = $3;
     }
     | generic_map_aspect port_map_aspect {
         $$ = new VhdlParseTreeNode(PT_BINDING_INDICATION);
-        $$->piece_count = 3;
         $$->pieces[0] = nullptr;
         $$->pieces[1] = $1;
         $$->pieces[2] = $2;
     }
     | KW_USE entity_aspect generic_map_aspect port_map_aspect {
         $$ = new VhdlParseTreeNode(PT_BINDING_INDICATION);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $3;
         $$->pieces[2] = $4;
@@ -2505,12 +2325,10 @@ entity_aspect:
 _entity_aspect_entity:
     KW_ENTITY _simple_or_selected_name {
         $$ = new VhdlParseTreeNode(PT_ENTITY_ASPECT_ENTITY);
-        $$->piece_count = 1;
         $$->pieces[0] = $2;
     }
     | KW_ENTITY _simple_or_selected_name '(' identifier ')' {
         $$ = new VhdlParseTreeNode(PT_ENTITY_ASPECT_ENTITY);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
     }
@@ -2518,7 +2336,6 @@ _entity_aspect_entity:
 _entity_aspect_configuration:
     KW_CONFIGURATION _simple_or_selected_name {
         $$ = new VhdlParseTreeNode(PT_ENTITY_ASPECT_CONFIGURATION);
-        $$->piece_count = 1;
         $$->pieces[0] = $2;
     }
 
@@ -2528,7 +2345,6 @@ _one_or_more_verification_unit_binding_indications:
       verification_unit_binding_indication {
         $$ = new VhdlParseTreeNode(
             PT_VERIFICATION_UNIT_BINDING_INDICATION_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
@@ -2536,7 +2352,6 @@ _one_or_more_verification_unit_binding_indications:
 verification_unit_binding_indication:
     KW_USE KW_VUNIT _list_of_names ';' {
         $$ = new VhdlParseTreeNode(PT_VERIFICATION_UNIT_BINDING_INDICATION);
-        $$->piece_count = 1;
         $$->pieces[0] = $3;
     }
 
@@ -2544,7 +2359,6 @@ verification_unit_binding_indication:
 disconnection_specification:
     KW_DISCONNECT guarded_signal_specification KW_AFTER expression ';' {
         $$ = new VhdlParseTreeNode(PT_DISCONNECTION_SPECIFICATION);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
     }
@@ -2552,7 +2366,6 @@ disconnection_specification:
 guarded_signal_specification:
     signal_list ':' type_mark {
         $$ = new VhdlParseTreeNode(PT_GUARDED_SIGNAL_SPECIFICATION);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -2593,7 +2406,6 @@ _hack_name_for_association_list:
     // names.
     prefix '(' _ambig_name_parens ')' {
         $$ = new VhdlParseTreeNode(PT_NAME_AMBIG_PARENS);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -2604,7 +2416,6 @@ _list_of_names:
     name
     | _list_of_names ',' name {
         $$ = new VhdlParseTreeNode(PT_NAME_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -2627,7 +2438,6 @@ _simple_or_selected_name:
 selected_name:
     prefix '.' suffix {
         $$ = new VhdlParseTreeNode(PT_NAME_SELECTED);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -2642,7 +2452,6 @@ suffix:
 slice_name:
     prefix '(' _almost_discrete_range ')' {
         $$ = new VhdlParseTreeNode(PT_NAME_SLICE);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -2654,13 +2463,11 @@ slice_name:
 _almost_attribute_name:
     prefix '\'' __attribute_kw_identifier_hack {
         $$ = new VhdlParseTreeNode(PT_NAME_ATTRIBUTE);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
     | prefix signature '\'' __attribute_kw_identifier_hack {
         $$ = new VhdlParseTreeNode(PT_NAME_ATTRIBUTE);
-        $$->piece_count = 3;
         $$->pieces[0] = $1;
         $$->pieces[1] = $4;
         $$->pieces[2] = $2;
@@ -2684,7 +2491,6 @@ attribute_name:
     _almost_attribute_name
     | _almost_attribute_name '(' expression ')' {
         $$ = $1;
-        $$->piece_count = 4;
         $$->pieces[3] = $3;
     }
 
@@ -2697,7 +2503,6 @@ external_name:
 external_constant_name:
     DL_LL KW_CONSTANT external_pathname ':' subtype_indication DL_RR {
         $$ = new VhdlParseTreeNode(PT_NAME_EXT_CONST);
-        $$->piece_count = 2;
         $$->pieces[0] = $3;
         $$->pieces[1] = $5;
     }
@@ -2705,7 +2510,6 @@ external_constant_name:
 external_signal_name:
     DL_LL KW_SIGNAL external_pathname ':' subtype_indication DL_RR {
         $$ = new VhdlParseTreeNode(PT_NAME_EXT_SIG);
-        $$->piece_count = 2;
         $$->pieces[0] = $3;
         $$->pieces[1] = $5;
     }
@@ -2713,7 +2517,6 @@ external_signal_name:
 external_variable_name:
     DL_LL KW_VARIABLE external_pathname ':' subtype_indication DL_RR {
         $$ = new VhdlParseTreeNode(PT_NAME_EXT_VAR);
-        $$->piece_count = 2;
         $$->pieces[0] = $3;
         $$->pieces[1] = $5;
     }
@@ -2726,7 +2529,6 @@ external_pathname:
 package_pathname:
     '@' identifier '.' _one_or_more_ids_dots '.' identifier {
         $$ = new VhdlParseTreeNode(PT_PACKAGE_PATHNAME);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = $6;
@@ -2736,7 +2538,6 @@ _one_or_more_ids_dots:
     identifier
     | _one_or_more_ids_dots '.' identifier {
         $$ = new VhdlParseTreeNode(PT_ID_LIST_REAL);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -2744,14 +2545,12 @@ _one_or_more_ids_dots:
 absolute_pathname:
     '.' partial_pathname {
         $$ = new VhdlParseTreeNode(PT_ABSOLUTE_PATHNAME);
-        $$->piece_count = 1;
         $$->pieces[0] = $2;
     }
 
 relative_pathname:
     partial_pathname {
         $$ = new VhdlParseTreeNode(PT_RELATIVE_PATHNAME);
-        $$->piece_count = 1;
         $$->pieces[0] = $1;
         $$->integer = 0;
     }
@@ -2763,12 +2562,10 @@ relative_pathname:
 partial_pathname:
     identifier {
         $$ = new VhdlParseTreeNode(PT_PARTIAL_PATHNAME);
-        $$->piece_count = 1;
         $$->pieces[0] = $1;
     }
     | _one_or_more_pathname_elements '.' identifier {
         $$ = new VhdlParseTreeNode(PT_PARTIAL_PATHNAME);
-        $$->piece_count = 2;
         $$->pieces[0] = $3;
         $$->pieces[1] = $1;
     }
@@ -2777,7 +2574,6 @@ _one_or_more_pathname_elements:
     pathname_element
     | _one_or_more_pathname_elements '.' pathname_element {
         $$ = new VhdlParseTreeNode(PT_PATHNAME_ELEMENT);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -2786,7 +2582,6 @@ pathname_element:
     identifier
     | identifier '(' expression ')' {
         $$ = new VhdlParseTreeNode(PT_PATHNAME_ELEMENT_GENERATE_LABEL);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -2801,7 +2596,6 @@ _one_or_more_expressions:
     expression
     | _one_or_more_expressions ',' expression {
         $$ = new VhdlParseTreeNode(PT_EXPRESSION_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -3130,7 +2924,6 @@ aggregate:
     }
     | '(' _must_have_choice_element_association ')' {
         $$ = new VhdlParseTreeNode(PT_AGGREGATE);
-        $$->piece_count = 2;
         $$->pieces[0] = nullptr;
         $$->pieces[1] = $2;
     }
@@ -3138,13 +2931,11 @@ aggregate:
 _two_or_more_element_association:
     element_association ',' element_association {
         $$ = new VhdlParseTreeNode(PT_AGGREGATE);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
     | _two_or_more_element_association ',' element_association {
         $$ = new VhdlParseTreeNode(PT_AGGREGATE);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -3152,7 +2943,6 @@ _two_or_more_element_association:
 element_association:
     expression {
         $$ = new VhdlParseTreeNode(PT_ELEMENT_ASSOCIATION);
-        $$->piece_count = 1;
         $$->pieces[0] = $1;
     }
     | _must_have_choice_element_association
@@ -3160,7 +2950,6 @@ element_association:
 _must_have_choice_element_association:
     choices DL_ARR expression {
         $$ = new VhdlParseTreeNode(PT_ELEMENT_ASSOCIATION);
-        $$->piece_count = 2;
         $$->pieces[0] = $3;
         $$->pieces[1] = $1;
     }
@@ -3169,7 +2958,6 @@ choices:
     choice
     | choices '|' choice {
         $$ = new VhdlParseTreeNode(PT_CHOICES);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -3188,7 +2976,6 @@ choice:
 _definitely_function_call:
     function_name '(' _definitely_parameter_association_list ')' {
         $$ = new VhdlParseTreeNode(PT_FUNCTION_CALL);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -3197,13 +2984,11 @@ _definitely_function_call:
 qualified_expression:
     type_mark '\'' '(' expression ')' {
         $$ = new VhdlParseTreeNode(PT_QUALIFIED_EXPRESSION);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $4;
     }
     | type_mark '\'' aggregate {
         $$ = new VhdlParseTreeNode(PT_QUALIFIED_EXPRESSION);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -3212,12 +2997,10 @@ qualified_expression:
 allocator:
     KW_NEW _allocator_subtype_indication {
         $$ = new VhdlParseTreeNode(PT_ALLOCATOR);
-        $$->piece_count = 1;
         $$->pieces[0] = $2;
     }
     | KW_NEW qualified_expression {
         $$ = new VhdlParseTreeNode(PT_ALLOCATOR);
-        $$->piece_count = 1;
         $$->pieces[0] = $2;
     }
 
@@ -3232,7 +3015,6 @@ _real_sequence_of_statements:
     sequential_statement
     | _real_sequence_of_statements sequential_statement {
         $$ = new VhdlParseTreeNode(PT_SEQUENCE_OF_STATEMENTS);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
@@ -3241,7 +3023,6 @@ sequential_statement:
     _real_sequential_statement ';'
     | identifier ':' _real_sequential_statement ';' {
         $$ = new VhdlParseTreeNode(PT_STATEMENT_LABEL);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -3265,7 +3046,6 @@ _real_sequential_statement:
 wait_statement:
     KW_WAIT sensitivity_clause condition_clause timeout_clause {
         $$ = new VhdlParseTreeNode(PT_WAIT_STATEMENT);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $3;
         $$->pieces[2] = $4;
@@ -3297,28 +3077,24 @@ assertion_statement:
 assertion:
     KW_ASSERT expression {
         $$ = new VhdlParseTreeNode(PT_ASSERTION_STATEMENT);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = nullptr;
         $$->pieces[2] = nullptr;
     }
     | KW_ASSERT expression KW_REPORT expression {
         $$ = new VhdlParseTreeNode(PT_ASSERTION_STATEMENT);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = nullptr;
     }
     | KW_ASSERT expression KW_SEVERITY expression {
         $$ = new VhdlParseTreeNode(PT_ASSERTION_STATEMENT);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = nullptr;
         $$->pieces[2] = $4;
     }
     | KW_ASSERT expression KW_REPORT expression KW_SEVERITY expression {
         $$ = new VhdlParseTreeNode(PT_ASSERTION_STATEMENT);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = $6;
@@ -3328,13 +3104,11 @@ assertion:
 report_statement:
     KW_REPORT expression {
         $$ = new VhdlParseTreeNode(PT_REPORT_STATEMENT);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = nullptr;
     }
     | KW_REPORT expression KW_SEVERITY expression {
         $$ = new VhdlParseTreeNode(PT_REPORT_STATEMENT);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
     }
@@ -3354,14 +3128,12 @@ simple_signal_assignment:
 simple_waveform_assignment:
     target DL_LEQ waveform {
         $$ = new VhdlParseTreeNode(PT_SIMPLE_WAVEFORM_ASSIGNMENT);
-        $$->piece_count = 3;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
         $$->pieces[2] = nullptr;
     }
     | target DL_LEQ delay_mechanism waveform {
         $$ = new VhdlParseTreeNode(PT_SIMPLE_WAVEFORM_ASSIGNMENT);
-        $$->piece_count = 3;
         $$->pieces[0] = $1;
         $$->pieces[1] = $4;
         $$->pieces[2] = $3;
@@ -3371,21 +3143,18 @@ simple_force_assignment:
     target DL_LEQ KW_FORCE expression {
         $$ = new VhdlParseTreeNode(PT_SIMPLE_FORCE_ASSIGNMENT);
         $$->force_mode = FORCE_UNSPEC;
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $4;
     }
     | target DL_LEQ KW_FORCE KW_IN expression {
         $$ = new VhdlParseTreeNode(PT_SIMPLE_FORCE_ASSIGNMENT);
         $$->force_mode = FORCE_IN;
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $5;
     }
     | target DL_LEQ KW_FORCE KW_OUT expression {
         $$ = new VhdlParseTreeNode(PT_SIMPLE_FORCE_ASSIGNMENT);
         $$->force_mode = FORCE_OUT;
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $5;
     }
@@ -3394,19 +3163,16 @@ simple_release_assignment:
     target DL_LEQ KW_RELEASE {
         $$ = new VhdlParseTreeNode(PT_SIMPLE_RELEASE_ASSIGNMENT);
         $$->force_mode = FORCE_UNSPEC;
-        $$->piece_count = 1;
         $$->pieces[0] = $1;
     }
     | target DL_LEQ KW_RELEASE KW_IN {
         $$ = new VhdlParseTreeNode(PT_SIMPLE_RELEASE_ASSIGNMENT);
         $$->force_mode = FORCE_IN;
-        $$->piece_count = 1;
         $$->pieces[0] = $1;
     }
     | target DL_LEQ KW_RELEASE KW_OUT {
         $$ = new VhdlParseTreeNode(PT_SIMPLE_RELEASE_ASSIGNMENT);
         $$->force_mode = FORCE_OUT;
-        $$->piece_count = 1;
         $$->pieces[0] = $1;
     }
 
@@ -3416,12 +3182,10 @@ delay_mechanism:
     }
     | KW_INERTIAL {
         $$ = new VhdlParseTreeNode(PT_DELAY_INERTIAL);
-        $$->piece_count = 1;
         $$->pieces[0] = nullptr;
     }
     | KW_REJECT expression KW_INERTIAL {
         $$ = new VhdlParseTreeNode(PT_DELAY_INERTIAL);
-        $$->piece_count = 1;
         $$->pieces[0] = $2;
     }
 
@@ -3439,7 +3203,6 @@ _one_or_more_waveform_elements:
     waveform_element
     | _one_or_more_waveform_elements ',' waveform_element {
         $$ = new VhdlParseTreeNode(PT_WAVEFORM);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -3447,13 +3210,11 @@ _one_or_more_waveform_elements:
 waveform_element:
     expression {
         $$ = new VhdlParseTreeNode(PT_WAVEFORM_ELEMENT);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = nullptr;
     }
     | expression KW_AFTER expression {
         $$ = new VhdlParseTreeNode(PT_WAVEFORM_ELEMENT);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -3467,14 +3228,12 @@ conditional_signal_assignment:
 conditional_waveform_assignment:
     target DL_LEQ conditional_waveforms {
         $$ = new VhdlParseTreeNode(PT_CONDITIONAL_WAVEFORM_ASSIGNMENT);
-        $$->piece_count = 3;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
         $$->pieces[2] = nullptr;
     }
     | target DL_LEQ delay_mechanism conditional_waveforms {
         $$ = new VhdlParseTreeNode(PT_CONDITIONAL_WAVEFORM_ASSIGNMENT);
-        $$->piece_count = 3;
         $$->pieces[0] = $1;
         $$->pieces[1] = $4;
         $$->pieces[2] = $3;
@@ -3483,7 +3242,6 @@ conditional_waveform_assignment:
 conditional_waveforms:
     waveform KW_WHEN expression {
         $$ = new VhdlParseTreeNode(PT_CONDITIONAL_WAVEFORMS);
-        $$->piece_count = 4;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
         $$->pieces[2] = nullptr;
@@ -3491,7 +3249,6 @@ conditional_waveforms:
     }
     | waveform KW_WHEN expression KW_ELSE waveform {
         $$ = new VhdlParseTreeNode(PT_CONDITIONAL_WAVEFORMS);
-        $$->piece_count = 4;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
         $$->pieces[2] = nullptr;
@@ -3500,7 +3257,6 @@ conditional_waveforms:
     | waveform KW_WHEN expression _one_or_more_conditional_waveform_elses
       KW_ELSE waveform {
         $$ = new VhdlParseTreeNode(PT_CONDITIONAL_WAVEFORMS);
-        $$->piece_count = 4;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
         $$->pieces[2] = $4;
@@ -3511,7 +3267,6 @@ _one_or_more_conditional_waveform_elses:
     _conditional_waveform_else
     | _one_or_more_conditional_waveform_elses _conditional_waveform_else {
         $$ = new VhdlParseTreeNode(PT_CONDITIONAL_WAVEFORM_ELSE_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
@@ -3519,7 +3274,6 @@ _one_or_more_conditional_waveform_elses:
 _conditional_waveform_else:
     KW_ELSE waveform KW_WHEN expression {
         $$ = new VhdlParseTreeNode(PT_CONDITIONAL_WAVEFORM_ELSE);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
     }
@@ -3528,21 +3282,18 @@ conditional_force_assignment:
     target DL_LEQ KW_FORCE conditional_expressions {
         $$ = new VhdlParseTreeNode(PT_CONDITIONAL_FORCE_ASSIGNMENT);
         $$->force_mode = FORCE_UNSPEC;
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $4;
     }
     | target DL_LEQ KW_FORCE KW_IN conditional_expressions {
         $$ = new VhdlParseTreeNode(PT_CONDITIONAL_FORCE_ASSIGNMENT);
         $$->force_mode = FORCE_IN;
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $5;
     }
     | target DL_LEQ KW_FORCE KW_OUT conditional_expressions {
         $$ = new VhdlParseTreeNode(PT_CONDITIONAL_FORCE_ASSIGNMENT);
         $$->force_mode = FORCE_OUT;
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $5;
     }
@@ -3550,7 +3301,6 @@ conditional_force_assignment:
 conditional_expressions:
     expression KW_WHEN expression {
         $$ = new VhdlParseTreeNode(PT_CONDITIONAL_EXPRESSIONS);
-        $$->piece_count = 4;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
         $$->pieces[2] = nullptr;
@@ -3558,7 +3308,6 @@ conditional_expressions:
     }
     | expression KW_WHEN expression KW_ELSE expression {
         $$ = new VhdlParseTreeNode(PT_CONDITIONAL_EXPRESSIONS);
-        $$->piece_count = 4;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
         $$->pieces[2] = nullptr;
@@ -3567,7 +3316,6 @@ conditional_expressions:
     | expression KW_WHEN expression _one_or_more_conditional_expression_elses
       KW_ELSE expression {
         $$ = new VhdlParseTreeNode(PT_CONDITIONAL_EXPRESSIONS);
-        $$->piece_count = 4;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
         $$->pieces[2] = $4;
@@ -3578,7 +3326,6 @@ _one_or_more_conditional_expression_elses:
     _conditional_expression_else
     | _one_or_more_conditional_expression_elses _conditional_expression_else {
         $$ = new VhdlParseTreeNode(PT_CONDITIONAL_EXPRESSION_ELSE_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
@@ -3586,7 +3333,6 @@ _one_or_more_conditional_expression_elses:
 _conditional_expression_else:
     KW_ELSE expression KW_WHEN expression {
         $$ = new VhdlParseTreeNode(PT_CONDITIONAL_EXPRESSION_ELSE);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
     }
@@ -3599,7 +3345,6 @@ selected_signal_assignment:
 selected_waveform_assignment:
     KW_WITH expression KW_SELECT target DL_LEQ selected_waveforms {
         $$ = new VhdlParseTreeNode(PT_SELECTED_WAVEFORM_ASSIGNMENT);
-        $$->piece_count = 4;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = $6;
@@ -3608,7 +3353,6 @@ selected_waveform_assignment:
     }
     | KW_WITH expression KW_SELECT '?' target DL_LEQ selected_waveforms {
         $$ = new VhdlParseTreeNode(PT_SELECTED_WAVEFORM_ASSIGNMENT);
-        $$->piece_count = 4;
         $$->pieces[0] = $2;
         $$->pieces[1] = $5;
         $$->pieces[2] = $7;
@@ -3618,7 +3362,6 @@ selected_waveform_assignment:
     | KW_WITH expression KW_SELECT
       target DL_LEQ delay_mechanism selected_waveforms {
         $$ = new VhdlParseTreeNode(PT_SELECTED_WAVEFORM_ASSIGNMENT);
-        $$->piece_count = 4;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = $7;
@@ -3628,7 +3371,6 @@ selected_waveform_assignment:
     | KW_WITH expression KW_SELECT '?'
       target DL_LEQ delay_mechanism selected_waveforms {
         $$ = new VhdlParseTreeNode(PT_SELECTED_WAVEFORM_ASSIGNMENT);
-        $$->piece_count = 4;
         $$->pieces[0] = $2;
         $$->pieces[1] = $5;
         $$->pieces[2] = $8;
@@ -3640,7 +3382,6 @@ selected_waveforms:
     _selected_waveform
     | selected_waveforms ',' _selected_waveform {
         $$ = new VhdlParseTreeNode(PT_SELECTED_WAVEFORMS);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -3648,7 +3389,6 @@ selected_waveforms:
 _selected_waveform:
     waveform KW_WHEN choices {
         $$ = new VhdlParseTreeNode(PT_SELECTED_WAVEFORM);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -3656,7 +3396,6 @@ _selected_waveform:
 selected_force_assignment:
     KW_WITH expression KW_SELECT target DL_LEQ KW_FORCE selected_expressions {
         $$ = new VhdlParseTreeNode(PT_SELECTED_FORCE_ASSIGNMENT);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = $7;
@@ -3666,7 +3405,6 @@ selected_force_assignment:
     | KW_WITH expression KW_SELECT target
       DL_LEQ KW_FORCE KW_IN selected_expressions {
         $$ = new VhdlParseTreeNode(PT_SELECTED_FORCE_ASSIGNMENT);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = $8;
@@ -3676,7 +3414,6 @@ selected_force_assignment:
     | KW_WITH expression KW_SELECT target
       DL_LEQ KW_FORCE KW_OUT selected_expressions {
         $$ = new VhdlParseTreeNode(PT_SELECTED_FORCE_ASSIGNMENT);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = $8;
@@ -3686,7 +3423,6 @@ selected_force_assignment:
     | KW_WITH expression KW_SELECT '?' target
       DL_LEQ KW_FORCE selected_expressions {
         $$ = new VhdlParseTreeNode(PT_SELECTED_FORCE_ASSIGNMENT);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $5;
         $$->pieces[2] = $8;
@@ -3696,7 +3432,6 @@ selected_force_assignment:
     | KW_WITH expression KW_SELECT '?' target
       DL_LEQ KW_FORCE KW_IN selected_expressions {
         $$ = new VhdlParseTreeNode(PT_SELECTED_FORCE_ASSIGNMENT);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $5;
         $$->pieces[2] = $9;
@@ -3706,7 +3441,6 @@ selected_force_assignment:
     | KW_WITH expression KW_SELECT '?' target
       DL_LEQ KW_FORCE KW_OUT selected_expressions {
         $$ = new VhdlParseTreeNode(PT_SELECTED_FORCE_ASSIGNMENT);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $5;
         $$->pieces[2] = $9;
@@ -3718,7 +3452,6 @@ selected_expressions:
     _selected_expression
     | selected_expressions ',' _selected_expression {
         $$ = new VhdlParseTreeNode(PT_SELECTED_EXPRESSIONS);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -3726,7 +3459,6 @@ selected_expressions:
 _selected_expression:
     expression KW_WHEN choices {
         $$ = new VhdlParseTreeNode(PT_SELECTED_EXPRESSION);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -3740,7 +3472,6 @@ variable_assignment_statement:
 simple_variable_assignment:
     target DL_ASS expression {
         $$ = new VhdlParseTreeNode(PT_SIMPLE_VARIABLE_ASSIGNMENT);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -3748,7 +3479,6 @@ simple_variable_assignment:
 conditional_variable_assignment:
     target DL_ASS conditional_expressions {
         $$ = new VhdlParseTreeNode(PT_CONDITIONAL_VARIABLE_ASSIGNMENT);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -3756,7 +3486,6 @@ conditional_variable_assignment:
 selected_variable_assignment:
     KW_WITH expression KW_SELECT target DL_ASS selected_expressions {
         $$ = new VhdlParseTreeNode(PT_SELECTED_VARIABLE_ASSIGNMENT);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = $6;
@@ -3764,7 +3493,6 @@ selected_variable_assignment:
     }
     | KW_WITH expression KW_SELECT '?' target DL_ASS selected_expressions {
         $$ = new VhdlParseTreeNode(PT_SELECTED_VARIABLE_ASSIGNMENT);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $5;
         $$->pieces[2] = $7;
@@ -3795,7 +3523,6 @@ if_statement:
 _real_if_statement:
     KW_IF expression KW_THEN sequence_of_statements KW_END KW_IF {
         $$ = new VhdlParseTreeNode(PT_IF_STATEMENT);
-        $$->piece_count = 5;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = nullptr;
@@ -3805,7 +3532,6 @@ _real_if_statement:
     | KW_IF expression KW_THEN sequence_of_statements _one_or_more_elsifs
       KW_END KW_IF {
         $$ = new VhdlParseTreeNode(PT_IF_STATEMENT);
-        $$->piece_count = 5;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = $5;
@@ -3815,7 +3541,6 @@ _real_if_statement:
     | KW_IF expression KW_THEN sequence_of_statements
       KW_ELSE sequence_of_statements KW_END KW_IF {
         $$ = new VhdlParseTreeNode(PT_IF_STATEMENT);
-        $$->piece_count = 5;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = nullptr;
@@ -3825,7 +3550,6 @@ _real_if_statement:
     | KW_IF expression KW_THEN sequence_of_statements 
       _one_or_more_elsifs KW_ELSE sequence_of_statements KW_END KW_IF {
         $$ = new VhdlParseTreeNode(PT_IF_STATEMENT);
-        $$->piece_count = 5;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = $5;
@@ -3837,7 +3561,6 @@ _one_or_more_elsifs:
     _elsif
     | _one_or_more_elsifs _elsif {
         $$ = new VhdlParseTreeNode(PT_ELSIF_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
@@ -3845,7 +3568,6 @@ _one_or_more_elsifs:
 _elsif:
     KW_ELSIF expression KW_THEN sequence_of_statements {
         $$ = new VhdlParseTreeNode(PT_ELSIF);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
     }
@@ -3862,7 +3584,6 @@ _real_case_statement:
     KW_CASE expression KW_IS _one_or_more_case_statement_alternatives
     KW_END KW_CASE {
         $$ = new VhdlParseTreeNode(PT_CASE_STATEMENT);
-        $$->piece_count = 3;
         $$->boolean = false;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
@@ -3871,7 +3592,6 @@ _real_case_statement:
     | KW_CASE '?' expression KW_IS _one_or_more_case_statement_alternatives
       KW_END KW_CASE '?' {
         $$ = new VhdlParseTreeNode(PT_CASE_STATEMENT);
-        $$->piece_count = 3;
         $$->boolean = true;
         $$->pieces[0] = $3;
         $$->pieces[1] = $5;
@@ -3882,7 +3602,6 @@ _one_or_more_case_statement_alternatives:
     case_statement_alternative
     | _one_or_more_case_statement_alternatives case_statement_alternative {
         $$ = new VhdlParseTreeNode(PT_CASE_STATEMENT_ALTERNATIVE_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
@@ -3890,7 +3609,6 @@ _one_or_more_case_statement_alternatives:
 case_statement_alternative:
     KW_WHEN choices DL_ARR sequence_of_statements {
         $$ = new VhdlParseTreeNode(PT_CASE_STATEMENT_ALTERNATIVE);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
     }
@@ -3906,14 +3624,12 @@ loop_statement:
 _real_loop_statement:
     KW_LOOP sequence_of_statements KW_END KW_LOOP {
         $$ = new VhdlParseTreeNode(PT_LOOP_STATEMENT);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = nullptr;
         $$->pieces[2] = nullptr;
     }
     | iteration_scheme KW_LOOP sequence_of_statements KW_END KW_LOOP {
         $$ = new VhdlParseTreeNode(PT_LOOP_STATEMENT);
-        $$->piece_count = 3;
         $$->pieces[0] = $3;
         $$->pieces[1] = $1;
         $$->pieces[2] = nullptr;
@@ -3922,19 +3638,16 @@ _real_loop_statement:
 iteration_scheme:
     KW_WHILE expression {
         $$ = new VhdlParseTreeNode(PT_ITERATION_WHILE);
-        $$->piece_count = 1;
         $$->pieces[0] = $2;
     }
     | KW_FOR parameter_specification {
         $$ = new VhdlParseTreeNode(PT_ITERATION_FOR);
-        $$->piece_count = 1;
         $$->pieces[0] = $2;
     }
 
 parameter_specification:
     identifier KW_IN discrete_range {
         $$ = new VhdlParseTreeNode(PT_PARAMETER_SPECIFICATION);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -3943,25 +3656,21 @@ parameter_specification:
 next_statement:
     KW_NEXT {
         $$ = new VhdlParseTreeNode(PT_NEXT_STATEMENT);
-        $$->piece_count = 2;
         $$->pieces[0] = nullptr;
         $$->pieces[1] = nullptr;
     }
     | KW_NEXT identifier {
         $$ = new VhdlParseTreeNode(PT_NEXT_STATEMENT);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = nullptr;
     }
     | KW_NEXT KW_WHEN expression {
         $$ = new VhdlParseTreeNode(PT_NEXT_STATEMENT);
-        $$->piece_count = 2;
         $$->pieces[0] = nullptr;
         $$->pieces[1] = $3;
     }
     | KW_NEXT identifier KW_WHEN expression {
         $$ = new VhdlParseTreeNode(PT_NEXT_STATEMENT);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
     }
@@ -3970,25 +3679,21 @@ next_statement:
 exit_statement:
     KW_EXIT {
         $$ = new VhdlParseTreeNode(PT_EXIT_STATEMENT);
-        $$->piece_count = 2;
         $$->pieces[0] = nullptr;
         $$->pieces[1] = nullptr;
     }
     | KW_EXIT identifier {
         $$ = new VhdlParseTreeNode(PT_EXIT_STATEMENT);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = nullptr;
     }
     | KW_EXIT KW_WHEN expression {
         $$ = new VhdlParseTreeNode(PT_EXIT_STATEMENT);
-        $$->piece_count = 2;
         $$->pieces[0] = nullptr;
         $$->pieces[1] = $3;
     }
     | KW_EXIT identifier KW_WHEN expression {
         $$ = new VhdlParseTreeNode(PT_EXIT_STATEMENT);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
     }
@@ -3997,11 +3702,9 @@ exit_statement:
 return_statement:
     KW_RETURN {
         $$ = new VhdlParseTreeNode(PT_RETURN_STATEMENT);
-        $$->piece_count = 0;
     }
     | KW_RETURN expression {
         $$ = new VhdlParseTreeNode(PT_RETURN_STATEMENT);
-        $$->piece_count = 1;
         $$->pieces[0] = $2;
     }
 
@@ -4032,7 +3735,6 @@ _real_sequence_of_concurrent_statements:
     concurrent_statement
     | _real_sequence_of_concurrent_statements concurrent_statement {
         $$ = new VhdlParseTreeNode(PT_SEQUENCE_OF_CONCURRENT_STATEMENTS);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
@@ -4050,7 +3752,6 @@ _real_block_statement:
     block_header block_declarative_part KW_BEGIN
     _sequence_of_concurrent_statements KW_END KW_BLOCK {
         $$ = new VhdlParseTreeNode(PT_BLOCK);
-        $$->piece_count = 6;
         $$->pieces[0] = $1;
         $$->pieces[1] = $5;
         $$->pieces[2] = nullptr;
@@ -4061,7 +3762,6 @@ _real_block_statement:
       block_header block_declarative_part KW_BEGIN
       _sequence_of_concurrent_statements KW_END KW_BLOCK {
         $$ = new VhdlParseTreeNode(PT_BLOCK);
-        $$->piece_count = 6;
         $$->pieces[0] = $1;
         $$->pieces[1] = $8;
         $$->pieces[2] = $5;
@@ -4077,7 +3777,6 @@ _real_block_declarative_part:
     block_declarative_item
     | _real_block_declarative_part block_declarative_item {
         $$ = new VhdlParseTreeNode(PT_DECLARATION_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
@@ -4099,7 +3798,6 @@ block_header:
 _block_header_generic_part:
     KW_GENERIC '(' interface_list ')' ';' {
         $$ = new VhdlParseTreeNode(PT_BLOCK_HEADER);
-        $$->piece_count = 4;
         $$->pieces[0] = $3;
         $$->pieces[1] = nullptr;
         $$->pieces[2] = nullptr;
@@ -4107,7 +3805,6 @@ _block_header_generic_part:
     }
     | KW_GENERIC '(' interface_list ')' ';' generic_map_aspect ';' {
         $$ = new VhdlParseTreeNode(PT_BLOCK_HEADER);
-        $$->piece_count = 4;
         $$->pieces[0] = $3;
         $$->pieces[1] = $6;
         $$->pieces[2] = nullptr;
@@ -4117,7 +3814,6 @@ _block_header_generic_part:
 _block_header_port_part:
     KW_PORT '(' interface_list ')' ';' {
         $$ = new VhdlParseTreeNode(PT_BLOCK_HEADER);
-        $$->piece_count = 4;
         $$->pieces[0] = nullptr;
         $$->pieces[1] = nullptr;
         $$->pieces[2] = $3;
@@ -4125,7 +3821,6 @@ _block_header_port_part:
     }
     | KW_PORT '(' interface_list ')' ';' port_map_aspect ';' {
         $$ = new VhdlParseTreeNode(PT_BLOCK_HEADER);
-        $$->piece_count = 4;
         $$->pieces[0] = nullptr;
         $$->pieces[1] = nullptr;
         $$->pieces[2] = $3;
@@ -4153,7 +3848,6 @@ _real_process_statement:
     KW_PROCESS __maybe_is process_declarative_part KW_BEGIN
     sequence_of_statements KW_END KW_PROCESS {
         $$ = new VhdlParseTreeNode(PT_PROCESS);
-        $$->piece_count = 5;
         $$->boolean = false;
         $$->pieces[0] = nullptr;
         $$->pieces[1] = $3;
@@ -4165,7 +3859,6 @@ _real_process_statement:
       process_declarative_part KW_BEGIN
       sequence_of_statements KW_END KW_PROCESS {
         $$ = new VhdlParseTreeNode(PT_PROCESS);
-        $$->piece_count = 5;
         $$->boolean = false;
         $$->pieces[0] = nullptr;
         $$->pieces[1] = $6;
@@ -4176,7 +3869,6 @@ _real_process_statement:
     | KW_POSTPONED KW_PROCESS __maybe_is process_declarative_part KW_BEGIN
       sequence_of_statements KW_END KW_POSTPONED KW_PROCESS {
         $$ = new VhdlParseTreeNode(PT_PROCESS);
-        $$->piece_count = 5;
         $$->boolean = true;
         $$->pieces[0] = nullptr;
         $$->pieces[1] = $4;
@@ -4188,7 +3880,6 @@ _real_process_statement:
       process_declarative_part KW_BEGIN
       sequence_of_statements KW_END KW_POSTPONED KW_PROCESS {
         $$ = new VhdlParseTreeNode(PT_PROCESS);
-        $$->piece_count = 5;
         $$->boolean = true;
         $$->pieces[0] = nullptr;
         $$->pieces[1] = $7;
@@ -4213,7 +3904,6 @@ _real_process_declarative_part:
     process_declarative_item
     | _real_process_declarative_part process_declarative_item {
         $$ = new VhdlParseTreeNode(PT_DECLARATION_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
@@ -4248,14 +3938,12 @@ concurrent_procedure_call_statement:
 _real_concurrent_procedure_call_statement:
     procedure_call {
         $$ = new VhdlParseTreeNode(PT_CONCURRENT_PROCEDURE_CALL);
-        $$->piece_count = 2;
         $$->boolean = false;
         $$->pieces[0] = $1;
         $$->pieces[1] = nullptr;
     }
     | KW_POSTPONED procedure_call {
         $$ = new VhdlParseTreeNode(PT_CONCURRENT_PROCEDURE_CALL);
-        $$->piece_count = 2;
         $$->boolean = true;
         $$->pieces[0] = $2;
         $$->pieces[1] = nullptr;
@@ -4272,14 +3960,12 @@ concurrent_assertion_statement:
 _real_concurrent_assertion_statement:
     assertion {
         $$ = new VhdlParseTreeNode(PT_CONCURRENT_ASSERTION_STATEMENT);
-        $$->piece_count = 2;
         $$->boolean = false;
         $$->pieces[0] = $1;
         $$->pieces[1] = nullptr;
     }
     | KW_POSTPONED assertion {
         $$ = new VhdlParseTreeNode(PT_CONCURRENT_ASSERTION_STATEMENT);
-        $$->piece_count = 2;
         $$->boolean = true;
         $$->pieces[0] = $2;
         $$->pieces[1] = nullptr;
@@ -4311,7 +3997,6 @@ _real_concurrent_signal_assignment_statement:
 concurrent_simple_signal_assignment:
     target DL_LEQ waveform {
         $$ = new VhdlParseTreeNode(PT_CONCURRENT_SIMPLE_SIGNAL_ASSIGNMENT);
-        $$->piece_count = 4;
         $$->boolean = false;
         $$->boolean2 = false;
         $$->pieces[0] = $1;
@@ -4321,7 +4006,6 @@ concurrent_simple_signal_assignment:
     }
     | target DL_LEQ delay_mechanism waveform {
         $$ = new VhdlParseTreeNode(PT_CONCURRENT_SIMPLE_SIGNAL_ASSIGNMENT);
-        $$->piece_count = 4;
         $$->boolean = false;
         $$->boolean2 = false;
         $$->pieces[0] = $1;
@@ -4331,7 +4015,6 @@ concurrent_simple_signal_assignment:
     }
     | target DL_LEQ KW_GUARDED waveform {
         $$ = new VhdlParseTreeNode(PT_CONCURRENT_SIMPLE_SIGNAL_ASSIGNMENT);
-        $$->piece_count = 4;
         $$->boolean = false;
         $$->boolean2 = true;
         $$->pieces[0] = $1;
@@ -4341,7 +4024,6 @@ concurrent_simple_signal_assignment:
     }
     | target DL_LEQ KW_GUARDED delay_mechanism waveform {
         $$ = new VhdlParseTreeNode(PT_CONCURRENT_SIMPLE_SIGNAL_ASSIGNMENT);
-        $$->piece_count = 4;
         $$->boolean = false;
         $$->boolean2 = true;
         $$->pieces[0] = $1;
@@ -4354,7 +4036,6 @@ concurrent_conditional_signal_assignment:
     target DL_LEQ conditional_waveforms {
         $$ = new VhdlParseTreeNode(
             PT_CONCURRENT_CONDITIONAL_SIGNAL_ASSIGNMENT);
-        $$->piece_count = 4;
         $$->boolean = false;
         $$->boolean2 = false;
         $$->pieces[0] = $1;
@@ -4365,7 +4046,6 @@ concurrent_conditional_signal_assignment:
     | target DL_LEQ delay_mechanism conditional_waveforms {
         $$ = new VhdlParseTreeNode(
             PT_CONCURRENT_CONDITIONAL_SIGNAL_ASSIGNMENT);
-        $$->piece_count = 4;
         $$->boolean = false;
         $$->boolean2 = false;
         $$->pieces[0] = $1;
@@ -4376,7 +4056,6 @@ concurrent_conditional_signal_assignment:
     | target DL_LEQ KW_GUARDED conditional_waveforms {
         $$ = new VhdlParseTreeNode(
             PT_CONCURRENT_CONDITIONAL_SIGNAL_ASSIGNMENT);
-        $$->piece_count = 4;
         $$->boolean = false;
         $$->boolean2 = true;
         $$->pieces[0] = $1;
@@ -4387,7 +4066,6 @@ concurrent_conditional_signal_assignment:
     | target DL_LEQ KW_GUARDED delay_mechanism conditional_waveforms {
         $$ = new VhdlParseTreeNode(
             PT_CONCURRENT_CONDITIONAL_SIGNAL_ASSIGNMENT);
-        $$->piece_count = 4;
         $$->boolean = false;
         $$->boolean2 = true;
         $$->pieces[0] = $1;
@@ -4399,7 +4077,6 @@ concurrent_conditional_signal_assignment:
 concurrent_selected_signal_assignment:
     KW_WITH expression KW_SELECT target DL_LEQ selected_waveforms {
         $$ = new VhdlParseTreeNode(PT_CONCURRENT_SELECTED_SIGNAL_ASSIGNMENT);
-        $$->piece_count = 5;
         $$->boolean = false;
         $$->boolean2 = false;
         $$->boolean3 = false;
@@ -4412,7 +4089,6 @@ concurrent_selected_signal_assignment:
     | KW_WITH expression KW_SELECT target delay_mechanism
       DL_LEQ selected_waveforms {
         $$ = new VhdlParseTreeNode(PT_CONCURRENT_SELECTED_SIGNAL_ASSIGNMENT);
-        $$->piece_count = 5;
         $$->boolean = false;
         $$->boolean2 = false;
         $$->boolean3 = false;
@@ -4425,7 +4101,6 @@ concurrent_selected_signal_assignment:
     | KW_WITH expression KW_SELECT target KW_GUARDED
       DL_LEQ selected_waveforms {
         $$ = new VhdlParseTreeNode(PT_CONCURRENT_SELECTED_SIGNAL_ASSIGNMENT);
-        $$->piece_count = 5;
         $$->boolean = false;
         $$->boolean2 = true;
         $$->boolean3 = false;
@@ -4438,7 +4113,6 @@ concurrent_selected_signal_assignment:
     | KW_WITH expression KW_SELECT target KW_GUARDED delay_mechanism
       DL_LEQ selected_waveforms {
         $$ = new VhdlParseTreeNode(PT_CONCURRENT_SELECTED_SIGNAL_ASSIGNMENT);
-        $$->piece_count = 5;
         $$->boolean = false;
         $$->boolean2 = true;
         $$->boolean3 = false;
@@ -4450,7 +4124,6 @@ concurrent_selected_signal_assignment:
     }
     | KW_WITH expression KW_SELECT '?' target DL_LEQ selected_waveforms {
         $$ = new VhdlParseTreeNode(PT_CONCURRENT_SELECTED_SIGNAL_ASSIGNMENT);
-        $$->piece_count = 5;
         $$->boolean = false;
         $$->boolean2 = false;
         $$->boolean3 = true;
@@ -4463,7 +4136,6 @@ concurrent_selected_signal_assignment:
     | KW_WITH expression KW_SELECT '?' target delay_mechanism
       DL_LEQ selected_waveforms {
         $$ = new VhdlParseTreeNode(PT_CONCURRENT_SELECTED_SIGNAL_ASSIGNMENT);
-        $$->piece_count = 5;
         $$->boolean = false;
         $$->boolean2 = false;
         $$->boolean3 = true;
@@ -4476,7 +4148,6 @@ concurrent_selected_signal_assignment:
     | KW_WITH expression KW_SELECT '?' target KW_GUARDED
       DL_LEQ selected_waveforms {
         $$ = new VhdlParseTreeNode(PT_CONCURRENT_SELECTED_SIGNAL_ASSIGNMENT);
-        $$->piece_count = 5;
         $$->boolean = false;
         $$->boolean2 = true;
         $$->boolean3 = true;
@@ -4489,7 +4160,6 @@ concurrent_selected_signal_assignment:
     | KW_WITH expression KW_SELECT '?' target KW_GUARDED delay_mechanism
       DL_LEQ selected_waveforms {
         $$ = new VhdlParseTreeNode(PT_CONCURRENT_SELECTED_SIGNAL_ASSIGNMENT);
-        $$->piece_count = 5;
         $$->boolean = false;
         $$->boolean2 = true;
         $$->boolean3 = true;
@@ -4506,7 +4176,6 @@ concurrent_selected_signal_assignment:
 component_instantiation_statement:
     identifier ':' _definitely_instantiated_unit ';' {
         $$ = new VhdlParseTreeNode(PT_COMPONENT_INSTANTIATION);
-        $$->piece_count = 4;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
         $$->pieces[2] = nullptr;
@@ -4514,7 +4183,6 @@ component_instantiation_statement:
     }
     | identifier ':' instantiated_unit generic_map_aspect ';' {
         $$ = new VhdlParseTreeNode(PT_COMPONENT_INSTANTIATION);
-        $$->piece_count = 4;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
         $$->pieces[2] = $4;
@@ -4522,7 +4190,6 @@ component_instantiation_statement:
     }
     | identifier ':' instantiated_unit port_map_aspect ';' {
         $$ = new VhdlParseTreeNode(PT_COMPONENT_INSTANTIATION);
-        $$->piece_count = 4;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
         $$->pieces[2] = nullptr;
@@ -4530,7 +4197,6 @@ component_instantiation_statement:
     }
     | identifier ':' instantiated_unit generic_map_aspect port_map_aspect ';' {
         $$ = new VhdlParseTreeNode(PT_COMPONENT_INSTANTIATION);
-        $$->piece_count = 4;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
         $$->pieces[2] = $4;
@@ -4541,7 +4207,6 @@ instantiated_unit:
     _definitely_instantiated_unit
     | _simple_or_selected_name {
         $$ = new VhdlParseTreeNode(PT_INSTANTIATED_UNIT_COMPONENT);
-        $$->piece_count = 1;
         $$->pieces[0] = $1;
     }
 
@@ -4553,19 +4218,16 @@ _definitely_instantiated_unit:
 _component_instantiated_unit:
     KW_COMPONENT _simple_or_selected_name {
         $$ = new VhdlParseTreeNode(PT_INSTANTIATED_UNIT_COMPONENT);
-        $$->piece_count = 1;
         $$->pieces[0] = $2;
     }
 
 _entity_instantiated_unit:
     KW_ENTITY _simple_or_selected_name {
         $$ = new VhdlParseTreeNode(PT_INSTANTIATED_UNIT_ENTITY);
-        $$->piece_count = 1;
         $$->pieces[0] = $2;
     }
     | KW_ENTITY _simple_or_selected_name '(' identifier ')' {
         $$ = new VhdlParseTreeNode(PT_INSTANTIATED_UNIT_ENTITY);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
     }
@@ -4573,7 +4235,6 @@ _entity_instantiated_unit:
 _configuration_instantiated_unit:
     KW_CONFIGURATION _simple_or_selected_name {
         $$ = new VhdlParseTreeNode(PT_INSTANTIATED_UNIT_CONFIGURATION);
-        $$->piece_count = 1;
         $$->pieces[0] = $2;
     }
 
@@ -4594,7 +4255,6 @@ _real_for_generate_statement:
     identifier ':' KW_FOR parameter_specification KW_GENERATE
     generate_statement_body KW_END KW_GENERATE {
         $$ = new VhdlParseTreeNode(PT_FOR_GENERATE);
-        $$->piece_count = 4;
         $$->pieces[0] = $1;
         $$->pieces[1] = $4;
         $$->pieces[2] = $6;
@@ -4612,7 +4272,6 @@ _real_if_generate_statement:
     identifier ':' KW_IF expression KW_GENERATE generate_statement_body
     _if_generate_elsifs _if_generate_else KW_END KW_GENERATE {
         $$ = new VhdlParseTreeNode(PT_IF_GENERATE);
-        $$->piece_count = 8;
         $$->pieces[0] = $1;
         $$->pieces[1] = $4;
         $$->pieces[2] = $6;
@@ -4632,7 +4291,6 @@ _real_if_generate_statement:
       KW_GENERATE generate_statement_body
       _if_generate_elsifs _if_generate_else KW_END KW_GENERATE {
         $$ = new VhdlParseTreeNode(PT_IF_GENERATE);
-        $$->piece_count = 8;
         $$->pieces[0] = $1;
         $$->pieces[1] = $6;
         $$->pieces[2] = $8;
@@ -4657,7 +4315,6 @@ _real_if_generate_elsifs:
     _if_generate_elsif
     | _real_if_generate_elsifs _if_generate_elsif {
         $$ = new VhdlParseTreeNode(PT_IF_GENERATE_ELSIF_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
@@ -4665,14 +4322,12 @@ _real_if_generate_elsifs:
 _if_generate_elsif:
     KW_ELSIF expression KW_GENERATE generate_statement_body {
         $$ = new VhdlParseTreeNode(PT_IF_GENERATE_ELSIF);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = nullptr;
     }
     | KW_ELSIF identifier ':' expression KW_GENERATE generate_statement_body {
         $$ = new VhdlParseTreeNode(PT_IF_GENERATE_ELSIF);
-        $$->piece_count = 3;
         $$->pieces[0] = $4;
         $$->pieces[1] = $6;
         $$->pieces[2] = $2;
@@ -4683,7 +4338,6 @@ _if_generate_else:
     | KW_ELSE KW_GENERATE generate_statement_body {
         // FIXME: Hack
         $$ = new VhdlParseTreeNode(PT_IF_GENERATE_ELSIF);
-        $$->piece_count = 2;
         $$->pieces[0] = nullptr;
         $$->pieces[1] = $3;
         $$->pieces[2] = nullptr;
@@ -4691,7 +4345,6 @@ _if_generate_else:
     | KW_ELSE identifier ':' KW_GENERATE generate_statement_body {
         // FIXME: Hack
         $$ = new VhdlParseTreeNode(PT_IF_GENERATE_ELSIF);
-        $$->piece_count = 2;
         $$->pieces[0] = nullptr;
         $$->pieces[1] = $5;
         $$->pieces[2] = $2;
@@ -4708,7 +4361,6 @@ _real_case_generate_statement:
     identifier ':' KW_CASE expression KW_GENERATE
     _one_or_more_case_generate_alternatives KW_END KW_GENERATE {
         $$ = new VhdlParseTreeNode(PT_CASE_GENERATE);
-        $$->piece_count = 4;
         $$->pieces[0] = $1;
         $$->pieces[1] = $4;
         $$->pieces[2] = $6;
@@ -4719,7 +4371,6 @@ _one_or_more_case_generate_alternatives:
     case_generate_alternative
     | _one_or_more_case_generate_alternatives case_generate_alternative {
         $$ = new VhdlParseTreeNode(PT_CASE_GENERATE_ALTERNATIVE_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
@@ -4727,14 +4378,12 @@ _one_or_more_case_generate_alternatives:
 case_generate_alternative:
     KW_WHEN choices DL_ARR generate_statement_body {
         $$ = new VhdlParseTreeNode(PT_CASE_GENERATE_ALTERNATIVE);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = nullptr;
     }
     | KW_WHEN identifier ':' choices DL_ARR generate_statement_body {
         $$ = new VhdlParseTreeNode(PT_CASE_GENERATE_ALTERNATIVE);
-        $$->piece_count = 3;
         $$->pieces[0] = $4;
         $$->pieces[1] = $6;
         $$->pieces[2] = $2;
@@ -4744,7 +4393,6 @@ case_generate_alternative:
 generate_statement_body:
     _sequence_of_concurrent_statements {
         $$ = new VhdlParseTreeNode(PT_GENERATE_BODY);
-        $$->piece_count = 3;
         $$->pieces[0] = nullptr;
         $$->pieces[1] = $1;
         $$->pieces[2] = nullptr;
@@ -4752,7 +4400,6 @@ generate_statement_body:
     | block_declarative_part KW_BEGIN
       _sequence_of_concurrent_statements _generate_statement_body_end {
         $$ = new VhdlParseTreeNode(PT_GENERATE_BODY);
-        $$->piece_count = 3;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
         $$->pieces[2] = $4;
@@ -4767,7 +4414,6 @@ _generate_statement_body_end:
 use_clause:
     KW_USE _one_or_more_selected_names ';' {
         $$ = new VhdlParseTreeNode(PT_USE_CLAUSE);
-        $$->piece_count = 1;
         $$->pieces[0] = $2;
     }
 
@@ -4775,7 +4421,6 @@ _one_or_more_selected_names:
     selected_name
     | _one_or_more_selected_names ',' selected_name {
         $$ = new VhdlParseTreeNode(PT_SELECTED_NAME_LIST);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
@@ -4787,7 +4432,6 @@ design_file:
     design_unit
     | design_file design_unit {
         $$ = new VhdlParseTreeNode(PT_DESIGN_FILE);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
@@ -4795,7 +4439,6 @@ design_file:
 design_unit:
     context_clause library_unit {
         $$ = new VhdlParseTreeNode(PT_DESIGN_UNIT);
-        $$->piece_count = 2;
         $$->pieces[0] = $2;
         $$->pieces[1] = $1;
     }
@@ -4819,7 +4462,6 @@ secondary_unit:
 library_clause:
     KW_LIBRARY identifier_list ';' {
         $$ = new VhdlParseTreeNode(PT_LIBRARY_CLAUSE);
-        $$->piece_count = 1;
         $$->pieces[0] = $2;
     }
 
@@ -4839,7 +4481,6 @@ context_declaration:
 _real_context_declaration:
     KW_CONTEXT identifier KW_IS context_clause KW_END {
         $$ = new VhdlParseTreeNode(PT_CONTEXT_DECLARATION);
-        $$->piece_count = 3;
         $$->pieces[0] = $2;
         $$->pieces[1] = $4;
         $$->pieces[2] = nullptr;
@@ -4854,7 +4495,6 @@ _real_context_clause:
     context_item
     | _real_context_clause context_item {
         $$ = new VhdlParseTreeNode(PT_CONTEXT_CLAUSE);
-        $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
@@ -4867,7 +4507,6 @@ context_item:
 context_reference:
     KW_CONTEXT _one_or_more_selected_names ';' {
         $$ = new VhdlParseTreeNode(PT_CONTEXT_REFERENCE);
-        $$->piece_count = 1;
         $$->pieces[0] = $2;
     }
 

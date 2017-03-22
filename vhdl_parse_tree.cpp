@@ -423,7 +423,6 @@ VhdlParseTreeNode::VhdlParseTreeNode(enum ParseTreeNodeType type) {
     this->chr = 0;
     this->integer = 0;
     this->boolean = false;
-    this->piece_count = 0;
     memset(this->pieces, 0, sizeof(this->pieces));
 }
 

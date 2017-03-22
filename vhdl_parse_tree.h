@@ -427,7 +427,6 @@ struct VhdlParseTreeNode {
     bool boolean2;
     bool boolean3;
     struct VhdlParseTreeNode *pieces[NUM_FIXED_PIECES];
-    int piece_count;
 
     ParseTreeOperatorType op_type;
     ParseTreeRangeDirection range_dir;
