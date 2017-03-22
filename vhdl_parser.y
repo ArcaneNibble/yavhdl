@@ -23,6 +23,19 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+// GLR parser for (hopefully) all of VHDL. The parser should not actually
+// require GLR, but it is definitely LR(k > 1). A TODO item is to fix this.
+// This parser accepts a subset of what is permitted by the IEEE 1076-2008
+// EBNF, but it should accept a superset of what is permitted by the
+// combination of the EBNF and the semantic rules. Most of the difficultly
+// lies in the "name" and "subtype_indication" rules.
+
+// One of the design decisions in this parser was to have absolutely as little
+// logic and processing in the Bison grammar as possible. This was done in the
+// hopes that it makes it easier to ever reuse this grammar file in tools other
+// than Bison. This is the reason why the parser e.g. returns nested node
+// objects rather than a list object.
+
 %{
 
 #include <string>
@@ -38,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 %name-prefix "frontend_vhdl_yy"
 
+// Make the parser reentrant
 %define api.pure
 %lex-param {void *scanner}
 %parse-param {void *scanner} {VhdlParseTreeNode **parse_output}
@@ -45,6 +59,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 %glr-parser
 
+// We get a decent number of "mysterious conflicts" the way the grammar is
+// currently structured (mostly due to type_mark). IELR mode cuts down on
+// conflicts significantly.
+// FIXME: Explain where exactly conflicts come from.
 %define lr.type ielr
 %define parse.error verbose
 %debug
