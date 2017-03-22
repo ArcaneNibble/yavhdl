@@ -49,6 +49,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 %define parse.error verbose
 %debug
 
+%define api.value.type {struct VhdlParseTreeNode *}
+
 //////////////////////// Reserved words, section 15.10 ////////////////////////
 
 %token KW_ABS
@@ -193,11 +195,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 %token TOK_DECIMAL
 %token TOK_BASED
 %token TOK_CHAR
-
 %token TOK_BASIC_ID
 %token TOK_EXT_ID
-
-%define api.value.type {struct VhdlParseTreeNode *}
 
 %%
 
