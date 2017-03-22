@@ -7,7 +7,7 @@ using namespace std;
 #include "vhdl_parser.tab.h"
 #include "vhdl_parse_tree.h"
 
-void frontend_vhdl_yyerror(const char *msg);
+void frontend_vhdl_yyerror(YYLTYPE *locp, yyscan_t scanner, const char *msg);
    
 %}
 
@@ -15,6 +15,9 @@ void frontend_vhdl_yyerror(const char *msg);
 %option noyywrap
 %option nounput
 %option prefix="frontend_vhdl_yy"
+
+%option reentrant bison-bridge bison-locations
+%option header-file="lex.frontend_vhdl_yy.h"
 
 %x COMMENT
 %x STRING
@@ -167,8 +170,8 @@ void frontend_vhdl_yyerror(const char *msg);
 %}
 [0-9](_?[0-9])*(\.[0-9](_?[0-9])*)?([Ee][+-]?[0-9](_?[0-9])*)?     {
     // Decimal literal
-    frontend_vhdl_yylval = new VhdlParseTreeNode(PT_LIT_DECIMAL);
-    frontend_vhdl_yylval->str = new std::string(yytext);
+    *yylval = new VhdlParseTreeNode(PT_LIT_DECIMAL);
+    (*yylval)->str = new std::string(yytext);
     return TOK_DECIMAL;
 }
 
@@ -177,8 +180,8 @@ void frontend_vhdl_yyerror(const char *msg);
 %}
 [0-9](_?[0-9])*#[0-9A-Fa-f](_?[0-9A-Fa-f])*(\.[0-9A-Fa-f](_?[0-9A-Fa-f])*)?#([Ee][+-]?[0-9](_?[0-9])*)?  {
     // Based literal
-    frontend_vhdl_yylval = new VhdlParseTreeNode(PT_LIT_BASED);
-    frontend_vhdl_yylval->str = new std::string(yytext);
+    *yylval = new VhdlParseTreeNode(PT_LIT_BASED);
+    (*yylval)->str = new std::string(yytext);
     return TOK_BASED;
 }
 
@@ -188,8 +191,8 @@ void frontend_vhdl_yyerror(const char *msg);
 [A-Za-z\xC0-\xD6\xD8-\xF6\xF8-\xFF](_?[A-Za-z\xC0-\xD6\xD8-\xF6\xF8-\xFF0-9])* {
     // FIXME: Are trailing underscores allowed here? On numbers?
     // Basic identifier
-    frontend_vhdl_yylval = new VhdlParseTreeNode(PT_BASIC_ID);
-    frontend_vhdl_yylval->str = new std::string(yytext);
+    *yylval = new VhdlParseTreeNode(PT_BASIC_ID);
+    (*yylval)->str = new std::string(yytext);
     return TOK_BASIC_ID;
 }
 
@@ -198,8 +201,8 @@ void frontend_vhdl_yyerror(const char *msg);
 %}
 "'"[\x20-\x7E\xA0-\xFF]"'" {
     // Character literal
-    frontend_vhdl_yylval = new VhdlParseTreeNode(PT_LIT_CHAR);
-    frontend_vhdl_yylval->chr = yytext[1];
+    *yylval = new VhdlParseTreeNode(PT_LIT_CHAR);
+    (*yylval)->chr = yytext[1];
     return TOK_CHAR;
 }
 
@@ -226,18 +229,18 @@ void frontend_vhdl_yyerror(const char *msg);
     }
     the_str[j] = 0;
 
-    frontend_vhdl_yylval = new VhdlParseTreeNode(PT_EXT_ID);
-    frontend_vhdl_yylval->str = new std::string(the_str);
+    *yylval = new VhdlParseTreeNode(PT_EXT_ID);
+    (*yylval)->str = new std::string(the_str);
     free(the_str);
     return TOK_EXT_ID;
 }
 <EXT_ID>[\x20-\x7E\xA0-\xFF]    { yymore(); }
 <EXT_ID>\n  {
-    frontend_vhdl_yyerror("Illegal newline in extended identifier");
+    frontend_vhdl_yyerror(nullptr, nullptr, "Illegal newline in extended identifier");
     throw 1;
 }
 <EXT_ID>.   {
-    frontend_vhdl_yyerror("Illegal extended identifier contents");
+    frontend_vhdl_yyerror(nullptr, nullptr, "Illegal extended identifier contents");
     throw 1;
 }
 
@@ -263,18 +266,18 @@ void frontend_vhdl_yyerror(const char *msg);
     }
     the_str[j] = 0;
 
-    frontend_vhdl_yylval = new VhdlParseTreeNode(PT_LIT_STRING);
-    frontend_vhdl_yylval->str = new std::string(the_str);
+    *yylval = new VhdlParseTreeNode(PT_LIT_STRING);
+    (*yylval)->str = new std::string(the_str);
     free(the_str);
     return TOK_STRING;
 }
 <STRING>[\x20-\x7E\xA0-\xFF]    { yymore(); }
 <STRING>\n  {
-    frontend_vhdl_yyerror("Illegal newline in string");
+    frontend_vhdl_yyerror(nullptr, nullptr, "Illegal newline in string");
     throw 1;
 }
 <STRING>.   {
-    frontend_vhdl_yyerror("Illegal string contents");
+    frontend_vhdl_yyerror(nullptr, nullptr, "Illegal string contents");
     throw 1;
 }
 
@@ -288,7 +291,7 @@ void frontend_vhdl_yyerror(const char *msg);
     BEGIN(0);
     char *the_str = strdup(yytext);
 
-    frontend_vhdl_yylval = new VhdlParseTreeNode(PT_LIT_BITSTRING);
+    *yylval = new VhdlParseTreeNode(PT_LIT_BITSTRING);
 
     // Strip last quote
     the_str[strlen(the_str) - 1] = 0;
@@ -299,7 +302,7 @@ void frontend_vhdl_yyerror(const char *msg);
         if (the_str[i] == '"') {
             the_str[i] = 0;
             main_str_offset = i + 1;
-            frontend_vhdl_yylval->str2 = new std::string(the_str);
+            (*yylval)->str2 = new std::string(the_str);
             break;
         }
     }
@@ -314,17 +317,17 @@ void frontend_vhdl_yyerror(const char *msg);
     }
     the_str[j] = 0;
 
-    frontend_vhdl_yylval->str = new std::string(the_str + main_str_offset);
+    (*yylval)->str = new std::string(the_str + main_str_offset);
     free(the_str);
     return TOK_BITSTRING;
 }
 <BITSTRING>[\x20-\x7E\xA0-\xFF]    { yymore(); }
 <BITSTRING>\n  {
-    frontend_vhdl_yyerror("Illegal newline in string");
+    frontend_vhdl_yyerror(nullptr, nullptr, "Illegal newline in string");
     throw 1;
 }
 <BITSTRING>.   {
-    frontend_vhdl_yyerror("Illegal string contents");
+    frontend_vhdl_yyerror(nullptr, nullptr, "Illegal string contents");
     throw 1;
 }
 

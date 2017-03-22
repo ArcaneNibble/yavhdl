@@ -7,8 +7,11 @@ using namespace std;
 
 #include "vhdl_parse_tree.h"
 
-int frontend_vhdl_yylex(void);
-void frontend_vhdl_yyerror(const char *msg);
+#include "vhdl_parser.tab.h"
+#include "lex.frontend_vhdl_yy.h"
+
+int frontend_vhdl_yylex(YYSTYPE*, YYLTYPE*, yyscan_t);
+void frontend_vhdl_yyerror(YYLTYPE *locp, yyscan_t scanner, const char *msg);
 int frontend_vhdl_yyget_lineno(void);
 int frontend_vhdl_yylex_destroy(void);
 extern FILE *frontend_vhdl_yyin;
@@ -20,6 +23,11 @@ struct VhdlParseTreeNode *parse_output;
 %}
 
 %name-prefix "frontend_vhdl_yy"
+
+%define api.pure
+%lex-param {void *scanner}
+%parse-param {void *scanner}
+%locations
 
 %glr-parser
 
@@ -4863,11 +4871,15 @@ int main(int argc, char **argv) {
         cout << "Error opening " << argv[1] << "\n";
         return -1;
     }
-    frontend_vhdl_yyin = f;
+    // frontend_vhdl_yyin = f;
+
+    yyscan_t myscanner;
+    frontend_vhdl_yylex_init(&myscanner);
+    frontend_vhdl_yyset_in(f, myscanner);
 
     int ret = 1;
     try {
-        ret = yyparse();
+        ret = yyparse(myscanner);
     } catch(int) {}
 
     if (ret != 0) {
@@ -4875,7 +4887,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    frontend_vhdl_yylex_destroy();
+    frontend_vhdl_yylex_destroy(myscanner);
 
     parse_output->debug_print();
     cout << "\n";
@@ -4884,8 +4896,8 @@ int main(int argc, char **argv) {
     fclose(f);
 }
 
-void frontend_vhdl_yyerror(const char *msg) {
-    cout << "Error " << msg << " on line " << frontend_vhdl_yyget_lineno() << "\n";
+void frontend_vhdl_yyerror(YYLTYPE *locp, yyscan_t scanner, const char *msg) {
+    cout << "Error " << msg << " on line " << frontend_vhdl_yyget_lineno(scanner) << "\n";
 
     // Hack for fuzzing?
     if (strcmp(msg, "syntax is ambiguous") == 0) {
