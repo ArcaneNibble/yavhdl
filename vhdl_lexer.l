@@ -270,12 +270,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 <EXT_ID>\n  {
     frontend_vhdl_yyerror(yylloc, yyscanner, nullptr, errors,
         "Illegal newline in extended identifier");
-    throw 1;
+    return LEXER_ERROR;
 }
 <EXT_ID>.   {
     frontend_vhdl_yyerror(yylloc, yyscanner, nullptr, errors,
         "Illegal extended identifier contents");
-    throw 1;
+    return LEXER_ERROR;
 }
 
 %{
@@ -309,12 +309,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 <STRING>\n  {
     frontend_vhdl_yyerror(yylloc, yyscanner, nullptr, errors,
         "Illegal newline in string");
-    throw 1;
+    return LEXER_ERROR;
 }
 <STRING>.   {
     frontend_vhdl_yyerror(yylloc, yyscanner, nullptr, errors,
         "Illegal string contents");
-    throw 1;
+    return LEXER_ERROR;
 }
 
 %{
@@ -361,12 +361,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 <BITSTRING>\n  {
     frontend_vhdl_yyerror(yylloc, yyscanner, nullptr, errors,
         "Illegal newline in string");
-    throw 1;
+    return LEXER_ERROR;
 }
 <BITSTRING>.   {
     frontend_vhdl_yyerror(yylloc, yyscanner, nullptr, errors,
         "Illegal string contents");
-    throw 1;
+    return LEXER_ERROR;
 }
 
 %{

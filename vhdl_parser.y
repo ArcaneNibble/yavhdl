@@ -217,6 +217,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 %token TOK_BASIC_ID
 %token TOK_EXT_ID
 
+// This token is used to report lexer errors
+%token LEXER_ERROR
+
 %%
 
 // Start token used for saving the parse tree

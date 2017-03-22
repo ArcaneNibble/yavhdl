@@ -77,11 +77,7 @@ VhdlParseTreeNode *VhdlParserParseFile(const char *fn, std::string &errors) {
     }
 
     frontend_vhdl_yyset_in(f, myscanner);
-    try {
-        ret = frontend_vhdl_yyparse(myscanner, &parse_output, errors);
-    } catch(int) {
-        ret = 1;
-    }
+    ret = frontend_vhdl_yyparse(myscanner, &parse_output, errors);
     frontend_vhdl_yylex_destroy(myscanner);
     fclose(f);
 
