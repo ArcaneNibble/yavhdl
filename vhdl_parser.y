@@ -1,23 +1,37 @@
+/*
+Copyright (c) 2016-2017, Robert Ou <rqou@robertou.com>
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice,
+   this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
 %{
 
-#include <cstdio>
-#include <iostream>
 #include <string>
-using namespace std;
 
-#include "vhdl_parse_tree.h"
+#define VHDL_PARSER_IN_BISON
+#include "vhdl_parser_glue.h"
 
-#include "vhdl_parser.tab.h"
-#include "lex.frontend_vhdl_yy.h"
-
-int frontend_vhdl_yylex(YYSTYPE*, YYLTYPE*, yyscan_t);
-void frontend_vhdl_yyerror(YYLTYPE *locp, yyscan_t scanner, const char *msg);
-int frontend_vhdl_yyget_lineno(void);
-int frontend_vhdl_yylex_destroy(void);
-extern FILE *frontend_vhdl_yyin;
-
-struct VhdlParseTreeNode *parse_output;
-
+// We seem to easily blow the parser stack in GLR mode, so set the maximum
+// stack depth to something huge.
 #define YYMAXDEPTH 10000000
 
 %}
@@ -26,14 +40,13 @@ struct VhdlParseTreeNode *parse_output;
 
 %define api.pure
 %lex-param {void *scanner}
-%parse-param {void *scanner}
+%parse-param {void *scanner} {VhdlParseTreeNode **parse_output}
 %locations
 
 %glr-parser
 
-// %define lr.type ielr
+%define lr.type ielr
 %define parse.error verbose
-// %define parse.lac full
 %debug
 
 //////////////////////// Reserved words, section 15.10 ////////////////////////
@@ -190,7 +203,7 @@ struct VhdlParseTreeNode *parse_output;
 
 // Start token used for saving the parse tree
 _toplevel_token:
-    design_file { parse_output = $1; }
+    design_file { *parse_output = $1; }
 
 //////////////// Design entities and configurations, section 3 ////////////////
 
@@ -4859,48 +4872,3 @@ string_literal: TOK_STRING
 bit_string_literal: TOK_BITSTRING
 
 %%
-
-int main(int argc, char **argv) {
-    if (argc < 2) {
-        cout << "Usage: " << argv[0] << " file.vhd\n";
-        return -1;
-    }
-
-    FILE *f = fopen(argv[1], "r");
-    if (!f) {
-        cout << "Error opening " << argv[1] << "\n";
-        return -1;
-    }
-    // frontend_vhdl_yyin = f;
-
-    yyscan_t myscanner;
-    frontend_vhdl_yylex_init(&myscanner);
-    frontend_vhdl_yyset_in(f, myscanner);
-
-    int ret = 1;
-    try {
-        ret = yyparse(myscanner);
-    } catch(int) {}
-
-    if (ret != 0) {
-        cout << "Parse error!\n";
-        return 1;
-    }
-
-    frontend_vhdl_yylex_destroy(myscanner);
-
-    parse_output->debug_print();
-    cout << "\n";
-    delete parse_output;
-
-    fclose(f);
-}
-
-void frontend_vhdl_yyerror(YYLTYPE *locp, yyscan_t scanner, const char *msg) {
-    cout << "Error " << msg << " on line " << frontend_vhdl_yyget_lineno(scanner) << "\n";
-
-    // Hack for fuzzing?
-    if (strcmp(msg, "syntax is ambiguous") == 0) {
-        abort();
-    }
-}

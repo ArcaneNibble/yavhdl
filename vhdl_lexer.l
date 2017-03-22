@@ -27,7 +27,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <string>
 
-#include "vhdl_parser.tab.h"
 #define VHDL_PARSER_IN_LEXER
 #include "vhdl_parser_glue.h"
 
@@ -269,11 +268,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 }
 <EXT_ID>[\x20-\x7E\xA0-\xFF]    { yymore(); }
 <EXT_ID>\n  {
-    frontend_vhdl_yyerror(yylloc, yyscanner, "Illegal newline in extended identifier");
+    frontend_vhdl_yyerror(yylloc, yyscanner, nullptr,
+        "Illegal newline in extended identifier");
     throw 1;
 }
 <EXT_ID>.   {
-    frontend_vhdl_yyerror(yylloc, yyscanner, "Illegal extended identifier contents");
+    frontend_vhdl_yyerror(yylloc, yyscanner, nullptr,
+        "Illegal extended identifier contents");
     throw 1;
 }
 
@@ -306,11 +307,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 }
 <STRING>[\x20-\x7E\xA0-\xFF]    { yymore(); }
 <STRING>\n  {
-    frontend_vhdl_yyerror(yylloc, yyscanner, "Illegal newline in string");
+    frontend_vhdl_yyerror(yylloc, yyscanner, nullptr,
+        "Illegal newline in string");
     throw 1;
 }
 <STRING>.   {
-    frontend_vhdl_yyerror(yylloc, yyscanner, "Illegal string contents");
+    frontend_vhdl_yyerror(yylloc, yyscanner, nullptr,
+        "Illegal string contents");
     throw 1;
 }
 
@@ -356,11 +359,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 }
 <BITSTRING>[\x20-\x7E\xA0-\xFF]    { yymore(); }
 <BITSTRING>\n  {
-    frontend_vhdl_yyerror(yylloc, yyscanner, "Illegal newline in string");
+    frontend_vhdl_yyerror(yylloc, yyscanner, nullptr,
+        "Illegal newline in string");
     throw 1;
 }
 <BITSTRING>.   {
-    frontend_vhdl_yyerror(yylloc, yyscanner, "Illegal string contents");
+    frontend_vhdl_yyerror(yylloc, yyscanner, nullptr,
+        "Illegal string contents");
     throw 1;
 }
 

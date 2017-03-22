@@ -3,10 +3,21 @@
 
 #include "vhdl_parse_tree.h"
 
-// This is a hack because we cannot include the lexer header file in the lexer
-// .l file but we don't want to have to expose the lexer internal types.
-#ifdef VHDL_PARSER_IN_LEXER
-void frontend_vhdl_yyerror(YYLTYPE *locp, yyscan_t scanner, const char *msg);
+#if defined(VHDL_PARSER_IN_LEXER)
+#include "vhdl_parser.tab.h"
+#endif
+
+#if defined(VHDL_PARSER_IN_BISON) || \
+    defined(VHDL_PARSER_IN_GLUE)
+#include "vhdl_parser.tab.h"
+#include "lex.frontend_vhdl_yy.h"
+#endif
+
+#if defined(VHDL_PARSER_IN_LEXER) || \
+    defined(VHDL_PARSER_IN_BISON) || \
+    defined(VHDL_PARSER_IN_GLUE)
+void frontend_vhdl_yyerror(YYLTYPE *locp, yyscan_t scanner,
+    VhdlParseTreeNode **, const char *msg);
 #endif
 
 #endif
