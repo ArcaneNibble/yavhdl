@@ -1,12 +1,3 @@
-entity test is
+architecture a of a is begin
+   result <= foo(bar => 3, baz => 4)(3);
 end;
-
-architecture test of test is
-    type arr_type is array (integer range 0 to 1) of integer;
-    shared variable aaa : arr_type;
-    shared variable bbb : aaa'subtype;
-begin
-    xxx <= yyy'subtype'(zzz);
-    www <= vvv(uuu range ttt'sss);
-    --\
-end architecture;

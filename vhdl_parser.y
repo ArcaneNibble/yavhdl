@@ -2580,12 +2580,18 @@ name:
     | _almost_attribute_name
     | external_name
 
+// We need this in order to be able to slice/select after a function call
+// with => in it
+prefix:
+    name
+    | _definitely_function_call
+
 _hack_name_for_association_list:
     // This handles anything that involves parentheses, including some things
     // that are actually a "primary." It needs to be disambiguated later in
     // second-stage parsing. However, it notably includes indexed and slice
     // names.
-    name '(' _ambig_name_parens ')' {
+    prefix '(' _ambig_name_parens ')' {
         $$ = new VhdlParseTreeNode(PT_NAME_AMBIG_PARENS);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
@@ -2619,7 +2625,7 @@ _simple_or_selected_name:
 
 /// Section 8.3
 selected_name:
-    name '.' suffix {
+    prefix '.' suffix {
         $$ = new VhdlParseTreeNode(PT_NAME_SELECTED);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
@@ -2634,7 +2640,7 @@ suffix:
 
 /// Section 8.5
 slice_name:
-    name '(' _almost_discrete_range ')' {
+    prefix '(' _almost_discrete_range ')' {
         $$ = new VhdlParseTreeNode(PT_NAME_SLICE);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
@@ -2646,13 +2652,13 @@ slice_name:
 // end because it is ambiguous with function calls. _ambig_name_parens should
 // pick that up.
 _almost_attribute_name:
-    name '\'' __attribute_kw_identifier_hack {
+    prefix '\'' __attribute_kw_identifier_hack {
         $$ = new VhdlParseTreeNode(PT_NAME_ATTRIBUTE);
         $$->piece_count = 2;
         $$->pieces[0] = $1;
         $$->pieces[1] = $3;
     }
-    | name signature '\'' __attribute_kw_identifier_hack {
+    | prefix signature '\'' __attribute_kw_identifier_hack {
         $$ = new VhdlParseTreeNode(PT_NAME_ATTRIBUTE);
         $$->piece_count = 3;
         $$->pieces[0] = $1;
