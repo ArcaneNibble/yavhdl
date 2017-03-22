@@ -37,35 +37,13 @@ int main(int argc, char **argv) {
         return -1;
     }
 
-    FILE *f = fopen(argv[1], "r");
-    if (!f) {
-        cout << "Error opening " << argv[1] << "\n";
-        return -1;
-    }
-    // frontend_vhdl_yyin = f;
-
-    yyscan_t myscanner;
-    frontend_vhdl_yylex_init(&myscanner);
-    frontend_vhdl_yyset_in(f, myscanner);
-    VhdlParseTreeNode *parse_output;
-
-    int ret = 1;
-    try {
-        ret = frontend_vhdl_yyparse(myscanner, &parse_output);
-    } catch(int) {}
-
-    if (ret != 0) {
-        cout << "Parse error!\n";
-        return 1;
-    }
-
-    frontend_vhdl_yylex_destroy(myscanner);
-
+    std::string errors = std::string();
+    VhdlParseTreeNode *parse_output = VhdlParserParseFile(argv[1], errors);
+    cout << errors;
+    cout << "----------\n";
     parse_output->debug_print();
     cout << "\n";
     delete parse_output;
-
-    fclose(f);
 }
 
 void frontend_vhdl_yyerror(YYLTYPE *locp, yyscan_t scanner, VhdlParseTreeNode **, const char *msg) {
@@ -75,4 +53,38 @@ void frontend_vhdl_yyerror(YYLTYPE *locp, yyscan_t scanner, VhdlParseTreeNode **
     if (strcmp(msg, "syntax is ambiguous") == 0) {
         abort();
     }
+}
+
+
+VhdlParseTreeNode *VhdlParserParseFile(const char *fn, std::string &errors) {
+    yyscan_t myscanner;
+    VhdlParseTreeNode *parse_output;
+
+    errors.clear();
+
+    FILE *f = fopen(fn, "rb");
+    if (!f) {
+        errors += "Error opening file \"";
+        errors += fn;
+        errors += "\"\n";
+        return nullptr;
+    }
+
+    int ret = frontend_vhdl_yylex_init(&myscanner);
+    if (ret != 0) {
+        errors += "yylex_init error!\n";
+        return nullptr;
+    }
+
+    frontend_vhdl_yyset_in(f, myscanner);
+    ret = frontend_vhdl_yyparse(myscanner, &parse_output);
+    frontend_vhdl_yylex_destroy(myscanner);
+    fclose(f);
+
+    if (ret != 0) {
+        errors += "Parse error!\n";
+        return nullptr;
+    }
+
+    return parse_output;
 }
