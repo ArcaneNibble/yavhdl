@@ -423,7 +423,15 @@ VhdlParseTreeNode::VhdlParseTreeNode(enum ParseTreeNodeType type) {
     this->chr = 0;
     this->integer = 0;
     this->boolean = false;
+    this->boolean2 = false;
+    this->boolean3 = false;
     memset(this->pieces, 0, sizeof(this->pieces));
+
+    // Default (unset) location information
+    this->first_line = -1;
+    this->first_column = -1;
+    this->last_line = -1;
+    this->last_column = -1;
 }
 
 // Destroy a parse tree node and free associated data
@@ -442,6 +450,23 @@ VhdlParseTreeNode::~VhdlParseTreeNode() {
 // Pretty-print the node into a JSON-like format
 void VhdlParseTreeNode::debug_print() {
     cout << "{\"type\": \"" << parse_tree_types[this->type] << "\"";
+
+    if (this->first_line >= 0) {
+        cout << ", \"first_line\": ";
+        cout << this->first_line;
+    }
+    if (this->first_column >= 0) {
+        cout << ", \"first_column\": ";
+        cout << this->first_column;
+    }
+    if (this->last_line >= 0) {
+        cout << ", \"last_line\": ";
+        cout << this->last_line;
+    }
+    if (this->last_column >= 0) {
+        cout << ", \"last_column\": ";
+        cout << this->last_column;
+    }
 
     switch (this->type) {
         case PT_LIT_STRING:

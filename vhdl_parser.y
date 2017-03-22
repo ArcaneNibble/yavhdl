@@ -47,6 +47,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // stack depth to something huge.
 #define YYMAXDEPTH 10000000
 
+// This macro stores line numbering information into the semantic value.
+#define STORE_LOC(lval, lloc) do {              \
+    lval->first_line = lloc.first_line;         \
+    lval->first_column = lloc.first_column;     \
+    lval->last_line = lloc.last_line;           \
+    lval->last_column = lloc.last_column;       \
+} while(0)
+
 %}
 
 %name-prefix "frontend_vhdl_yy"
@@ -297,7 +305,10 @@ _real_entity_declarative_part:
         $$->pieces[1] = $2;
     }
 
-entity_declarative_item:
+// Store line number information
+entity_declarative_item: _entity_declarative_item { STORE_LOC($$, @$); }
+
+_entity_declarative_item:
     subprogram_declaration
     | subprogram_body
     | subprogram_instantiation_declaration
@@ -363,7 +374,10 @@ _real_architecture_body:
     }
 
 /// Section 3.3.2
-block_declarative_item:
+// Store line number information
+block_declarative_item: _block_declarative_item { STORE_LOC($$, @$); }
+
+_block_declarative_item:
     subprogram_declaration
     | subprogram_body
     | subprogram_instantiation_declaration
@@ -429,7 +443,11 @@ _real_configuration_declarative_part:
         $$->pieces[1] = $2;
     }
 
+// Store line number information
 configuration_declarative_item:
+    _configuration_declarative_item { STORE_LOC($$, @$); }
+
+_configuration_declarative_item:
     use_clause
     | attribute_specification
     | group_declaration
@@ -667,7 +685,11 @@ _real_subprogram_declarative_part:
         $$->pieces[1] = $2;
     }
 
+// Store line number information
 subprogram_declarative_item:
+    _subprogram_declarative_item { STORE_LOC($$, @$); }
+
+_subprogram_declarative_item:
     subprogram_declaration
     | subprogram_body
     | subprogram_instantiation_declaration
@@ -807,7 +829,10 @@ _real_package_declarative_part:
         $$->pieces[1] = $2;
     }
 
-package_declarative_item:
+// Store line number information
+package_declarative_item: _package_declarative_item { STORE_LOC($$, @$); }
+
+_package_declarative_item:
     subprogram_declaration
     | subprogram_instantiation_declaration
     | package_declaration
@@ -860,7 +885,11 @@ _real_package_body_declarative_part:
         $$->pieces[1] = $2;
     }
 
+// Store line number information
 package_body_declarative_item:
+    _package_body_declarative_item { STORE_LOC($$, @$); }
+
+_package_body_declarative_item:
     subprogram_declaration
     | subprogram_body
     | subprogram_instantiation_declaration
@@ -1289,7 +1318,11 @@ _real_protected_type_declarative_part:
         $$->pieces[1] = $2;
     }
 
+// Store line number information
 protected_type_declarative_item:
+    _protected_type_declarative_item { STORE_LOC($$, @$); }
+
+_protected_type_declarative_item:
     subprogram_declaration
     | subprogram_instantiation_declaration
     | attribute_specification
@@ -1324,7 +1357,11 @@ _real_protected_type_body_declarative_part:
         $$->pieces[1] = $2;
     }
 
+// Store line number information
 protected_type_body_declarative_item:
+    _protected_type_body_declarative_item { STORE_LOC($$, @$); }
+
+_protected_type_body_declarative_item:
     subprogram_declaration
     | subprogram_body
     | subprogram_instantiation_declaration
@@ -3019,7 +3056,10 @@ _real_sequence_of_statements:
         $$->pieces[1] = $2;
     }
 
-sequential_statement:
+// Store line number information
+sequential_statement: _sequential_statement { STORE_LOC($$, @$); }
+
+_sequential_statement:
     _real_sequential_statement ';'
     | identifier ':' _real_sequential_statement ';' {
         $$ = new VhdlParseTreeNode(PT_STATEMENT_LABEL);
@@ -3717,7 +3757,11 @@ null_statement:
 ////////////////////// Concurrent statements, section 11 //////////////////////
 
 /// Section 11.1
-concurrent_statement:
+
+// Store line number information
+concurrent_statement: _concurrent_statement { STORE_LOC($$, @$); }
+
+_concurrent_statement:
     block_statement
     | process_statement
     | concurrent_procedure_call_statement
@@ -4443,7 +4487,10 @@ design_unit:
         $$->pieces[1] = $1;
     }
 
-library_unit:
+// Store line number information
+library_unit: _library_unit { STORE_LOC($$, @$); }
+
+_library_unit:
     primary_unit
     | secondary_unit
 

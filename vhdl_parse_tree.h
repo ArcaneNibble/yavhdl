@@ -437,6 +437,12 @@ struct VhdlParseTreeNode {
     ParseTreeEntityClass entity_class;
     ParseTreeSignalKind signal_kind;
 
+    // Location information
+    int first_line;
+    int first_column;
+    int last_line;
+    int last_column;
+
     VhdlParseTreeNode(enum ParseTreeNodeType type);
     ~VhdlParseTreeNode();
 
