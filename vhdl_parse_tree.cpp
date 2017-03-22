@@ -28,6 +28,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <cstring>
 using namespace std;
+using namespace YaVHDL::Parser;
 
 // Names, used for pretty-printing
 // Keep in sync with enum

@@ -26,7 +26,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define VHDL_PARSER_IN_GLUE
 #include "vhdl_parser_glue.h"
 
-void frontend_vhdl_yyerror(YYLTYPE *locp, yyscan_t scanner, VhdlParseTreeNode **, std::string &errors, const char *msg) {
+void frontend_vhdl_yyerror(YYLTYPE *locp, yyscan_t scanner,
+    VhdlParseTreeNode **, std::string &errors, const char *msg) {
     errors += "Error ";
     errors += msg;
     errors += " on line ";
@@ -34,7 +35,8 @@ void frontend_vhdl_yyerror(YYLTYPE *locp, yyscan_t scanner, VhdlParseTreeNode **
     errors += "\n";
 }
 
-VhdlParseTreeNode *VhdlParserParseFile(const char *fn, std::string &errors) {
+VhdlParseTreeNode *YaVHDL::Parser::VhdlParserParseFile(
+    const char *fn, std::string &errors) {
     yyscan_t myscanner;
     VhdlParseTreeNode *parse_output;
 

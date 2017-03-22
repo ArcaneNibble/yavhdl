@@ -28,6 +28,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <string>
 
+namespace YaVHDL::Parser
+{
+
 enum ParseTreeNodeType
 {
     // Various types of literals (spread throughout the spec)
@@ -440,5 +443,7 @@ struct VhdlParseTreeNode {
 
     void debug_print();
 };
+
+}
 
 #endif

@@ -33,11 +33,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "vhdl_parse_tree.h"
 
+namespace YaVHDL::Parser
+{
+
 // Main wrapper for low-level parser function.
 VhdlParseTreeNode *VhdlParserParseFile(const char *fn, std::string &errors);
 
+}
+
 // All the code below here is miscellaneous junk needed for the lexer/parser
 // to talk to each other correctly.
+#if defined(VHDL_PARSER_IN_LEXER) || \
+    defined(VHDL_PARSER_IN_BISON) || \
+    defined(VHDL_PARSER_IN_GLUE)
+using namespace YaVHDL::Parser;
+#endif
+
 #if defined(VHDL_PARSER_IN_LEXER)
 #define YY_DECL int frontend_vhdl_yylex \
     (YYSTYPE * yylval_param, YYLTYPE * yylloc_param , yyscan_t yyscanner, \
