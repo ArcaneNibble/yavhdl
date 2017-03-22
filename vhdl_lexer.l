@@ -1,14 +1,47 @@
+/*
+Copyright (c) 2016-2017, Robert Ou <rqou@robertou.com>
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice,
+   this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
 %{
 
-#include <iostream>
 #include <string>
-using namespace std;
 
 #include "vhdl_parser.tab.h"
-#include "vhdl_parse_tree.h"
+#define VHDL_PARSER_IN_LEXER
+#include "vhdl_parser_glue.h"
 
-void frontend_vhdl_yyerror(YYLTYPE *locp, yyscan_t scanner, const char *msg);
-   
+%}
+
+%{
+// Bison location tracking default (obvious) implementation.
+#define YY_USER_ACTION do {                         \
+    yylloc->first_line = yylineno;                  \
+    yylloc->last_line = yylineno;                   \
+    yylloc->first_column = yycolumn;                \
+    yylloc->last_column = yycolumn + yyleng - 1;    \
+    yycolumn += yyleng;                             \
+} while(0);
 %}
 
 %option yylineno
@@ -236,11 +269,11 @@ void frontend_vhdl_yyerror(YYLTYPE *locp, yyscan_t scanner, const char *msg);
 }
 <EXT_ID>[\x20-\x7E\xA0-\xFF]    { yymore(); }
 <EXT_ID>\n  {
-    frontend_vhdl_yyerror(nullptr, nullptr, "Illegal newline in extended identifier");
+    frontend_vhdl_yyerror(yylloc, yyscanner, "Illegal newline in extended identifier");
     throw 1;
 }
 <EXT_ID>.   {
-    frontend_vhdl_yyerror(nullptr, nullptr, "Illegal extended identifier contents");
+    frontend_vhdl_yyerror(yylloc, yyscanner, "Illegal extended identifier contents");
     throw 1;
 }
 
@@ -273,11 +306,11 @@ void frontend_vhdl_yyerror(YYLTYPE *locp, yyscan_t scanner, const char *msg);
 }
 <STRING>[\x20-\x7E\xA0-\xFF]    { yymore(); }
 <STRING>\n  {
-    frontend_vhdl_yyerror(nullptr, nullptr, "Illegal newline in string");
+    frontend_vhdl_yyerror(yylloc, yyscanner, "Illegal newline in string");
     throw 1;
 }
 <STRING>.   {
-    frontend_vhdl_yyerror(nullptr, nullptr, "Illegal string contents");
+    frontend_vhdl_yyerror(yylloc, yyscanner, "Illegal string contents");
     throw 1;
 }
 
@@ -323,11 +356,11 @@ void frontend_vhdl_yyerror(YYLTYPE *locp, yyscan_t scanner, const char *msg);
 }
 <BITSTRING>[\x20-\x7E\xA0-\xFF]    { yymore(); }
 <BITSTRING>\n  {
-    frontend_vhdl_yyerror(nullptr, nullptr, "Illegal newline in string");
+    frontend_vhdl_yyerror(yylloc, yyscanner, "Illegal newline in string");
     throw 1;
 }
 <BITSTRING>.   {
-    frontend_vhdl_yyerror(nullptr, nullptr, "Illegal string contents");
+    frontend_vhdl_yyerror(yylloc, yyscanner, "Illegal string contents");
     throw 1;
 }
 
