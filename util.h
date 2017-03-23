@@ -34,6 +34,9 @@ namespace YaVHDL::Util
 void print_chr_escaped(char c);
 void print_string_escaped(std::string *s);
 
+extern const unsigned char latin1_lcase_table[256];
+extern const char * const latin1_prettyprint_table[256];
+
 }
 
 #endif
