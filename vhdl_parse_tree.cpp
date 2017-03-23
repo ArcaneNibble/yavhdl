@@ -27,8 +27,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <iostream>
 #include <cstring>
+#include "util.h"
 using namespace std;
 using namespace YaVHDL::Parser;
+using namespace YaVHDL::Util;
 
 // Names, used for pretty-printing
 // Keep in sync with enum
@@ -396,22 +398,6 @@ const char * const signal_kinds[] = {
     "register",
     "bus",
 };
-
-// Escape values for JSON output
-void print_chr_escaped(char c) {
-    if (c >= 0x20 && c <= 0x7E && c != '"') {
-        cout << c;
-    } else {
-        cout << "\\x" << hex << (+c & 0xFF);
-    }
-}
-
-void print_string_escaped(std::string *s) {
-    for (size_t i = 0; i < s->length(); i++) {
-        char c = (*s)[i];
-        print_chr_escaped(c);
-    }
-}
 
 // Create a new parse tree node with type but no data
 VhdlParseTreeNode::VhdlParseTreeNode(enum ParseTreeNodeType type) {

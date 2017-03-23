@@ -23,28 +23,23 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef VHDL_ANALYSIS_DESIGN_DB_H
-#define VHDL_ANALYSIS_DESIGN_DB_H
+#include "util.h"
 
-#include <unordered_map>
-#include <vector>
+#include <iostream>
+using namespace YaVHDL::Util;
 
-namespace YaVHDL::Analyser
-{
-
-class DesignDatabase {
-public:
-    void PopulateBuiltins();
-    void debug_print();
-
-    void AddLibrary(std::string name, void *library);
-    void *FindLibrary(std::string name);
-
-private:
-    std::unordered_map<std::string, void *> db_by_name;
-    std::vector<void *> db_by_order;
-};
-
+// Escape values for JSON output
+void YaVHDL::Util::print_chr_escaped(char c) {
+    if (c >= 0x20 && c <= 0x7E && c != '"') {
+        std::cout << c;
+    } else {
+        std::cout << "\\x" << std::hex << (+c & 0xFF);
+    }
 }
 
-#endif
+void YaVHDL::Util::print_string_escaped(std::string *s) {
+    for (size_t i = 0; i < s->length(); i++) {
+        char c = (*s)[i];
+        print_chr_escaped(c);
+    }
+}

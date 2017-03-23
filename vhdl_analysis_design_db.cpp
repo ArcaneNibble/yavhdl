@@ -33,7 +33,26 @@ void DesignDatabase::PopulateBuiltins() {
 }
 
 void DesignDatabase::debug_print() {
-    std::cout << "I'm a design database!\n";
+    std::cout << "{\"type\": \"DesignDatabase\", \"libraries\": [";
+
+    for (auto i = this->db_by_order.begin();
+         i != this->db_by_order.end(); i++) {
+        // TODO
+    }
+
+    std::cout << "]}";
+}
+
+void DesignDatabase::AddLibrary(std::string name, void *library) {
+    this->db_by_name.insert({{name, library}});
+    this->db_by_order.push_back(library);
+}
+
+void *DesignDatabase::FindLibrary(std::string name) {
+    auto library = this->db_by_name.find(name);
+    if (library == this->db_by_name.end())
+        return NULL;
+    return library->second;
 }
 
 #ifdef VHDL_ANALYSIS_DEMO_MODE

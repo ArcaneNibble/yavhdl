@@ -23,27 +23,16 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef VHDL_ANALYSIS_DESIGN_DB_H
-#define VHDL_ANALYSIS_DESIGN_DB_H
+#ifndef UTIL_H
+#define UTIL_H
 
-#include <unordered_map>
-#include <vector>
+#include <string>
 
-namespace YaVHDL::Analyser
+namespace YaVHDL::Util
 {
 
-class DesignDatabase {
-public:
-    void PopulateBuiltins();
-    void debug_print();
-
-    void AddLibrary(std::string name, void *library);
-    void *FindLibrary(std::string name);
-
-private:
-    std::unordered_map<std::string, void *> db_by_name;
-    std::vector<void *> db_by_order;
-};
+void print_chr_escaped(char c);
+void print_string_escaped(std::string *s);
 
 }
 
