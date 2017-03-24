@@ -25,6 +25,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "util.h"
 
+#include <cstring>
 #include <iostream>
 using namespace YaVHDL::Util;
 
@@ -146,3 +147,49 @@ const char * const latin1_prettyprint_table[256] = {
     "ð",     "ñ",     "ò",     "ó",     "ô",     "õ",     "ö",     "÷",
     "ø",     "ù",     "ú",     "û",     "ü",     "ý",     "þ",     "ÿ",
 };
+
+bool is_valid_for_basic_id(char32_t c) {
+    // Upper-case letters
+    if (c >= 0x41 && c <= 0x5a) return true;
+    if (c >= 0xc0 && c <= 0xde && c != 0xd7) return true;
+    // Lower-case letters
+    if (c >= 0x61 && c <= 0x7a) return true;
+    if (c >= 0xdf && c <= 0xff && c != 0xf7) return true;
+    // Underline
+    if (c == 0x5f) return true;
+    // Digits
+    if (c >= 0x30 && c <= 0x39) return true;
+
+    return false;
+}
+
+bool is_valid_for_ext_id(char32_t c) {
+    // Must be in Latin-1 range
+    if (c >= 0x100) return false;
+    // Cannot be C0 controls
+    if (c >= 0x00 && c <= 0x1f) return false;
+    // Cannot be C1 controls
+    if (c >= 0x80 && c <= 0x9f) return false;
+    // Cannot be delete
+    if (c == 0x7f) return false;
+
+    return true;
+}
+
+bool is_valid_basic_id(const char *c) {
+    size_t l = strlen(c);
+
+    // Needs to be at least one character long
+    if (l == 0) return false;
+
+    // First character cannot be a digit or underline
+    if (c[0] >= 0x30 && c[0] <= 0x39) return false;
+    if (c[0] == 0x5f) return false;
+
+    // Cannot have consecutive underlines
+    for (size_t i = 1; i < l; i++) {
+        if (c[i] == 0x5f && c[i-1] == 0x5f) return false;
+    }
+
+    return true;
+}
