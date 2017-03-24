@@ -82,10 +82,10 @@ int main(int argc, char **argv) {
 
     std::string errors = std::string();
     VhdlParseTreeNode *parse_output = VhdlParserParseFile(argv[1], errors);
-    cout << errors;
-    cout << "----------\n";
     if (parse_output) {
         parse_output->debug_print();
+    } else {
+        cout << errors;
     }
     cout << "\n";
     delete parse_output;

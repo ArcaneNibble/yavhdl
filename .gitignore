@@ -1,3 +1,4 @@
 lex.*_yy.*
 *.tab.*
 vhdl_parser
+vhdl_analyser

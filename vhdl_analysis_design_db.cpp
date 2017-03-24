@@ -85,6 +85,7 @@ int main(int argc, char **argv) {
     }
 
     db->debug_print();
+    cout << "\n";
     delete db;
 }
 
