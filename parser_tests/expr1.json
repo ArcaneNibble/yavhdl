@@ -1,0 +1,44 @@
+{
+    "library_unit": {
+        "declarations": {
+            "expression": {
+                "op": "+",
+                "type": "PT_BINARY_OPERATOR",
+                "x": {
+                    "str": "foo",
+                    "type": "PT_BASIC_ID"
+                },
+                "y": {
+                    "str": "bar",
+                    "type": "PT_BASIC_ID"
+                }
+            },
+            "first_column": 5,
+            "first_line": 2,
+            "identifiers": {
+                "str": "a",
+                "type": "PT_BASIC_ID"
+            },
+            "last_column": 14,
+            "last_line": 3,
+            "subtype": {
+                "str": "b",
+                "type": "PT_BASIC_ID"
+            },
+            "type": "PT_CONSTANT_DECLARATION"
+        },
+        "first_column": 1,
+        "first_line": 1,
+        "header": {
+            "type": "PT_ENTITY_HEADER"
+        },
+        "identifier": {
+            "str": "test",
+            "type": "PT_BASIC_ID"
+        },
+        "last_column": 4,
+        "last_line": 4,
+        "type": "PT_ENTITY"
+    },
+    "type": "PT_DESIGN_UNIT"
+}
