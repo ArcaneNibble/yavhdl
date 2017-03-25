@@ -1,0 +1,21 @@
+{
+    "type": "PT_DESIGN_UNIT",
+    "library_unit": {
+        "type": "PT_ARCHITECTURE",
+        "first_line": 1, "first_column": 1, "last_line": 3, "last_column": 10,
+        "identifier": {"type": "PT_BASIC_ID", "str": "test"},
+        "name": {"type": "PT_BASIC_ID", "str": "test2"},
+        "declarations": {
+            "type": "PT_CONSTANT_DECLARATION",
+            "first_line": 2, "first_column": 5,
+            "last_line": 2, "last_column": 37,
+            "identifiers": {"type": "PT_BASIC_ID", "str": "foo"},
+            "subtype": {"type": "PT_BASIC_ID", "str": "bar"},
+            "expression": {
+                "type": "PT_LIT_BITSTRING",
+                "base_str": "32d",
+                "str": "12345"
+            }
+        }
+    }
+}
