@@ -392,7 +392,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 %{
 // Separators, section 15.3
 %}
-[ \xA0\t\v\r\n\f]   /* ignore separators (including NBSP) */
+[ \xA0\t\v\r\f]     /* ignore separators (including NBSP) */
+// Somehow we need to back up yycolumn here for some reason
+\n                  { yycolumn--; }
 
 %{
 // Pass unknown characters to the parser
