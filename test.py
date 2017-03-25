@@ -6,6 +6,7 @@ import os
 import os.path
 import subprocess
 import sys
+import traceback
 
 
 def do_parser_tests():
@@ -66,7 +67,7 @@ def do_parser_tests():
             # Load parser result
             try:
                 prog_output = json.loads(subp.stdout.decode('ascii'))
-            except:
+            except Exception as e:
                 failures = True
                 print("\x1b[31m✗")
                 print("Bad parser output!\x1b[0m")
@@ -74,6 +75,8 @@ def do_parser_tests():
                 sys.stdout.buffer.write(subp.stdout)
                 print("\x1b[33m----- stderr -----\x1b[0m")
                 sys.stdout.buffer.write(subp.stderr)
+                print("\x1b[33m----- exception -----\x1b[0m")
+                print(traceback.format_exc())
                 continue
 
             # Compare
