@@ -1076,7 +1076,11 @@ index_subtype_definition:
 
 array_constraint:
     _array_constraint_open
-    | _array_constraint_open_and_element_constraint
+    | '(' KW_OPEN ')' element_constraint {
+        $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = $4;
+    }
     | index_constraint {
         $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
         $$->pieces[0] = $1;
@@ -1094,9 +1098,7 @@ _definitely_not_name_array_constraint:
     | _array_constraint_definitely_multiple_ranges
 
 _after_slice_limited_array_constraint:
-    _array_constraint_open
-    | _definitely_not_name_array_constraint
-    | _definitely_not_name_record_constraint
+    _after_open_limited_array_constraint
 
 _array_constraint_open:
     '(' KW_OPEN ')' {
@@ -1106,7 +1108,19 @@ _array_constraint_open:
     }
 
 _array_constraint_open_and_element_constraint:
-    '(' KW_OPEN ')' element_constraint {
+    '(' KW_OPEN ')' _after_open_limited_array_constraint {
+        $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
+        $$->pieces[0] = nullptr;
+        $$->pieces[1] = $4;
+    }
+
+// TODO: WTF is going on here?
+_after_open_limited_array_constraint:
+    _association_list_for_record_element_constraint
+    | _array_constraint_open
+    // A function cannot return a function, so (open)(open) is definitely an
+    // array constraint and an array element constraint
+    | '(' KW_OPEN ')' element_constraint {
         $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
         $$->pieces[0] = nullptr;
         $$->pieces[1] = $4;
