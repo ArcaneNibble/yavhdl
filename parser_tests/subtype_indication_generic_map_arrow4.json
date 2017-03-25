@@ -42,7 +42,7 @@
                 "str": "a",
                 "type": "PT_BASIC_ID"
             },
-            "last_column": 58,
+            "last_column": 57,
             "last_line": 2,
             "type": "PT_PACKAGE_INSTANTIATION_DECLARATION",
             "uninstantiated_name": {

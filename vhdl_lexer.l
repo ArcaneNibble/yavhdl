@@ -291,7 +291,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // need to be doubled rather than backslashes.
 %}
 \"              { BEGIN(STRING); }
-<STRING>\"\"    { yymore(); }
+<STRING>\"\"    { UNUPDATE_COL(); yymore(); }
 <STRING>\"      {
     BEGIN(0);
     char *the_str = strdup(yytext);
@@ -312,7 +312,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     free(the_str);
     return TOK_STRING;
 }
-<STRING>[\x20-\x7E\xA0-\xFF]    { yymore(); }
+<STRING>[\x20-\x7E\xA0-\xFF]    { UNUPDATE_COL(); yymore(); }
 <STRING>\n  {
     frontend_vhdl_yyerror(yylloc, yyscanner, nullptr, errors,
         "Illegal newline in string");

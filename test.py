@@ -129,7 +129,10 @@ def main():
     failures = failures or do_parser_tests()
 
     if failures:
+        print("\x1b[31mThere were test failures!\x1b[0m")
         sys.exit(1)
+    else:
+        print("\x1b[32mAll tests pass!\x1b[0m")
 
 if __name__ == '__main__':
     main()
