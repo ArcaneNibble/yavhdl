@@ -18,7 +18,7 @@ def do_parser_tests():
     test_files = os.listdir("parser_tests")
     test_files_real = []
     test_files_set = set()
-    for f in test_files:
+    for f in sorted(test_files):
         name, ext = os.path.basename(f).rsplit(".", 1)
         vhd_name = "parser_tests/" + name + ".vhd"
         json_name = "parser_tests/" + name + ".json"
