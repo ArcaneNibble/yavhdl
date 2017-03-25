@@ -1,0 +1,66 @@
+{
+    "library_unit": {
+        "declarations": {
+            "expression": {
+                "expression": {
+                    "rest": {
+                        "expression": {
+                            "str": "bar",
+                            "type": "PT_BASIC_ID"
+                        },
+                        "type": "PT_ELEMENT_ASSOCIATION"
+                    },
+                    "this_piece": {
+                        "choices": {
+                            "rest": {
+                                "str": "baz",
+                                "type": "PT_BASIC_ID"
+                            },
+                            "this_piece": {
+                                "type": "PT_CHOICES_OTHER"
+                            },
+                            "type": "PT_CHOICES"
+                        },
+                        "expression": {
+                            "str": "qux",
+                            "type": "PT_BASIC_ID"
+                        },
+                        "type": "PT_ELEMENT_ASSOCIATION"
+                    },
+                    "type": "PT_AGGREGATE"
+                },
+                "qualify_type": {
+                    "str": "foo",
+                    "type": "PT_BASIC_ID"
+                },
+                "type": "PT_QUALIFIED_EXPRESSION"
+            },
+            "first_column": 5,
+            "first_line": 2,
+            "identifiers": {
+                "str": "a",
+                "type": "PT_BASIC_ID"
+            },
+            "last_column": 33,
+            "last_line": 3,
+            "subtype": {
+                "str": "b",
+                "type": "PT_BASIC_ID"
+            },
+            "type": "PT_CONSTANT_DECLARATION"
+        },
+        "first_column": 1,
+        "first_line": 1,
+        "header": {
+            "type": "PT_ENTITY_HEADER"
+        },
+        "identifier": {
+            "str": "test",
+            "type": "PT_BASIC_ID"
+        },
+        "last_column": 4,
+        "last_line": 4,
+        "type": "PT_ENTITY"
+    },
+    "type": "PT_DESIGN_UNIT"
+}

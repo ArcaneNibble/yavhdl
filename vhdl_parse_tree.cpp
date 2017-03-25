@@ -634,7 +634,7 @@ void VhdlParseTreeNode::debug_print() {
             break;
 
         case PT_QUALIFIED_EXPRESSION:
-            cout << ", \"type\": ";
+            cout << ", \"qualify_type\": ";
             this->pieces[0]->debug_print();
             cout << ", \"expression\": ";
             this->pieces[1]->debug_print();
