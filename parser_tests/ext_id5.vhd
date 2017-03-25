@@ -1,0 +1,2 @@
+entity \test
+\ is end;
