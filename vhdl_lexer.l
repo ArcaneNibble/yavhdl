@@ -34,8 +34,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 %{
 // Bison location tracking default (obvious) implementation.
-// FIXME: This breaks when any of the alternate lexer states such as EXT_ID
-// are used.
 #define YY_USER_ACTION do {                         \
     yylloc->first_line = yylineno;                  \
     yylloc->last_line = yylineno;                   \
@@ -328,8 +326,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Bit string literals, section 15.8
 // Again similar logic as strings.
 %}
-([0-9](_?[0-9])*)?([USus]?[BOXbox]|[Dd])\"    { BEGIN(BITSTRING); yymore(); }
-<BITSTRING>\"\"                 { yymore(); }
+([0-9](_?[0-9])*)?([USus]?[BOXbox]|[Dd])\"    {
+    BEGIN(BITSTRING);
+    UNUPDATE_COL();
+    yymore();
+}
+<BITSTRING>\"\"                 { UNUPDATE_COL(); yymore(); }
 <BITSTRING>\"                   {
     BEGIN(0);
     char *the_str = strdup(yytext);
@@ -364,7 +366,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     free(the_str);
     return TOK_BITSTRING;
 }
-<BITSTRING>[\x20-\x7E\xA0-\xFF]    { yymore(); }
+<BITSTRING>[\x20-\x7E\xA0-\xFF]    { UNUPDATE_COL(); yymore(); }
 <BITSTRING>\n  {
     frontend_vhdl_yyerror(yylloc, yyscanner, nullptr, errors,
         "Illegal newline in string");
