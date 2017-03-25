@@ -1,0 +1,27 @@
+{
+    "type": "PT_DESIGN_UNIT",
+    "library_unit": {
+        "type": "PT_ENTITY",
+        "first_line": 1, "first_column": 1, "last_line": 5, "last_column": 4,
+        "identifier": {"type": "PT_BASIC_ID", "str": "test"},
+        "header": {"type": "PT_ENTITY_HEADER"},
+        "declarations": {
+            "type": "PT_FULL_TYPE_DECLARATION",
+            "first_line": 2, "first_column": 5,
+            "last_line": 4, "last_column": 15,
+            "identifier": {"type": "PT_BASIC_ID", "str": "t"},
+            "definition": {
+                "type": "PT_RECORD_TYPE_DEFINITION",
+                "elements": {
+                    "type": "PT_ELEMENT_DECLARATION",
+                    "identifiers": {
+                        "type": "PT_ID_LIST_REAL",
+                        "rest": {"type": "PT_BASIC_ID", "str": "foo"},
+                        "this_piece": {"type": "PT_BASIC_ID", "str": "bar"}
+                    },
+                    "subtype": {"type": "PT_BASIC_ID", "str": "baz"}
+                }
+            }
+        }
+    }
+}
