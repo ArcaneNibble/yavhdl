@@ -1,0 +1,1 @@
+entity test begin end;
