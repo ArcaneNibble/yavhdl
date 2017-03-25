@@ -1,0 +1,1 @@
+architecture test of foo.bar.baz.qux is begin end;

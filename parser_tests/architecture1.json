@@ -1,0 +1,12 @@
+{
+    "type": "PT_DESIGN_UNIT",
+    "library_unit": {
+        "type": "PT_ARCHITECTURE",
+        "first_line": 1,
+        "first_column": 1,
+        "last_line": 1,
+        "last_column": 40,
+        "identifier": {"type": "PT_BASIC_ID", "str": "test"},
+        "name": {"type": "PT_BASIC_ID", "str": "test2"}
+    }
+}

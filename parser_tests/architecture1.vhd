@@ -1,0 +1,1 @@
+architecture test of test2 is begin end;

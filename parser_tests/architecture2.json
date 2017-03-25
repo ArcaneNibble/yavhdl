@@ -1,0 +1,28 @@
+{
+    "type": "PT_DESIGN_UNIT",
+    "library_unit": {
+        "type": "PT_ARCHITECTURE",
+        "first_line": 1,
+        "first_column": 1,
+        "last_line": 1,
+        "last_column": 50,
+        "identifier": {"type": "PT_BASIC_ID", "str": "test"},
+
+        "name": {
+         "type": "PT_NAME_SELECTED",
+         "name": {
+          "type": "PT_NAME_SELECTED",
+          "name": {
+           "type": "PT_NAME_SELECTED",
+           "name": {
+            "type": "PT_BASIC_ID",
+            "str": "foo"
+           },
+           "suffix": {"type": "PT_BASIC_ID", "str": "bar"}
+          },
+          "suffix": {"type": "PT_BASIC_ID", "str": "baz"}
+         },
+         "suffix": {"type": "PT_BASIC_ID", "str": "qux"}
+        }
+    }
+}
