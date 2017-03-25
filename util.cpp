@@ -34,7 +34,7 @@ void YaVHDL::Util::print_chr_escaped(char c) {
     if (c >= 0x20 && c <= 0x7E && c != '"' && c != '\\') {
         std::cout << c;
     } else {
-        std::cout << "\\u00" << std::hex << (+c & 0xFF);
+        std::cout << "\\u00" << std::hex << (+c & 0xFF) << std::dec;
     }
 }
 

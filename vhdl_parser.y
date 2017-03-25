@@ -50,9 +50,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // This macro stores line numbering information into the semantic value.
 #define STORE_LOC(lval, lloc) do {              \
     lval->first_line = lloc.first_line;         \
-    lval->first_column = lloc.first_column;     \
+    lval->first_column = lloc.first_column + 1; \
     lval->last_line = lloc.last_line;           \
-    lval->last_column = lloc.last_column;       \
+    lval->last_column = lloc.last_column + 1;   \
 } while(0)
 
 %}
