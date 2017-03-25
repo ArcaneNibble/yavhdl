@@ -1,0 +1,79 @@
+{
+    "library_unit": {
+        "declarations": {
+            "first_column": 5,
+            "first_line": 2,
+            "generic_map": {
+                "association_list": {
+                    "actual_part": {
+                        "constraint": {
+                            "index_constraint": {
+                                "rest": {
+                                    "dir": "to",
+                                    "type": "PT_RANGE",
+                                    "x": {
+                                        "str": "0",
+                                        "type": "PT_LIT_DECIMAL"
+                                    },
+                                    "y": {
+                                        "str": "2",
+                                        "type": "PT_LIT_DECIMAL"
+                                    }
+                                },
+                                "this_piece": {
+                                    "dir": "to",
+                                    "type": "PT_RANGE",
+                                    "x": {
+                                        "str": "1",
+                                        "type": "PT_LIT_DECIMAL"
+                                    },
+                                    "y": {
+                                        "str": "3",
+                                        "type": "PT_LIT_DECIMAL"
+                                    }
+                                },
+                                "type": "PT_INDEX_CONSTRAINT"
+                            },
+                            "type": "PT_ARRAY_CONSTRAINT"
+                        },
+                        "type": "PT_SUBTYPE_INDICATION",
+                        "type_mark": {
+                            "str": "foo",
+                            "type": "PT_BASIC_ID"
+                        }
+                    },
+                    "formal_part": {
+                        "str": "c",
+                        "type": "PT_BASIC_ID"
+                    },
+                    "type": "PT_ASSOCIATION_ELEMENT"
+                },
+                "type": "PT_GENERIC_MAP_ASPECT"
+            },
+            "identifier": {
+                "str": "a",
+                "type": "PT_BASIC_ID"
+            },
+            "last_column": 61,
+            "last_line": 2,
+            "type": "PT_PACKAGE_INSTANTIATION_DECLARATION",
+            "uninstantiated_name": {
+                "str": "b",
+                "type": "PT_BASIC_ID"
+            }
+        },
+        "first_column": 1,
+        "first_line": 1,
+        "header": {
+            "type": "PT_ENTITY_HEADER"
+        },
+        "identifier": {
+            "str": "test",
+            "type": "PT_BASIC_ID"
+        },
+        "last_column": 4,
+        "last_line": 3,
+        "type": "PT_ENTITY"
+    },
+    "type": "PT_DESIGN_UNIT"
+}
