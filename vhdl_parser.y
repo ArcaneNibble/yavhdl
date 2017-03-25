@@ -1097,9 +1097,6 @@ _definitely_not_name_array_constraint:
     _array_constraint_open_and_element_constraint
     | _array_constraint_definitely_multiple_ranges
 
-_after_slice_limited_array_constraint:
-    _after_open_limited_array_constraint
-
 _array_constraint_open:
     '(' KW_OPEN ')' {
         $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
@@ -1108,15 +1105,17 @@ _array_constraint_open:
     }
 
 _array_constraint_open_and_element_constraint:
-    '(' KW_OPEN ')' _after_open_limited_array_constraint {
+    '(' KW_OPEN ')' _morph_name_into_subtype_indication_constraint {
         $$ = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
         $$->pieces[0] = nullptr;
         $$->pieces[1] = $4;
     }
 
 // TODO: WTF is going on here?
-_after_open_limited_array_constraint:
-    _association_list_for_record_element_constraint
+// This is the "stuff that can come after a name involving parentheses" that
+// ensures that it is for certain a subtype_indication.
+_morph_name_into_subtype_indication_constraint:
+    _definitely_further_element_constraint
     | _array_constraint_open
     // A function cannot return a function, so (open)(open) is definitely an
     // array constraint and an array element constraint
@@ -1266,13 +1265,14 @@ _one_or_more_association_list_record_element_constraint:
     }
 
 _association_list_record_element_constraint:
-    identifier _association_list_for_record_element_constraint {
+    identifier _definitely_further_element_constraint {
         $$ = new VhdlParseTreeNode(PT_RECORD_ELEMENT_CONSTRAINT);
         $$->pieces[0] = $1;
         $$->pieces[1] = $2;
     }
     // HACK, FIXME
-    | _hack_name_for_association_list _after_slice_limited_array_constraint {
+    | _hack_name_for_association_list
+      _morph_name_into_subtype_indication_constraint {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION_AMBIG_WTF);
         $$->pieces[0] = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
         $$->pieces[0]->pieces[0] = $1;
@@ -1472,7 +1472,13 @@ _allocator_subtype_indication:
         $$->pieces[2] = $2;
     }
 
-// Does not have a bare name because that's ambiguous.
+// This is an attempt to cover exactly those things that are subtype_indication
+// but not a name. When we know we have a resolution_indication this is easy,
+// but when we don't we might have no idea. The disambiguation is done by
+// trying to look for either "stuff in parentheses" that cannot be a function
+// call or a slice or "stuff after the parentheses" that cannot come after
+// a function call or a slice. Does not have a bare name because that's
+// ambiguous.
 _association_list_subtype_indication:
     resolution_indication type_mark {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
@@ -1493,7 +1499,8 @@ _association_list_subtype_indication:
         $$->pieces[2] = $3;
     }
     // HACK, FIXME
-    | _hack_name_for_association_list _after_slice_limited_array_constraint {
+    | _hack_name_for_association_list
+      _morph_name_into_subtype_indication_constraint {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION_AMBIG_WTF);
         $$->pieces[0] = new VhdlParseTreeNode(PT_ARRAY_CONSTRAINT);
         $$->pieces[0]->pieces[0] = $1;
@@ -1547,11 +1554,9 @@ constraint:
     | array_constraint
     | record_constraint
 
-// FIXME: Ugly, WTF is happening here?
 _association_list_definitely_constraint:
     range_constraint
-    | _definitely_not_name_array_constraint
-    | _definitely_not_name_record_constraint
+    | _definitely_further_element_constraint
 
 // When a "discrete" subtype indication is needed, the _only_ type of
 // constraint we can have is a range constraint. Arrays and records aren't
@@ -1568,7 +1573,7 @@ element_constraint:
     array_constraint
     | record_constraint
 
-_association_list_for_record_element_constraint:
+_definitely_further_element_constraint:
     _definitely_not_name_array_constraint
     | _definitely_not_name_record_constraint
 
