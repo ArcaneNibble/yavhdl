@@ -1,0 +1,61 @@
+{
+    "library_unit": {
+        "declarations": {
+            "first_column": 5,
+            "first_line": 2,
+            "identifier": {
+                "str": "t",
+                "type": "PT_BASIC_ID"
+            },
+            "last_column": 40,
+            "last_line": 2,
+            "subtype": {
+                "constraint": {
+                    "element_constraint": {
+                        "element_constraint": {
+                            "index_constraint": "open",
+                            "type": "PT_ARRAY_CONSTRAINT"
+                        },
+                        "index_constraint": {
+                            "dir": "to",
+                            "type": "PT_RANGE",
+                            "x": {
+                                "str": "0",
+                                "type": "PT_LIT_DECIMAL"
+                            },
+                            "y": {
+                                "str": "2",
+                                "type": "PT_LIT_DECIMAL"
+                            }
+                        },
+                        "type": "PT_ARRAY_CONSTRAINT"
+                    },
+                    "index_constraint": {
+                        "str": "bar",
+                        "type": "PT_BASIC_ID"
+                    },
+                    "type": "PT_ARRAY_CONSTRAINT"
+                },
+                "type": "PT_SUBTYPE_INDICATION",
+                "type_mark": {
+                    "str": "foo",
+                    "type": "PT_BASIC_ID"
+                }
+            },
+            "type": "PT_SUBTYPE_DECLARATION"
+        },
+        "first_column": 1,
+        "first_line": 1,
+        "header": {
+            "type": "PT_ENTITY_HEADER"
+        },
+        "identifier": {
+            "str": "test",
+            "type": "PT_BASIC_ID"
+        },
+        "last_column": 4,
+        "last_line": 3,
+        "type": "PT_ENTITY"
+    },
+    "type": "PT_DESIGN_UNIT"
+}

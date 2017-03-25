@@ -1,0 +1,63 @@
+{
+    "library_unit": {
+        "declarations": {
+            "first_column": 5,
+            "first_line": 2,
+            "generic_map": {
+                "association_list": {
+                    "actual_part": {
+                        "fixup_needed": {
+                            "element_constraint": {
+                                "index_constraint": "open",
+                                "type": "PT_ARRAY_CONSTRAINT"
+                            },
+                            "index_constraint": {
+                                "name": {
+                                    "str": "foo",
+                                    "type": "PT_BASIC_ID"
+                                },
+                                "parens": {
+                                    "str": "bar",
+                                    "type": "PT_BASIC_ID"
+                                },
+                                "type": "PT_NAME_AMBIG_PARENS"
+                            },
+                            "type": "PT_ARRAY_CONSTRAINT"
+                        },
+                        "type": "PT_SUBTYPE_INDICATION_AMBIG_WTF"
+                    },
+                    "formal_part": {
+                        "str": "c",
+                        "type": "PT_BASIC_ID"
+                    },
+                    "type": "PT_ASSOCIATION_ELEMENT"
+                },
+                "type": "PT_GENERIC_MAP_ASPECT"
+            },
+            "identifier": {
+                "str": "a",
+                "type": "PT_BASIC_ID"
+            },
+            "last_column": 56,
+            "last_line": 2,
+            "type": "PT_PACKAGE_INSTANTIATION_DECLARATION",
+            "uninstantiated_name": {
+                "str": "b",
+                "type": "PT_BASIC_ID"
+            }
+        },
+        "first_column": 1,
+        "first_line": 1,
+        "header": {
+            "type": "PT_ENTITY_HEADER"
+        },
+        "identifier": {
+            "str": "test",
+            "type": "PT_BASIC_ID"
+        },
+        "last_column": 4,
+        "last_line": 3,
+        "type": "PT_ENTITY"
+    },
+    "type": "PT_DESIGN_UNIT"
+}
