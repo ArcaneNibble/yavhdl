@@ -1,0 +1,47 @@
+{
+    "type": "PT_DESIGN_UNIT",
+    "library_unit": {
+        "type": "PT_ENTITY",
+        "first_line": 1,
+        "first_column": 1,
+        "last_line": 8,
+        "last_column": 4,
+        "identifier": {"type": "PT_BASIC_ID", "str": "test"},
+        "header": {"type": "PT_ENTITY_HEADER"},
+        "declarations": {
+            "type": "PT_FULL_TYPE_DECLARATION",
+            "first_line": 2,
+            "first_column": 5,
+            "last_line": 7,
+            "last_column": 14,
+            "identifier": {"type": "PT_BASIC_ID", "str": "t"},
+            "definition": {
+                "type": "PT_PHYSICAL_TYPE_DEFINITION",
+                "range": {
+                    "type": "PT_RANGE",
+                    "dir": "to",
+                    "x": {"type": "PT_LIT_DECIMAL", "str": "0"},
+                    "y": {"type": "PT_LIT_DECIMAL", "str": "10"}
+                },
+                "primary": {"type": "PT_BASIC_ID", "str": "foo"},
+                "secondaries": {
+                 "type": "PT_SECONDARY_UNIT_DECLARATION_LIST",
+                 "rest": {
+                  "type": "PT_SECONDARY_UNIT_DECLARATION",
+                  "identifier": {"type": "PT_BASIC_ID", "str": "bar"},
+                  "literal": {
+                   "type": "PT_LIT_PHYS",
+                   "unit": {"type": "PT_BASIC_ID", "str": "foo"},
+                   "val": {"type": "PT_LIT_DECIMAL", "str": "2"}
+                  }
+                 },
+                 "this_piece": {
+                  "type": "PT_SECONDARY_UNIT_DECLARATION",
+                  "identifier": {"type": "PT_BASIC_ID", "str": "baz"},
+                  "literal": {"type": "PT_BASIC_ID", "str": "bar"}
+                 }
+                }
+            }
+        }
+    }
+}
