@@ -34,6 +34,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 %{
 // Bison location tracking default (obvious) implementation.
+// FIXME: This breaks when any of the alternate lexer states such as EXT_ID
+// are used.
 #define YY_USER_ACTION do {                         \
     yylloc->first_line = yylineno;                  \
     yylloc->last_line = yylineno;                   \
