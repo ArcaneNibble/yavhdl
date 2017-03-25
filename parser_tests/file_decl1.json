@@ -1,0 +1,16 @@
+{
+    "type": "PT_DESIGN_UNIT",
+    "library_unit": {
+        "type": "PT_ENTITY",
+        "first_line": 1, "first_column": 1, "last_line": 3, "last_column": 4,
+        "identifier": {"type": "PT_BASIC_ID", "str": "test"},
+        "header": {"type": "PT_ENTITY_HEADER"},
+        "declarations": {
+            "type": "PT_FILE_DECLARATION",
+            "first_line": 2, "first_column": 5,
+            "last_line": 2, "last_column": 19,
+            "identifiers": {"type": "PT_BASIC_ID", "str": "foo"},
+            "subtype": {"type": "PT_BASIC_ID", "str": "bar"}
+        }
+    }
+}
