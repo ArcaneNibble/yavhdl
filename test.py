@@ -15,16 +15,18 @@ def do_parser_tests():
 
     # Gather tests
     test_files = os.listdir("parser_tests")
-    test_files_real = set()
+    test_files_real = []
+    test_files_set = set()
     for f in test_files:
         name, ext = os.path.basename(f).rsplit(".", 1)
         vhd_name = "parser_tests/" + name + ".vhd"
         json_name = "parser_tests/" + name + ".json"
         if os.path.isfile(vhd_name) and os.path.isfile(json_name):
             this_test = (vhd_name, json_name, name)
-            if this_test not in test_files_real:
+            if name not in test_files_set:
                 print("Found test \"" + name + "\"")
-                test_files_real.add(this_test)
+                test_files_real.append(this_test)
+                test_files_set.add(name)
 
     print("Found " + str(len(test_files_real)) + " tests")
 
