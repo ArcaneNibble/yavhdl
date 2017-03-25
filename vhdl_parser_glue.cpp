@@ -80,15 +80,20 @@ int main(int argc, char **argv) {
         return -1;
     }
 
+    int ret = 0;
+
     std::string errors = std::string();
     VhdlParseTreeNode *parse_output = VhdlParserParseFile(argv[1], errors);
     if (parse_output) {
         parse_output->debug_print();
     } else {
+        ret = 1;
         cout << errors;
     }
     cout << "\n";
     delete parse_output;
+
+    return ret;
 }
 
 #endif
