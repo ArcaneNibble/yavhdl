@@ -5,8 +5,8 @@
         "first_line": 1,
         "first_column": 0,
         "last_line": 1,
-        "last_column": 20,
-        "identifier": {"type": "PT_EXT_ID", "str": "test"},
+        "last_column": 22,
+        "identifier": {"type": "PT_EXT_ID", "str": "t\\est"},
         "header": {"type": "PT_ENTITY_HEADER"}
     }
 }

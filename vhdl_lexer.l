@@ -43,6 +43,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     yylloc->last_column = yycolumn + yyleng - 1;    \
     yycolumn += yyleng;                             \
 } while(0);
+
+// This is a hack so that alternate lexer states track columns correctly.
+#define UNUPDATE_COL() do {         \
+    yycolumn -= yyleng;             \
+} while(0)
 %}
 
 %option yylineno
@@ -247,7 +252,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // else.
 %}
 \\              { BEGIN(EXT_ID); }
-<EXT_ID>\\\\    { yymore(); }
+<EXT_ID>\\\\    { UNUPDATE_COL(); yymore(); }
 <EXT_ID>\\      {
     BEGIN(0);
     char *the_str = strdup(yytext);
@@ -268,7 +273,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     free(the_str);
     return TOK_EXT_ID;
 }
-<EXT_ID>[\x20-\x7E\xA0-\xFF]    { yymore(); }
+<EXT_ID>[\x20-\x7E\xA0-\xFF]    { UNUPDATE_COL(); yymore(); }
 <EXT_ID>\n  {
     frontend_vhdl_yyerror(yylloc, yyscanner, nullptr, errors,
         "Illegal newline in extended identifier");
