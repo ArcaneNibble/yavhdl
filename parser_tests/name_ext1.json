@@ -1,0 +1,54 @@
+{
+    "library_unit": {
+        "declarations": {
+            "expression": {
+                "pathname": {
+                    "library": {
+                        "str": "foo",
+                        "type": "PT_BASIC_ID"
+                    },
+                    "object": {
+                        "str": "baz",
+                        "type": "PT_BASIC_ID"
+                    },
+                    "package": {
+                        "str": "bar",
+                        "type": "PT_BASIC_ID"
+                    },
+                    "type": "PT_PACKAGE_PATHNAME"
+                },
+                "subtype_indication": {
+                    "str": "t",
+                    "type": "PT_BASIC_ID"
+                },
+                "type": "PT_NAME_EXT_CONST"
+            },
+            "first_column": 5,
+            "first_line": 2,
+            "identifiers": {
+                "str": "a",
+                "type": "PT_BASIC_ID"
+            },
+            "last_column": 34,
+            "last_line": 3,
+            "subtype": {
+                "str": "b",
+                "type": "PT_BASIC_ID"
+            },
+            "type": "PT_CONSTANT_DECLARATION"
+        },
+        "first_column": 1,
+        "first_line": 1,
+        "header": {
+            "type": "PT_ENTITY_HEADER"
+        },
+        "identifier": {
+            "str": "test",
+            "type": "PT_BASIC_ID"
+        },
+        "last_column": 4,
+        "last_line": 4,
+        "type": "PT_ENTITY"
+    },
+    "type": "PT_DESIGN_UNIT"
+}
