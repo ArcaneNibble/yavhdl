@@ -1,0 +1,11 @@
+{
+    "type": "PT_DESIGN_UNIT",
+    "library_unit": {
+        "type": "PT_CONTEXT_DECLARATION",
+        "first_line": 1,
+        "first_column": 1,
+        "last_line": 1,
+        "last_column": 20,
+        "identifier": {"type": "PT_BASIC_ID", "str": "test"}
+    }
+}
