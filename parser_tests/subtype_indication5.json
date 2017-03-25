@@ -1,0 +1,46 @@
+{
+    "library_unit": {
+        "declarations": {
+            "first_column": 5,
+            "first_line": 2,
+            "identifier": {
+                "str": "t",
+                "type": "PT_BASIC_ID"
+            },
+            "last_column": 35,
+            "last_line": 2,
+            "subtype": {
+                "constraint": {
+                    "attribute": {
+                        "str": "baz",
+                        "type": "PT_BASIC_ID"
+                    },
+                    "name": {
+                        "str": "bar",
+                        "type": "PT_BASIC_ID"
+                    },
+                    "type": "PT_NAME_ATTRIBUTE"
+                },
+                "type": "PT_SUBTYPE_INDICATION",
+                "type_mark": {
+                    "str": "foo",
+                    "type": "PT_BASIC_ID"
+                }
+            },
+            "type": "PT_SUBTYPE_DECLARATION"
+        },
+        "first_column": 1,
+        "first_line": 1,
+        "header": {
+            "type": "PT_ENTITY_HEADER"
+        },
+        "identifier": {
+            "str": "test",
+            "type": "PT_BASIC_ID"
+        },
+        "last_column": 4,
+        "last_line": 3,
+        "type": "PT_ENTITY"
+    },
+    "type": "PT_DESIGN_UNIT"
+}
