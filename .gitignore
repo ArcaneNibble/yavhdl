@@ -1,5 +1,5 @@
-lex.*_yy.*
-*.tab.*
+*_ll.*
+*_yy.*
 vhdl_parser
 vhdl_analyser
 *.o
