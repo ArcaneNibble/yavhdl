@@ -54,12 +54,12 @@ using namespace YaVHDL::Parser;
     (YYSTYPE * yylval_param, YYLTYPE * yylloc_param , yyscan_t yyscanner, \
      std::string &errors)
 
-#include "vhdl_parser.tab.h"
+#include "vhdl_parser_yy.h"
 #endif
 
 #if defined(VHDL_PARSER_IN_BISON) || \
     defined(VHDL_PARSER_IN_GLUE)
-#include "vhdl_parser.tab.h"
+#include "vhdl_parser_yy.h"
 #include "lex.frontend_vhdl_yy.h"
 #endif
 

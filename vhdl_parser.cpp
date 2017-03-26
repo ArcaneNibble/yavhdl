@@ -23,34 +23,32 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "vhdl_analysis_design_db.h"
-
 #include <iostream>
-using namespace YaVHDL::Analyser;
 
-void DesignDatabase::PopulateBuiltins() {
-    // TODO
-}
+#include "vhdl_parse_tree.h"
+#define VHDL_PARSER_IN_GLUE
+#include "vhdl_parser_glue.h"
 
-void DesignDatabase::debug_print() {
-    std::cout << "{\"type\": \"DesignDatabase\", \"libraries\": [";
+using namespace std;
 
-    for (auto i = this->db_by_order.begin();
-         i != this->db_by_order.end(); i++) {
-        // TODO
+int main(int argc, char **argv) {
+    if (argc < 2) {
+        cout << "Usage: " << argv[0] << " file.vhd\n";
+        return -1;
     }
 
-    std::cout << "]}";
-}
+    int ret = 0;
 
-void DesignDatabase::AddLibrary(std::string name, void *library) {
-    this->db_by_name.insert({{name, library}});
-    this->db_by_order.push_back(library);
-}
+    std::string errors = std::string();
+    VhdlParseTreeNode *parse_output = VhdlParserParseFile(argv[1], errors);
+    if (parse_output) {
+        parse_output->debug_print();
+    } else {
+        ret = 1;
+        cout << errors;
+    }
+    cout << "\n";
+    delete parse_output;
 
-void *DesignDatabase::FindLibrary(std::string name) {
-    auto library = this->db_by_name.find(name);
-    if (library == this->db_by_name.end())
-        return NULL;
-    return library->second;
+    return ret;
 }
