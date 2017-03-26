@@ -27,10 +27,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <cstring>
 #include <iostream>
-using namespace YaVHDL::Util;
+
+namespace YaVHDL::Util
+{
 
 // Escape values for JSON output
-void YaVHDL::Util::print_chr_escaped(char c) {
+void print_chr_escaped(char c) {
     if (c >= 0x20 && c <= 0x7E && c != '"' && c != '\\') {
         std::cout << c;
     } else {
@@ -38,14 +40,14 @@ void YaVHDL::Util::print_chr_escaped(char c) {
     }
 }
 
-void YaVHDL::Util::print_string_escaped(std::string *s) {
+void print_string_escaped(std::string *s) {
     for (size_t i = 0; i < s->length(); i++) {
         char c = (*s)[i];
         print_chr_escaped(c);
     }
 }
 
-const unsigned char YaVHDL::Util::latin1_lcase_table[256] = {
+const unsigned char latin1_lcase_table[256] = {
     // 0x00-0x0f
     0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
     0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
@@ -97,7 +99,7 @@ const unsigned char YaVHDL::Util::latin1_lcase_table[256] = {
 };
 
 // Ensure this table is UTF-8!
-const char * const YaVHDL::Util::latin1_prettyprint_table[256] = {
+const char * const latin1_prettyprint_table[256] = {
     // 0x00-0x0f
     "␀",     "␁",     "␂",     "␃",     "␄",     "␅",     "␆",     "␇",
     "␈",     "␉",     "␊",     "␋",     "␌",     "␍",     "␎",     "␏",
@@ -148,7 +150,8 @@ const char * const YaVHDL::Util::latin1_prettyprint_table[256] = {
     "ø",     "ù",     "ú",     "û",     "ü",     "ý",     "þ",     "ÿ",
 };
 
-bool YaVHDL::Util::is_valid_for_basic_id(char32_t c) {
+bool is_valid_for_basic_id(char c_) {
+    unsigned char c = c_;
     // Upper-case letters
     if (c >= 0x41 && c <= 0x5a) return true;
     if (c >= 0xc0 && c <= 0xde && c != 0xd7) return true;
@@ -163,9 +166,8 @@ bool YaVHDL::Util::is_valid_for_basic_id(char32_t c) {
     return false;
 }
 
-bool YaVHDL::Util::is_valid_for_ext_id(char32_t c) {
-    // Must be in Latin-1 range
-    if (c >= 0x100) return false;
+bool is_valid_for_ext_id(char c_) {
+    unsigned char c = c_;
     // Cannot be C0 controls
     if (c >= 0x00 && c <= 0x1f) return false;
     // Cannot be C1 controls
@@ -176,7 +178,7 @@ bool YaVHDL::Util::is_valid_for_ext_id(char32_t c) {
     return true;
 }
 
-bool YaVHDL::Util::is_valid_basic_id(const char *c) {
+bool is_valid_basic_id(const char *c) {
     size_t l = strlen(c);
 
     // Needs to be at least one character long
@@ -195,4 +197,6 @@ bool YaVHDL::Util::is_valid_basic_id(const char *c) {
     if (c[l - 1] == 0x5f) return false;
 
     return true;
+}
+
 }
