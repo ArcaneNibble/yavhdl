@@ -155,7 +155,7 @@ bool YaVHDL::Util::is_valid_for_basic_id(char32_t c) {
     // Lower-case letters
     if (c >= 0x61 && c <= 0x7a) return true;
     if (c >= 0xdf && c <= 0xff && c != 0xf7) return true;
-    // Underline
+    // Underscore
     if (c == 0x5f) return true;
     // Digits
     if (c >= 0x30 && c <= 0x39) return true;
@@ -182,14 +182,17 @@ bool YaVHDL::Util::is_valid_basic_id(const char *c) {
     // Needs to be at least one character long
     if (l == 0) return false;
 
-    // First character cannot be a digit or underline
+    // First character cannot be a digit or underscore
     if (c[0] >= 0x30 && c[0] <= 0x39) return false;
     if (c[0] == 0x5f) return false;
 
-    // Cannot have consecutive underlines
+    // Cannot have consecutive underscores
     for (size_t i = 1; i < l; i++) {
         if (c[i] == 0x5f && c[i-1] == 0x5f) return false;
     }
+
+    // Cannot end with an underscore
+    if (c[l - 1] == 0x5f) return false;
 
     return true;
 }
