@@ -5,24 +5,31 @@ TARGETS = vhdl_analyser vhdl_parser
 
 FLEXFILES = $(wildcard *.l)
 BISONFILES = $(wildcard *.y)
-CFLEX = $(patsubst %.l, %_ll.c, $(FLEXFILES))
-CBISON = $(patsubst %.y, %_yy.c, $(BISONFILES))
-SOURCES = $(CFLEX) $(CBISON) $(filter-out $(patsubst %, %.cpp, $(TARGETS)),$(wildcard *.cpp))
+CXXFLEX = $(patsubst %.l, %_ll.cpp, $(FLEXFILES))
+CXXBISON = $(patsubst %.y, %_yy.cpp, $(BISONFILES))
+SOURCES = $(CXXFLEX) $(CXXBISON) $(filter-out $(patsubst %, %.cpp, $(TARGETS)),$(wildcard *.cpp))
+OBJECTS = $(patsubst %.cpp, %.o, $(SOURCES))
 
-.PHONY: all clean
+.PHONY: all clean test
 
-all: $(TARGETS)
+all: $(TARGETS) vhdl_analyser_bits.a
 
-%: %.cpp $(SOURCES)
+%: %.cpp $(OBJECTS)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
-$(CFLEX): $(CBISON)
+vhdl_analyser_bits.a: $(OBJECTS)
+	ar ruv $@ $^
 
-%_ll.c: %.l
+$(CXXFLEX): $(CXXBISON)
+
+%_ll.cpp: %.l
 	flex -o $@ $<
 
-%_yy.c: %.y
+%_yy.cpp: %.y
 	bison -v -d -o $@ $<
 
 clean:
-	rm -f $(CFLEX) $(CBISON) $(TARGETS) *_ll.* *_yy.*
+	rm -f $(TARGETS) *_ll.* *_yy.* *.o *.a
+
+test:
+	./test.py
