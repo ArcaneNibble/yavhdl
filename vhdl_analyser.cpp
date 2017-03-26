@@ -23,31 +23,55 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <cstring>
 #include <iostream>
 
 #include "vhdl_analysis_design_db.h"
 #include "vhdl_parser_glue.h"
 
 using namespace std;
+using namespace YaVHDL::Analyser;
 using namespace YaVHDL::Parser;
 
 int main(int argc, char **argv) {
     if (argc < 3) {
-        cout << "Usage: " << argv[0] << " work_lib_name ";
+        cout << "Usage: " << argv[0] << " [-e] work_lib_name ";
         cout << "file1.vhd, file2.vhd, ...\n";
         return -1;
     }
 
-    YaVHDL::Analyser::DesignDatabase *db = new YaVHDL::Analyser::DesignDatabase();
+    // Parse the given identifier
+    Identifier *lib_id;
+    bool lib_was_ext_id = false;
+    if (strcmp(argv[1], "-e") == 0) {
+        lib_was_ext_id = true;
+        lib_id = Identifier::FromUTF8(argv[2], true);
+    } else {
+        lib_id = Identifier::FromUTF8(argv[1], false);
+    }
+
+    if (!lib_id) {
+        cout << "Bad library identifier!\n";
+        return 1;
+    }
+
+    // Create design database (ultimate container for everything)
+    DesignDatabase *db = new DesignDatabase();
     db->PopulateBuiltins();
-    std::string errors = std::string();
+
+    // Create the library
+    Library *work_lib = new Library();
+    work_lib->id = lib_id;
+    db->AddLibrary(work_lib);
 
     // Parse each file
-    for (int i = 2; i < argc; i++) {
+    std::string errors = std::string();
+    for (int i = lib_was_ext_id ? 3 : 2; i < argc; i++) {
         cout << "Parsing file \"" << argv[i] << "\"...\n";
         VhdlParseTreeNode *pt = VhdlParserParseFile(argv[i], errors);
         if (pt) {
-
+            // TODO
+            delete pt;
         } else {
             cout << errors;
             break;
@@ -57,4 +81,6 @@ int main(int argc, char **argv) {
     db->debug_print();
     cout << "\n";
     delete db;
+
+    return 0;
 }

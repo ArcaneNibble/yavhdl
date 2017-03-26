@@ -41,12 +41,16 @@ public:
     // Pretty name suitable for printing. UTF-8
     std::string pretty_name;
     bool is_extended_id;
+    
+    void debug_print();
 
     static Identifier *FromLatin1(const char *name, bool is_extended_id);
     static Identifier *FromUTF8(const char *name, bool is_extended_id);
 
     bool operator==(const Identifier &other) const;
     bool operator!=(const Identifier &other) const;
+
+    Identifier(const Identifier &o);
 
 private:
     Identifier();

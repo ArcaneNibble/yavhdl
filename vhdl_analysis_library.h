@@ -23,49 +23,31 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "vhdl_analysis_design_db.h"
+#ifndef VHDL_ANALYSIS_LIBRARY_H
+#define VHDL_ANALYSIS_LIBRARY_H
 
-#include <iostream>
-using namespace YaVHDL::Analyser;
+#include <unordered_map>
+#include <vector>
 
-DesignDatabase::~DesignDatabase() {
-    for (auto i = this->db_by_order.begin();
-         i != this->db_by_order.end(); i++) {
+namespace YaVHDL::Analyser
+{
 
-        delete (*i);
-    }
+class Library {
+public:
+    virtual ~Library();
+
+    void debug_print();
+
+    // void AddDesignUnit(std::string name, void *library);
+    // void *FindDesignUnit(std::string name);
+
+    Identifier *id;
+
+private:
+    // std::unordered_map<std::string, void *> db_by_name;
+    // std::vector<void *> db_by_order;
+};
+
 }
 
-void DesignDatabase::PopulateBuiltins() {
-    // TODO
-}
-
-void DesignDatabase::debug_print() {
-    std::cout << "{\"type\": \"DesignDatabase\", \"libraries\": [";
-
-    bool first = true;
-    for (auto i = this->db_by_order.begin();
-         i != this->db_by_order.end(); i++) {
-
-        if (!first) {
-            std::cout << ", ";
-        }
-        first = false;
-
-        (*i)->debug_print();
-    }
-
-    std::cout << "]}";
-}
-
-void DesignDatabase::AddLibrary(Library *library) {
-    this->db_by_name.insert({{*(library->id), library}});
-    this->db_by_order.push_back(library);
-}
-
-void *DesignDatabase::FindLibrary(Identifier name) {
-    auto library = this->db_by_name.find(name);
-    if (library == this->db_by_name.end())
-        return NULL;
-    return library->second;
-}
+#endif

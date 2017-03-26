@@ -29,20 +29,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unordered_map>
 #include <vector>
 
+#include "vhdl_analysis_identifier.h"
+#include "vhdl_analysis_library.h"
+
 namespace YaVHDL::Analyser
 {
 
 class DesignDatabase {
 public:
+    virtual ~DesignDatabase();
+
     void PopulateBuiltins();
     void debug_print();
 
-    void AddLibrary(std::string name, void *library);
-    void *FindLibrary(std::string name);
+    void AddLibrary(Library *library);
+    void *FindLibrary(Identifier name);
 
 private:
-    std::unordered_map<std::string, void *> db_by_name;
-    std::vector<void *> db_by_order;
+    std::unordered_map<Identifier, Library *> db_by_name;
+    std::vector<Library *> db_by_order;
 };
 
 }

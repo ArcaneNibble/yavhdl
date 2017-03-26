@@ -27,6 +27,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <codecvt>
 #include <cstring>
+#include <iostream>
 #include <locale>
 #include <string>
 #include "util.h"
@@ -106,6 +107,22 @@ Identifier *Identifier::FromUTF8(const char *name, bool is_extended_id) {
     return _IdentifierInternalCreate(byte_str, is_extended_id);
 }
 
+void Identifier::debug_print() {
+    cout << "\"";
+
+    if (this->is_extended_id) {
+        cout << "\\\\";
+    }
+
+    print_string_escaped(&this->orig_name);
+
+    if (this->is_extended_id) {
+        cout << "\\\\";
+    }
+
+    cout << "\"";
+}
+
 bool Identifier::operator==(const Identifier &other) const {
     if (this->is_extended_id != other.is_extended_id) return false;
 
@@ -116,7 +133,9 @@ bool Identifier::operator!=(const Identifier &other) const {
     return !(*this == other);
 }
 
-size_t hash<YaVHDL::Analyser::Identifier>::operator()(YaVHDL::Analyser::Identifier value) const {
+size_t hash<YaVHDL::Analyser::Identifier>::operator()(
+    YaVHDL::Analyser::Identifier value) const {
+
     size_t ret = hash<string>()(value.canonical_name);
 
     if (value.is_extended_id) {
@@ -124,4 +143,13 @@ size_t hash<YaVHDL::Analyser::Identifier>::operator()(YaVHDL::Analyser::Identifi
     }
 
     return ret;
+}
+
+// FIXME: My roommate said I need this to fix some bad_alloc error but I have
+// no idea why.
+Identifier::Identifier(const Identifier &o) {
+    this->orig_name = o.orig_name;
+    this->canonical_name = o.canonical_name;
+    this->pretty_name = o.pretty_name;
+    this->is_extended_id = o.is_extended_id;
 }
