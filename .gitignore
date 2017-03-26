@@ -2,3 +2,5 @@ lex.*_yy.*
 *.tab.*
 vhdl_parser
 vhdl_analyser
+*.o
+analyser_native_tests/*.cpp.bin
