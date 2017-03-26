@@ -147,7 +147,8 @@ def do_analyser_native_tests():
         print(base_name + ": ", end='')
 
         # Try compiling it
-        subp = subprocess.run(['g++', '-Wall', '-ggdb3', '-o',
+        subp = subprocess.run(['g++', '-Wall', '-ggdb3',
+                               '-I', '.', '-o',
                                cpp_file + '.bin', cpp_file,
                                'vhdl_analyser_bits.o'],
                               stdout=subprocess.PIPE,

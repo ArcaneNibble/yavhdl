@@ -45,7 +45,7 @@ void YaVHDL::Util::print_string_escaped(std::string *s) {
     }
 }
 
-const unsigned char latin1_lcase_table[256] = {
+const unsigned char YaVHDL::Util::latin1_lcase_table[256] = {
     // 0x00-0x0f
     0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
     0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
@@ -97,7 +97,7 @@ const unsigned char latin1_lcase_table[256] = {
 };
 
 // Ensure this table is UTF-8!
-const char * const latin1_prettyprint_table[256] = {
+const char * const YaVHDL::Util::latin1_prettyprint_table[256] = {
     // 0x00-0x0f
     "␀",     "␁",     "␂",     "␃",     "␄",     "␅",     "␆",     "␇",
     "␈",     "␉",     "␊",     "␋",     "␌",     "␍",     "␎",     "␏",
@@ -148,7 +148,7 @@ const char * const latin1_prettyprint_table[256] = {
     "ø",     "ù",     "ú",     "û",     "ü",     "ý",     "þ",     "ÿ",
 };
 
-bool is_valid_for_basic_id(char32_t c) {
+bool YaVHDL::Util::is_valid_for_basic_id(char32_t c) {
     // Upper-case letters
     if (c >= 0x41 && c <= 0x5a) return true;
     if (c >= 0xc0 && c <= 0xde && c != 0xd7) return true;
@@ -163,7 +163,7 @@ bool is_valid_for_basic_id(char32_t c) {
     return false;
 }
 
-bool is_valid_for_ext_id(char32_t c) {
+bool YaVHDL::Util::is_valid_for_ext_id(char32_t c) {
     // Must be in Latin-1 range
     if (c >= 0x100) return false;
     // Cannot be C0 controls
@@ -176,7 +176,7 @@ bool is_valid_for_ext_id(char32_t c) {
     return true;
 }
 
-bool is_valid_basic_id(const char *c) {
+bool YaVHDL::Util::is_valid_basic_id(const char *c) {
     size_t l = strlen(c);
 
     // Needs to be at least one character long
