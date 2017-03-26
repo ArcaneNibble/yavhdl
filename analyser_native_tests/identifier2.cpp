@@ -1,6 +1,7 @@
 #include <cassert>
 
 #include "vhdl_analysis_identifier.h"
+using namespace std;
 using namespace YaVHDL::Analyser;
 
 int main(int argc, char **argv) {
@@ -10,6 +11,7 @@ int main(int argc, char **argv) {
         assert(test1);
         assert(test2);
         assert(*test1 == *test2);
+        assert(hash<Identifier>()(*test1) == hash<Identifier>()(*test2));
         delete test1;
         delete test2;
     }
@@ -28,6 +30,7 @@ int main(int argc, char **argv) {
         assert(test1);
         assert(test2);
         assert(*test1 == *test2);
+        assert(hash<Identifier>()(*test1) == hash<Identifier>()(*test2));
         delete test1;
         delete test2;
     }

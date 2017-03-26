@@ -115,3 +115,13 @@ bool Identifier::operator==(const Identifier &other) const {
 bool Identifier::operator!=(const Identifier &other) const {
     return !(*this == other);
 }
+
+size_t hash<YaVHDL::Analyser::Identifier>::operator()(YaVHDL::Analyser::Identifier value) const {
+    size_t ret = hash<string>()(value.canonical_name);
+
+    if (value.is_extended_id) {
+        ret ^= 1;
+    }
+
+    return ret;
+}

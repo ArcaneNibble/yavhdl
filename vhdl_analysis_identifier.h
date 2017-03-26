@@ -56,4 +56,13 @@ private:
 
 }
 
+namespace std
+{
+
+template<> struct hash<YaVHDL::Analyser::Identifier> {
+    size_t operator()(YaVHDL::Analyser::Identifier value) const;
+};
+
+}
+
 #endif
