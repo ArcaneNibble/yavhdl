@@ -150,7 +150,7 @@ def do_analyser_native_tests():
         subp = subprocess.run(['g++', '-Wall', '-ggdb3',
                                '-I', '.', '-o',
                                cpp_file + '.bin', cpp_file,
-                               'vhdl_analyser_bits.o'],
+                               'vhdl_analyser_bits.a'],
                               stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
 

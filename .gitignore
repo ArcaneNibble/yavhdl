@@ -3,4 +3,5 @@
 vhdl_parser
 vhdl_analyser
 *.o
+*.a
 analyser_native_tests/*.cpp.bin
