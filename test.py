@@ -206,6 +206,8 @@ def do_analyser_native_tests():
         # All good!
         print("\x1b[32m✓\x1b[0m")
 
+    return failures
+
 
 def main():
     # I have been burned too many times by this flakiness, so we first set our
