@@ -12,7 +12,7 @@ OBJECTS = $(patsubst %.cpp, %.o, $(SOURCES))
 
 .PHONY: all clean test
 
-all: $(TARGETS) vhdl_analyser_bits.a
+all: $(TARGETS)
 
 %: %.cpp $(OBJECTS)
 	$(CXX) $(CXXFLAGS) -o $@ $^
@@ -31,5 +31,5 @@ $(CXXFLEX): $(CXXBISON)
 clean:
 	rm -f $(TARGETS) *_ll.* *_yy.* *.o *.a
 
-test:
+test: $(TARGETS) vhdl_analyser_bits.a
 	./test.py
