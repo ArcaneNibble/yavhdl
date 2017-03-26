@@ -105,3 +105,13 @@ Identifier *Identifier::FromUTF8(const char *name, bool is_extended_id) {
 
     return _IdentifierInternalCreate(byte_str, is_extended_id);
 }
+
+bool Identifier::operator==(const Identifier &other) const {
+    if (this->is_extended_id != other.is_extended_id) return false;
+
+    return this->canonical_name == other.canonical_name;
+}
+
+bool Identifier::operator!=(const Identifier &other) const {
+    return !(*this == other);
+}

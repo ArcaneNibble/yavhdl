@@ -45,6 +45,9 @@ public:
     static Identifier *FromLatin1(const char *name, bool is_extended_id);
     static Identifier *FromUTF8(const char *name, bool is_extended_id);
 
+    bool operator==(const Identifier &other) const;
+    bool operator!=(const Identifier &other) const;
+
 private:
     Identifier();
     static Identifier *_IdentifierInternalCreate(
