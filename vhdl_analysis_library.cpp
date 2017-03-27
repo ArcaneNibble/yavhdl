@@ -43,3 +43,15 @@ void Library::debug_print() {
 
     std::cout << "}";
 }
+
+void Library::AddDesignUnit(Identifier name, AST::AbstractNode *unit) {
+    this->db_by_name.insert({{name, unit}});
+    this->db_by_order.push_back(unit);
+}
+
+void *Library::FindDesignUnit(Identifier name) {
+    auto unit = this->db_by_name.find(name);
+    if (unit == this->db_by_name.end())
+        return NULL;
+    return unit->second;
+}

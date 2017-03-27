@@ -23,32 +23,19 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef VHDL_ANALYSIS_LIBRARY_H
-#define VHDL_ANALYSIS_LIBRARY_H
+#ifndef VHDL_AST_ABSTRACTNODE_H
+#define VHDL_AST_ABSTRACTNODE_H
 
-#include <unordered_map>
-#include <vector>
-
-#include "vhdl_analysis_identifier.h"
-#include "vhdl_ast_abstractnode.h"
-
-namespace YaVHDL::Analyser
+namespace YaVHDL::Analyser::AST
 {
 
-class Library {
+// We use this essentially as a "marker" class that is used as a base class
+// for every possible AST node type
+
+class AbstractNode {
 public:
-    virtual ~Library();
-
-    void debug_print();
-
-    void AddDesignUnit(Identifier name, AST::AbstractNode *unit);
-    void *FindDesignUnit(Identifier name);
-
-    Identifier *id;
-
-private:
-    std::unordered_map<Identifier, AST::AbstractNode *> db_by_name;
-    std::vector<AST::AbstractNode *> db_by_order;
+    virtual void debug_print() = 0;
+    virtual void GetParent() = 0;
 };
 
 }
