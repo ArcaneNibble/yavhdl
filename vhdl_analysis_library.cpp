@@ -39,9 +39,21 @@ void Library::debug_print() {
     std::cout << ", \"id\": ";
     this->id->debug_print();
 
-    // TODO
+    std::cout << ", \"units\": [";
 
-    std::cout << "}";
+    bool first = true;
+    for (auto i = this->db_by_order.begin();
+         i != this->db_by_order.end(); i++) {
+
+        if (!first) {
+            std::cout << ", ";
+        }
+        first = false;
+
+        (*i)->debug_print();
+    }
+
+    std::cout << "]}";
 }
 
 void Library::AddDesignUnit(Identifier name, AST::AbstractNode *unit) {
