@@ -32,7 +32,16 @@ using namespace YaVHDL::Analyser::AST;
 ScopeTrait::ScopeTrait() {}
 
 void ScopeTrait::AddItem(Identifier name, AbstractNode *node) {
-    this->items_id.insert({{name, node}});
+    auto vec = this->items_id.find(name);
+    if (vec == this->items_id.end()) {
+        // Didn't exist at all
+        auto new_vec = vector<AbstractNode *>();
+        new_vec.push_back(node);
+        this->items_id.insert({{name, new_vec}});
+    } else {
+        // Add a new overloaded thing
+        vec->second.push_back(node);
+    }
 }
 
 void ScopeTrait::AddItem(char name, AbstractNode *node) {
@@ -61,10 +70,11 @@ void ScopeTrait::AddItem(string name, AbstractNode *node) {
     }
 }
 
-AbstractNode *ScopeTrait::FindItem(Identifier name) {
+vector<AbstractNode *> ScopeTrait::FindItem(Identifier name) {
     auto found_obj = this->items_id.find(name);
-    if (found_obj == this->items_id.end())
-        return NULL;
+    if (found_obj == this->items_id.end()) {
+        return vector<AbstractNode *>();
+    }
     return found_obj->second;
 }
 
@@ -86,7 +96,9 @@ vector<AbstractNode *> ScopeTrait::FindItem(string name) {
 
 void ScopeTrait::_DeleteScopedSubitems() {
     for (auto i = this->items_id.begin(); i != this->items_id.end(); i++) {
-        delete i->second;
+        for (auto j = i->second.begin(); j != i->second.end(); j++) {
+            delete *j;
+        }
     }
     for (auto i = this->items_char.begin(); i != this->items_char.end(); i++) {
         for (auto j = i->second.begin(); j != i->second.end(); j++) {

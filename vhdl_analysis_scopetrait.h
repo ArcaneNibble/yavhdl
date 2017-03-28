@@ -41,16 +41,14 @@ namespace YaVHDL::Analyser
 // word "scope" in its "traditional" sense of "a region that can enclose a
 // number of names that refer to objects" rather than the "VHDL" sense of
 // "a region that the name of an object exists in." The definition we are
-// using here is what VHDL calls a "declarative region." Note that character
-// literals and string literals can be overloaded and thus return a list.
-// However, identifiers cannot be overloaded.
+// using here is what VHDL calls a "declarative region."
 class ScopeTrait {
 public:
     virtual void AddItem(Identifier name, AST::AbstractNode *node);
     virtual void AddItem(char name, AST::AbstractNode *node);
     virtual void AddItem(std::string name, AST::AbstractNode *node);
 
-    virtual AST::AbstractNode *FindItem(Identifier name);
+    virtual std::vector<AST::AbstractNode *> FindItem(Identifier name);
     virtual std::vector<AST::AbstractNode *> FindItem(char name);
     virtual std::vector<AST::AbstractNode *> FindItem(std::string name);
 
@@ -59,7 +57,7 @@ protected:
     // pure virtual methods so we make the constructor protected instead.
     ScopeTrait();
 
-    std::unordered_map<Identifier, AST::AbstractNode *> items_id;
+    std::unordered_map<Identifier, std::vector<AST::AbstractNode *>> items_id;
     std::unordered_map<char, std::vector<AST::AbstractNode *>> items_char;
     std::unordered_map<std::string, std::vector<AST::AbstractNode *>> items_str;
 

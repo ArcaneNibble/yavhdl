@@ -23,7 +23,8 @@ int main(int argc, char **argv) {
         delete id;
         id = Identifier::FromLatin1("a", true);
         auto result = test.FindItem(*id);
-        assert(result == &node1);
+        assert(result.size() == 1);
+        assert(result[0] == &node1);
         delete id;
     }
     {
@@ -60,7 +61,7 @@ int main(int argc, char **argv) {
         TestAbstractNode node1;
         test.AddItem('a', &node1);
         auto result = test.FindItem(*id);
-        assert(result == nullptr);
+        assert(result.size() == 0);
         auto result2 = test.FindItem("a");
         assert(result2.size() == 0);
         delete id;
@@ -71,7 +72,7 @@ int main(int argc, char **argv) {
         TestAbstractNode node1;
         test.AddItem("a", &node1);
         auto result = test.FindItem(*id);
-        assert(result == nullptr);
+        assert(result.size() == 0);
         auto result2 = test.FindItem('a');
         assert(result2.size() == 0);
         delete id;
