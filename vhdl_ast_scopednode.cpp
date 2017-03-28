@@ -83,3 +83,19 @@ vector<AbstractNode *> ScopedNode::FindItem(string name) {
     }
     return found_obj->second;
 }
+
+void ScopedNode::_DeleteScopedSubitems() {
+    for (auto i = this->items_id.begin(); i != this->items_id.end(); i++) {
+        delete i->second;
+    }
+    for (auto i = this->items_char.begin(); i != this->items_char.end(); i++) {
+        for (auto j = i->second.begin(); j != i->second.end(); j++) {
+            delete *j;
+        }
+    }
+    for (auto i = this->items_str.begin(); i != this->items_str.end(); i++) {
+        for (auto j = i->second.begin(); j != i->second.end(); j++) {
+            delete *j;
+        }
+    }
+}

@@ -34,6 +34,7 @@ namespace YaVHDL::Analyser::AST
 class AbstractNode {
 public:
     virtual void debug_print() = 0;
+    virtual ~AbstractNode() {};
 };
 
 }

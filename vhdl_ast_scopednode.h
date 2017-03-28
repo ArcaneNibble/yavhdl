@@ -63,6 +63,13 @@ protected:
     std::unordered_map<YaVHDL::Analyser::Identifier, AbstractNode *> items_id;
     std::unordered_map<char, std::vector<AbstractNode *>> items_char;
     std::unordered_map<std::string, std::vector<AbstractNode *>> items_str;
+
+    // Whether or not this item owns its children depends on where it is used.
+    // For most of the AST nodes, it will own its children, and so derived
+    // classes need to call this. However, if (when?) this gets used to
+    // implement scope chains, scope chains do _not_ own their items so this
+    // function MUST NOT be called.
+    void _DeleteScopedSubitems();
 };
 
 }
