@@ -31,11 +31,9 @@ namespace YaVHDL::Analyser::AST
 
 // We use this essentially as a "marker" class that is used as a base class
 // for every possible AST node type
-
 class AbstractNode {
 public:
     virtual void debug_print() = 0;
-    virtual void GetParent() = 0;
 };
 
 }
