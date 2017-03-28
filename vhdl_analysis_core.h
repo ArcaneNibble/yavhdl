@@ -31,6 +31,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "vhdl_analysis_library.h"
 #include "vhdl_parser_glue.h"
 
+namespace YaVHDL::Analyser
+{
+
+struct AnalyzerCoreStateBlob
+{
+    YaVHDL::Analyser::DesignDatabase *design_db;
+    YaVHDL::Analyser::Library *work_lib;
+    std::string errors;
+    std::string warnings;
+    std::string file_name;
+};
+
 // The core of the analysis code. This analyses the parse output of a single
 // design file (stored in pt) into the design library work_lib. The design
 // library work_lib must have already been added to the design database,
@@ -42,7 +54,10 @@ bool do_vhdl_analysis(
     YaVHDL::Analyser::DesignDatabase *design_db,
     YaVHDL::Analyser::Library *work_lib,
     YaVHDL::Parser::VhdlParseTreeNode *pt,
-    std::string &errors,
-    std::string &warnings);
+    std::string errors,
+    std::string warnings,
+    std::string file_name);
+
+}
 
 #endif

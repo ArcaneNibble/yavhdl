@@ -34,7 +34,8 @@ using namespace std;
 using namespace YaVHDL::Analyser;
 using namespace YaVHDL::Parser;
 
-Identifier *analyze_identifier(VhdlParseTreeNode *pt) {
+// TODO: Move me?
+static Identifier *analyze_identifier(VhdlParseTreeNode *pt) {
     switch (pt->type) {
         case PT_BASIC_ID:
             return Identifier::FromLatin1(pt->str->c_str(), false);
@@ -47,9 +48,8 @@ Identifier *analyze_identifier(VhdlParseTreeNode *pt) {
     }
 }
 
-AST::Entity *analyze_entity(
-    DesignDatabase *design_db, Library *work_lib, VhdlParseTreeNode *pt,
-    std::string &errors, std::string &warnings) {
+static AST::Entity *analyze_entity(
+    VhdlParseTreeNode *pt, AnalyzerCoreStateBlob &s) {
 
     AST::Entity *ret = new AST::Entity();
 
@@ -62,8 +62,7 @@ AST::Entity *analyze_entity(
 
 // Analyzes PT_DESIGN_UNIT
 static bool analyze_design_unit(
-    DesignDatabase *design_db, Library *work_lib, VhdlParseTreeNode *pt,
-    std::string &errors, std::string &warnings) {
+    VhdlParseTreeNode *pt, AnalyzerCoreStateBlob &s) {
 
     // Not implemented
     assert(pt->pieces[1] == nullptr);
@@ -73,8 +72,7 @@ static bool analyze_design_unit(
 
     switch (pt->pieces[0]->type) {
         case PT_ENTITY: {
-            AST::Entity *entity = analyze_entity(
-                design_db, work_lib, pt->pieces[0], errors, warnings);
+            AST::Entity *entity = analyze_entity(pt->pieces[0], s);
             node_to_add = entity;
             name_of_node = entity->id;
             break;
@@ -84,40 +82,33 @@ static bool analyze_design_unit(
             assert(!"Don't know how to handle this parse tree node!");
     }
 
-    if (work_lib->FindDesignUnit(*name_of_node)) {
-        errors += "ERROR: Design unit ";
-        errors += name_of_node->pretty_name;
-        errors += " already exists!";
+    if (s.work_lib->FindDesignUnit(*name_of_node)) {
+        s.errors += "ERROR: Design unit ";
+        s.errors += name_of_node->pretty_name;
+        s.errors += " already exists!";
         return false;
     }
 
     // Add the thing we analyzed to the library
-    work_lib->AddDesignUnit(*name_of_node, node_to_add);
+    s.work_lib->AddDesignUnit(*name_of_node, node_to_add);
 
     return true;
 }
 
 // Analyzes PT_DESIGN_FILE or PT_DESIGN_UNIT
-bool do_vhdl_analysis(
-    YaVHDL::Analyser::DesignDatabase *design_db,
-    YaVHDL::Analyser::Library *work_lib,
-    YaVHDL::Parser::VhdlParseTreeNode *pt,
-    std::string &errors,
-    std::string &warnings) {
+static bool analyze_design_file(
+    VhdlParseTreeNode *pt, AnalyzerCoreStateBlob &s) {
 
     bool no_errors = true;
 
     switch (pt->type) {
         case PT_DESIGN_UNIT:
-            no_errors &= analyze_design_unit(
-                design_db, work_lib, pt, errors, warnings);
+            no_errors &= analyze_design_unit(pt, s);
             break;
 
         case PT_DESIGN_FILE:
-            no_errors &= do_vhdl_analysis(
-                design_db, work_lib, pt->pieces[0], errors, warnings);
-            no_errors &= analyze_design_unit(
-                design_db, work_lib, pt->pieces[1], errors, warnings);
+            no_errors &= analyze_design_file(pt->pieces[0], s);
+            no_errors &= analyze_design_unit(pt->pieces[1], s);
             break;
 
         default:
@@ -125,4 +116,22 @@ bool do_vhdl_analysis(
     }
 
     return no_errors;
+}
+
+bool YaVHDL::Analyser::do_vhdl_analysis(
+    YaVHDL::Analyser::DesignDatabase *design_db,
+    YaVHDL::Analyser::Library *work_lib,
+    YaVHDL::Parser::VhdlParseTreeNode *pt,
+    std::string errors,
+    std::string warnings,
+    std::string file_name) {
+
+    AnalyzerCoreStateBlob state;
+    state.design_db = design_db;
+    state.work_lib = work_lib;
+    state.errors = errors;
+    state.warnings = warnings;
+    state.file_name = file_name;
+
+    return analyze_design_file(pt, state);
 }

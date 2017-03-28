@@ -75,7 +75,8 @@ int main(int argc, char **argv) {
             cout << "Analysing file \"" << argv[i] << "\"...\n";
             errors.clear();
             warnings.clear();
-            bool ret = do_vhdl_analysis(db, work_lib, pt, errors, warnings);
+            bool ret = do_vhdl_analysis(
+                db, work_lib, pt, errors, warnings, argv[1]);
             cout << warnings;
             if (!ret) {
                 // An error occurred
