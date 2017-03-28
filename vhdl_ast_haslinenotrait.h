@@ -23,24 +23,31 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "vhdl_ast_entity.h"
+#ifndef VHDL_AST_HASLINENOTRAIT_H
+#define VHDL_AST_HASLINENOTRAIT_H
 
-#include <iostream>
+#include <string>
 
-using namespace YaVHDL::Analyser;
-using namespace YaVHDL::Analyser::AST;
+namespace YaVHDL::Analyser::AST
+{
 
-Entity::~Entity() {
-    delete this->id;
+class HasLinenoTrait {
+public:
+    virtual ~HasLinenoTrait() {};
+
+    int first_line;
+    int first_column;
+    int last_line;
+    int last_column;
+    std::string file_name;
+
+    void FormatLocIntoString(std::string &s);
+    void debug_print_lineno();
+
+protected:
+    HasLinenoTrait();
+};
+
 }
 
-void Entity::debug_print() {
-    std::cout << "{\"type\": \"Entity\"";
-
-    std::cout << ", \"id\": ";
-    this->id->debug_print();
-
-    this->debug_print_lineno();
-
-    std::cout << "}";
-}
+#endif

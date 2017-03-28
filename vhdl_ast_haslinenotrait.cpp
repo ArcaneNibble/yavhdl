@@ -23,24 +23,39 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "vhdl_ast_entity.h"
+#include "vhdl_ast_haslinenotrait.h"
 
 #include <iostream>
+#include "util.h"
 
-using namespace YaVHDL::Analyser;
 using namespace YaVHDL::Analyser::AST;
 
-Entity::~Entity() {
-    delete this->id;
+HasLinenoTrait::HasLinenoTrait() {
+    this->first_line = -1;
+    this->first_column = -1;
+    this->last_line = -1;
+    this->last_column = -1;
 }
 
-void Entity::debug_print() {
-    std::cout << "{\"type\": \"Entity\"";
+void HasLinenoTrait::FormatLocIntoString(std::string &s) {
+    s += this->file_name;
+    s += ":";
+    s += std::to_string(this->first_line);
+    s += ":";
+    s += std::to_string(this->first_column);
+}
 
-    std::cout << ", \"id\": ";
-    this->id->debug_print();
+void HasLinenoTrait::debug_print_lineno() {
+    std::cout << ", \"first_line\": ";
+    std::cout << this->first_line;
+    std::cout << ", \"first_column\": ";
+    std::cout << this->first_column;
+    std::cout << ", \"last_line\": ";
+    std::cout << this->last_line;
+    std::cout << ", \"last_column\": ";
+    std::cout << this->last_column;
 
-    this->debug_print_lineno();
-
-    std::cout << "}";
+    std::cout << ", \"file_name\": \"";
+    YaVHDL::Util::print_string_escaped(&this->file_name);
+    std::cout << "\"";
 }
