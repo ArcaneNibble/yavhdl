@@ -28,11 +28,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "vhdl_analysis_identifier.h"
 #include "vhdl_ast_abstractnode.h"
+#include "vhdl_ast_haslinenotrait.h"
 
 namespace YaVHDL::Analyser::AST
 {
 
-class Entity : public AbstractNode {
+class Entity : public AbstractNode, public HasLinenoTrait {
 public:
     ~Entity();
     void debug_print();

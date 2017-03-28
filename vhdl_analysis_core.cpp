@@ -49,6 +49,13 @@ static void dump_current_location(
     o += ":";
 }
 
+static void copy_line_no(AST::HasLinenoTrait *dest, VhdlParseTreeNode *src) {
+    dest->first_line = src->first_line;
+    dest->first_column = src->first_column;
+    dest->last_line = src->last_line;
+    dest->last_column = src->last_column;
+}
+
 // TODO: Move me?
 static Identifier *analyze_identifier(VhdlParseTreeNode *pt) {
     switch (pt->type) {
@@ -67,6 +74,9 @@ static AST::Entity *analyze_entity(
     VhdlParseTreeNode *pt, AnalyzerCoreStateBlob &s) {
 
     AST::Entity *ret = new AST::Entity();
+
+    copy_line_no(ret, pt);
+    ret->file_name = s.file_name;
 
     ret->id = analyze_identifier(pt->pieces[0]);
 
@@ -111,11 +121,24 @@ static bool analyze_design_unit(
             assert(!"Don't know how to handle this parse tree node!");
     }
 
-    if (s.work_lib->FindDesignUnit(*name_of_node)) {
+    // FIXME: WTF
+    AST::AbstractNode *old_node;
+    if ((old_node = s.work_lib->FindDesignUnit(*name_of_node))) {
+
         dump_current_location(pt->pieces[0], s, true);
         *s.errors += "ERROR: Design unit ";
         *s.errors += name_of_node->pretty_name;
         *s.errors += " already exists in library!\n";
+
+        AST::HasLinenoTrait *old_node_;
+        if ((old_node_ = dynamic_cast<AST::HasLinenoTrait *>(old_node))) {
+            *s.errors += "\tPrevious version was at ";
+            old_node_->FormatLocIntoString(*s.errors);
+            *s.errors += "\n";
+        }
+
+        delete node_to_add;
+
         return false;
     }
 
