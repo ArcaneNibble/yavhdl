@@ -34,6 +34,21 @@ using namespace std;
 using namespace YaVHDL::Analyser;
 using namespace YaVHDL::Parser;
 
+static void dump_current_location(
+    VhdlParseTreeNode *pt, AnalyzerCoreStateBlob &s, bool err) {
+
+    std::string &o = err ? *s.errors : *s.warnings;
+
+    o += s.file_name;
+    if (pt->first_line != -1) {
+        o += ":";
+        o += to_string(pt->first_line);
+        o += ":";
+        o += to_string(pt->first_column);
+    }
+    o += ":";
+}
+
 // TODO: Move me?
 static Identifier *analyze_identifier(VhdlParseTreeNode *pt) {
     switch (pt->type) {
@@ -55,6 +70,19 @@ static AST::Entity *analyze_entity(
 
     ret->id = analyze_identifier(pt->pieces[0]);
 
+    // Verify that the id at the end (if any) is the same as the one in the
+    // beginning
+    if (pt->pieces[4]) {
+        Identifier *tail_id = analyze_identifier(pt->pieces[4]);
+        if (tail_id != ret->id) {
+            dump_current_location(pt, s, true);
+            *s.errors +=
+                "ERROR: Name at end of entity must match name at beginning\n";
+            delete ret;
+            return nullptr;
+        }
+    }
+
     // TODO
 
     return ret;
@@ -73,6 +101,7 @@ static bool analyze_design_unit(
     switch (pt->pieces[0]->type) {
         case PT_ENTITY: {
             AST::Entity *entity = analyze_entity(pt->pieces[0], s);
+            if (!entity) return false;
             node_to_add = entity;
             name_of_node = entity->id;
             break;
@@ -83,9 +112,10 @@ static bool analyze_design_unit(
     }
 
     if (s.work_lib->FindDesignUnit(*name_of_node)) {
-        s.errors += "ERROR: Design unit ";
-        s.errors += name_of_node->pretty_name;
-        s.errors += " already exists!";
+        dump_current_location(pt->pieces[0], s, true);
+        *s.errors += "ERROR: Design unit ";
+        *s.errors += name_of_node->pretty_name;
+        *s.errors += " already exists in library!\n";
         return false;
     }
 
@@ -122,15 +152,15 @@ bool YaVHDL::Analyser::do_vhdl_analysis(
     YaVHDL::Analyser::DesignDatabase *design_db,
     YaVHDL::Analyser::Library *work_lib,
     YaVHDL::Parser::VhdlParseTreeNode *pt,
-    std::string errors,
-    std::string warnings,
+    std::string &errors,
+    std::string &warnings,
     std::string file_name) {
 
     AnalyzerCoreStateBlob state;
     state.design_db = design_db;
     state.work_lib = work_lib;
-    state.errors = errors;
-    state.warnings = warnings;
+    state.errors = &errors;
+    state.warnings = &warnings;
     state.file_name = file_name;
 
     return analyze_design_file(pt, state);

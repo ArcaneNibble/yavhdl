@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
             errors.clear();
             warnings.clear();
             bool ret = do_vhdl_analysis(
-                db, work_lib, pt, errors, warnings, argv[1]);
+                db, work_lib, pt, errors, warnings, argv[i]);
             cout << warnings;
             if (!ret) {
                 // An error occurred

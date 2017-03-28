@@ -38,8 +38,8 @@ struct AnalyzerCoreStateBlob
 {
     YaVHDL::Analyser::DesignDatabase *design_db;
     YaVHDL::Analyser::Library *work_lib;
-    std::string errors;
-    std::string warnings;
+    std::string *errors;
+    std::string *warnings;
     std::string file_name;
 };
 
@@ -54,8 +54,8 @@ bool do_vhdl_analysis(
     YaVHDL::Analyser::DesignDatabase *design_db,
     YaVHDL::Analyser::Library *work_lib,
     YaVHDL::Parser::VhdlParseTreeNode *pt,
-    std::string errors,
-    std::string warnings,
+    std::string &errors,
+    std::string &warnings,
     std::string file_name);
 
 }
