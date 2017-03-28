@@ -25,15 +25,104 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "vhdl_analysis_core.h"
 
+#include <cassert>
+#include <iostream>
+
+#include "vhdl_ast_entity.h"
+
 using namespace std;
 using namespace YaVHDL::Analyser;
 using namespace YaVHDL::Parser;
 
+Identifier *analyze_identifier(VhdlParseTreeNode *pt) {
+    switch (pt->type) {
+        case PT_BASIC_ID:
+            return Identifier::FromLatin1(pt->str->c_str(), false);
+
+        case PT_EXT_ID:
+            return Identifier::FromLatin1(pt->str->c_str(), true);
+
+        default:
+            assert(!"Don't know how to handle this parse tree node!");
+    }
+}
+
+AST::Entity *analyze_entity(
+    DesignDatabase *design_db, Library *work_lib, VhdlParseTreeNode *pt,
+    std::string &errors, std::string &warnings) {
+
+    AST::Entity *ret = new AST::Entity();
+
+    ret->id = analyze_identifier(pt->pieces[0]);
+
+    // TODO
+
+    return ret;
+}
+
+// Analyzes PT_DESIGN_UNIT
+static bool analyze_design_unit(
+    DesignDatabase *design_db, Library *work_lib, VhdlParseTreeNode *pt,
+    std::string &errors, std::string &warnings) {
+
+    // Not implemented
+    assert(pt->pieces[1] == nullptr);
+
+    AST::AbstractNode *node_to_add;
+    Identifier *name_of_node;
+
+    switch (pt->pieces[0]->type) {
+        case PT_ENTITY: {
+            AST::Entity *entity = analyze_entity(
+                design_db, work_lib, pt->pieces[0], errors, warnings);
+            node_to_add = entity;
+            name_of_node = entity->id;
+            break;
+        }
+
+        default:
+            assert(!"Don't know how to handle this parse tree node!");
+    }
+
+    if (work_lib->FindDesignUnit(*name_of_node)) {
+        errors += "ERROR: Design unit ";
+        errors += name_of_node->pretty_name;
+        errors += " already exists!";
+        return false;
+    }
+
+    // Add the thing we analyzed to the library
+    work_lib->AddDesignUnit(*name_of_node, node_to_add);
+
+    return true;
+}
+
+// Analyzes PT_DESIGN_FILE or PT_DESIGN_UNIT
 bool do_vhdl_analysis(
     YaVHDL::Analyser::DesignDatabase *design_db,
     YaVHDL::Analyser::Library *work_lib,
     YaVHDL::Parser::VhdlParseTreeNode *pt,
     std::string &errors,
     std::string &warnings) {
-    return true;
+
+    bool no_errors = true;
+
+    switch (pt->type) {
+        case PT_DESIGN_UNIT:
+            no_errors &= analyze_design_unit(
+                design_db, work_lib, pt, errors, warnings);
+            break;
+
+        case PT_DESIGN_FILE:
+            no_errors &= do_vhdl_analysis(
+                design_db, work_lib, pt->pieces[0], errors, warnings);
+            no_errors &= analyze_design_unit(
+                design_db, work_lib, pt->pieces[1], errors, warnings);
+            break;
+
+        default:
+            assert(!"Don't know how to handle this parse tree node!");
+    }
+
+    return no_errors;
 }

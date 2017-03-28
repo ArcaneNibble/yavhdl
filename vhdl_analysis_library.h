@@ -42,7 +42,7 @@ public:
     void debug_print();
 
     void AddDesignUnit(Identifier name, AST::AbstractNode *unit);
-    void *FindDesignUnit(Identifier name);
+    AST::AbstractNode *FindDesignUnit(Identifier name);
 
     Identifier *id;
 

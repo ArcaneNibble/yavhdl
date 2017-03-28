@@ -31,6 +31,12 @@ using namespace YaVHDL::Analyser;
 
 Library::~Library() {
     delete this->id;
+    
+    for (auto i = this->db_by_order.begin();
+         i != this->db_by_order.end(); i++) {
+
+        delete (*i);
+    }
 }
 
 void Library::debug_print() {
@@ -61,7 +67,7 @@ void Library::AddDesignUnit(Identifier name, AST::AbstractNode *unit) {
     this->db_by_order.push_back(unit);
 }
 
-void *Library::FindDesignUnit(Identifier name) {
+AST::AbstractNode *Library::FindDesignUnit(Identifier name) {
     auto unit = this->db_by_name.find(name);
     if (unit == this->db_by_name.end())
         return NULL;
