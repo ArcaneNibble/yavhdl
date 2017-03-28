@@ -23,8 +23,8 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef VHDL_AST_SCOPEDNODE_H
-#define VHDL_AST_SCOPEDNODE_H
+#ifndef VHDL_ANALYSIS_SCOPETRAIT_H
+#define VHDL_ANALYSIS_SCOPETRAIT_H
 
 #include <string>
 #include <unordered_map>
@@ -33,7 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "vhdl_analysis_identifier.h"
 #include "vhdl_ast_abstractnode.h"
 
-namespace YaVHDL::Analyser::AST
+namespace YaVHDL::Analyser
 {
 
 // We use this to implement the shared functionality for an object that can be
@@ -44,25 +44,24 @@ namespace YaVHDL::Analyser::AST
 // using here is what VHDL calls a "declarative region." Note that character
 // literals and string literals can be overloaded and thus return a list.
 // However, identifiers cannot be overloaded.
-class ScopedNode {
+class ScopeTrait {
 public:
-    virtual void AddItem(
-        YaVHDL::Analyser::Identifier name, AbstractNode *node);
-    virtual void AddItem(char name, AbstractNode *node);
-    virtual void AddItem(std::string name, AbstractNode *node);
+    virtual void AddItem(Identifier name, AST::AbstractNode *node);
+    virtual void AddItem(char name, AST::AbstractNode *node);
+    virtual void AddItem(std::string name, AST::AbstractNode *node);
 
-    virtual AbstractNode *FindItem(YaVHDL::Analyser::Identifier name);
-    virtual std::vector<AbstractNode *> FindItem(char name);
-    virtual std::vector<AbstractNode *> FindItem(std::string name);
+    virtual AST::AbstractNode *FindItem(Identifier name);
+    virtual std::vector<AST::AbstractNode *> FindItem(char name);
+    virtual std::vector<AST::AbstractNode *> FindItem(std::string name);
 
 protected:
     // We don't want to make this constructable by itself, but we have no
     // pure virtual methods so we make the constructor protected instead.
-    ScopedNode();
+    ScopeTrait();
 
-    std::unordered_map<YaVHDL::Analyser::Identifier, AbstractNode *> items_id;
-    std::unordered_map<char, std::vector<AbstractNode *>> items_char;
-    std::unordered_map<std::string, std::vector<AbstractNode *>> items_str;
+    std::unordered_map<Identifier, AST::AbstractNode *> items_id;
+    std::unordered_map<char, std::vector<AST::AbstractNode *>> items_char;
+    std::unordered_map<std::string, std::vector<AST::AbstractNode *>> items_str;
 
     // Whether or not this item owns its children depends on where it is used.
     // For most of the AST nodes, it will own its children, and so derived

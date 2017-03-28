@@ -23,19 +23,19 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "vhdl_ast_scopednode.h"
+#include "vhdl_analysis_scopetrait.h"
 
 using namespace std;
 using namespace YaVHDL::Analyser;
 using namespace YaVHDL::Analyser::AST;
 
-ScopedNode::ScopedNode() {}
+ScopeTrait::ScopeTrait() {}
 
-void ScopedNode::AddItem(Identifier name, AbstractNode *node) {
+void ScopeTrait::AddItem(Identifier name, AbstractNode *node) {
     this->items_id.insert({{name, node}});
 }
 
-void ScopedNode::AddItem(char name, AbstractNode *node) {
+void ScopeTrait::AddItem(char name, AbstractNode *node) {
     auto vec = this->items_char.find(name);
     if (vec == this->items_char.end()) {
         // Didn't exist at all
@@ -48,7 +48,7 @@ void ScopedNode::AddItem(char name, AbstractNode *node) {
     }
 }
 
-void ScopedNode::AddItem(string name, AbstractNode *node) {
+void ScopeTrait::AddItem(string name, AbstractNode *node) {
     auto vec = this->items_str.find(name);
     if (vec == this->items_str.end()) {
         // Didn't exist at all
@@ -61,14 +61,14 @@ void ScopedNode::AddItem(string name, AbstractNode *node) {
     }
 }
 
-AbstractNode *ScopedNode::FindItem(Identifier name) {
+AbstractNode *ScopeTrait::FindItem(Identifier name) {
     auto found_obj = this->items_id.find(name);
     if (found_obj == this->items_id.end())
         return NULL;
     return found_obj->second;
 }
 
-vector<AbstractNode *> ScopedNode::FindItem(char name) {
+vector<AbstractNode *> ScopeTrait::FindItem(char name) {
     auto found_obj = this->items_char.find(name);
     if (found_obj == this->items_char.end()) {
         return vector<AbstractNode *>();
@@ -76,7 +76,7 @@ vector<AbstractNode *> ScopedNode::FindItem(char name) {
     return found_obj->second;
 }
 
-vector<AbstractNode *> ScopedNode::FindItem(string name) {
+vector<AbstractNode *> ScopeTrait::FindItem(string name) {
     auto found_obj = this->items_str.find(name);
     if (found_obj == this->items_str.end()) {
         return vector<AbstractNode *>();
@@ -84,7 +84,7 @@ vector<AbstractNode *> ScopedNode::FindItem(string name) {
     return found_obj->second;
 }
 
-void ScopedNode::_DeleteScopedSubitems() {
+void ScopeTrait::_DeleteScopedSubitems() {
     for (auto i = this->items_id.begin(); i != this->items_id.end(); i++) {
         delete i->second;
     }

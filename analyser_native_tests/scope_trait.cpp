@@ -1,11 +1,11 @@
 #include <cassert>
 
-#include "vhdl_ast_scopednode.h"
+#include "vhdl_analysis_scopetrait.h"
 using namespace std;
 using namespace YaVHDL::Analyser;
 using namespace YaVHDL::Analyser::AST;
 
-class TestScopedNode : public ScopedNode {
+class TestScopedNode : public ScopeTrait {
     // We just need to force this into a concrete class.
 };
 
