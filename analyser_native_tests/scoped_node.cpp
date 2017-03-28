@@ -20,6 +20,8 @@ int main(int argc, char **argv) {
         TestScopedNode test;
         TestAbstractNode node1;
         test.AddItem(*id, &node1);
+        delete id;
+        id = Identifier::FromLatin1("a", true);
         auto result = test.FindItem(*id);
         assert(result == &node1);
         delete id;
