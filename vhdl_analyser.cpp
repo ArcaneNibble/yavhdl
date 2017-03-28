@@ -26,6 +26,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cstring>
 #include <iostream>
 
+#include "vhdl_analysis_core.h"
 #include "vhdl_analysis_design_db.h"
 #include "vhdl_parser_glue.h"
 
@@ -66,11 +67,21 @@ int main(int argc, char **argv) {
 
     // Parse each file
     std::string errors = std::string();
+    std::string warnings = std::string();
     for (int i = lib_was_ext_id ? 3 : 2; i < argc; i++) {
         cout << "Parsing file \"" << argv[i] << "\"...\n";
         VhdlParseTreeNode *pt = VhdlParserParseFile(argv[i], errors);
         if (pt) {
-            // TODO
+            cout << "Analysing file \"" << argv[i] << "\"...\n";
+            errors.clear();
+            warnings.clear();
+            bool ret = do_vhdl_analysis(db, work_lib, pt, errors, warnings);
+            cout << warnings;
+            if (!ret) {
+                // An error occurred
+                cout << "ERRORS occurred during analysis!\n";
+                cout << errors;
+            }
             delete pt;
         } else {
             cout << errors;
