@@ -75,13 +75,39 @@ static AST::Entity *analyze_entity(
 
     AST::Entity *ret = new AST::Entity();
 
-    // Store the given root declarative region (owned by entity)
-    ret->root_decl_region = s.innermost_scope;
-
+    // Location information
     copy_line_no(ret, pt);
     ret->file_name = s.file_name;
 
+    // Our name
     ret->id = analyze_identifier(pt->pieces[0]);
+
+    AST::AbstractNode *old_node;
+    if ((old_node = s.work_lib->FindDesignUnit(*ret->id))) {
+
+        dump_current_location(pt, s, true);
+        *s.errors += "ERROR: Design unit ";
+        *s.errors += ret->id->pretty_name;
+        *s.errors += " already exists in library!\n";
+
+        AST::HasLinenoTrait *old_node_;
+        if ((old_node_ = dynamic_cast<AST::HasLinenoTrait *>(old_node))) {
+            *s.errors += "\tPrevious version was at ";
+            old_node_->FormatLocIntoString(*s.errors);
+            *s.errors += "\n";
+        }
+
+        // FIXME: We're expected to take ownership of the root declarative
+        // region, so now we need to free it.
+        delete s.innermost_scope;
+        delete ret;
+        return nullptr;
+    }
+
+    s.work_lib->TentativeAddDesignUnit(*ret->id, ret);
+
+    // Store the given root declarative region (owned by entity)
+    ret->root_decl_region = s.innermost_scope;
 
     // Verify that the id at the end (if any) is the same as the one in the
     // beginning
@@ -91,12 +117,15 @@ static AST::Entity *analyze_entity(
             dump_current_location(pt, s, true);
             *s.errors +=
                 "ERROR: Name at end of entity must match name at beginning\n";
-            delete ret;
+            s.work_lib->DropTentativeDesignUnit();
             return nullptr;
         }
     }
 
     // TODO
+
+    // Add the thing we analyzed to the library for real
+    s.work_lib->CommitTentativeDesignUnit();
 
     return ret;
 }
@@ -112,44 +141,16 @@ static bool analyze_design_unit(
     // Not implemented
     assert(pt->pieces[1] == nullptr);
 
-    AST::AbstractNode *node_to_add;
-    Identifier *name_of_node;
-
     switch (pt->pieces[0]->type) {
         case PT_ENTITY: {
             AST::Entity *entity = analyze_entity(pt->pieces[0], s);
             if (!entity) return false;
-            node_to_add = entity;
-            name_of_node = entity->id;
             break;
         }
 
         default:
             assert(!"Don't know how to handle this parse tree node!");
     }
-
-    AST::AbstractNode *old_node;
-    if ((old_node = s.work_lib->FindDesignUnit(*name_of_node))) {
-
-        dump_current_location(pt->pieces[0], s, true);
-        *s.errors += "ERROR: Design unit ";
-        *s.errors += name_of_node->pretty_name;
-        *s.errors += " already exists in library!\n";
-
-        AST::HasLinenoTrait *old_node_;
-        if ((old_node_ = dynamic_cast<AST::HasLinenoTrait *>(old_node))) {
-            *s.errors += "\tPrevious version was at ";
-            old_node_->FormatLocIntoString(*s.errors);
-            *s.errors += "\n";
-        }
-
-        delete node_to_add;
-
-        return false;
-    }
-
-    // Add the thing we analyzed to the library
-    s.work_lib->AddDesignUnit(*name_of_node, node_to_add);
 
     return true;
 }

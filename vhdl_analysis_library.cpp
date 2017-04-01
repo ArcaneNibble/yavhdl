@@ -25,13 +25,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "vhdl_analysis_design_db.h"
 
+#include <cassert>
 #include <iostream>
 #include "util.h"
 using namespace YaVHDL::Analyser;
 
+Library::Library() {
+    this->temp_node = nullptr;
+}
+
 Library::~Library() {
     delete this->id;
-    
+    delete this->temp_node;
+
     for (auto i = this->db_by_order.begin();
          i != this->db_by_order.end(); i++) {
 
@@ -68,8 +74,40 @@ void Library::AddDesignUnit(Identifier name, AST::AbstractNode *unit) {
 }
 
 AST::AbstractNode *Library::FindDesignUnit(Identifier name) {
+    // Check the tentative one first if we have one
+    if (this->temp_node) {
+        if (name == *this->temp_id) {
+            return this->temp_node;
+        }
+    }
+
     auto unit = this->db_by_name.find(name);
     if (unit == this->db_by_name.end())
         return NULL;
     return unit->second;
+}
+
+void Library::TentativeAddDesignUnit(
+    Identifier name, AST::AbstractNode *unit) {
+
+    // Cannot add a new tentative thing if we already have one
+    assert(this->temp_node == nullptr);
+
+    // FIXME: Is this right?
+    this->temp_id = &name;
+    this->temp_node = unit;
+}
+
+void Library::CommitTentativeDesignUnit() {
+    assert(this->temp_node);
+
+    this->AddDesignUnit(*this->temp_id, this->temp_node);
+    this->temp_node = nullptr;
+}
+
+void Library::DropTentativeDesignUnit() {
+    assert(this->temp_node);
+
+    delete this->temp_node;
+    this->temp_node = nullptr;
 }

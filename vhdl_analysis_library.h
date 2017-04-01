@@ -37,6 +37,7 @@ namespace YaVHDL::Analyser
 
 class Library {
 public:
+    Library();
     virtual ~Library();
 
     void debug_print();
@@ -44,11 +45,20 @@ public:
     void AddDesignUnit(Identifier name, AST::AbstractNode *unit);
     AST::AbstractNode *FindDesignUnit(Identifier name);
 
+    // We need this for making design units usable via selected names
+    // while still analyzing them (I think we need to do that??).
+    void TentativeAddDesignUnit(Identifier name, AST::AbstractNode *unit);
+    void CommitTentativeDesignUnit();
+    void DropTentativeDesignUnit();
+
     Identifier *id;
 
 private:
     std::unordered_map<Identifier, AST::AbstractNode *> db_by_name;
     std::vector<AST::AbstractNode *> db_by_order;
+
+    Identifier *temp_id;
+    AST::AbstractNode *temp_node;
 };
 
 }
