@@ -31,13 +31,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "vhdl_analysis_scopetrait.h"
 #include "vhdl_ast_abstractnode.h"
 #include "vhdl_ast_haslinenotrait.h"
-#include "vhdl_ast_isdeclarationtrait.h"
 
 namespace YaVHDL::Analyser::AST
 {
 
-class Entity : public AbstractNode, public HasLinenoTrait,
-               public IsDeclarationTrait, public ScopeTrait {
+class Entity : public AbstractNode, public HasLinenoTrait, public ScopeTrait {
 public:
     ~Entity();
     void debug_print();
