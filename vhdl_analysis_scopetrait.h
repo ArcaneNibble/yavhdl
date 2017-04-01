@@ -44,6 +44,8 @@ namespace YaVHDL::Analyser
 // using here is what VHDL calls a "declarative region."
 class ScopeTrait {
 public:
+    virtual ~ScopeTrait() {}
+
     virtual void AddItem(Identifier name, AST::AbstractNode *node);
     virtual void AddItem(char name, AST::AbstractNode *node);
     virtual void AddItem(std::string name, AST::AbstractNode *node);

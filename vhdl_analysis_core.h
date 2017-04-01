@@ -29,6 +29,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include "vhdl_analysis_design_db.h"
 #include "vhdl_analysis_library.h"
+#include "vhdl_analysis_scopechainnode.h"
 #include "vhdl_parser_glue.h"
 
 namespace YaVHDL::Analyser
@@ -41,6 +42,8 @@ struct AnalyzerCoreStateBlob
     std::string *errors;
     std::string *warnings;
     std::string file_name;
+    // Contains directly visible names.
+    YaVHDL::Analyser::ScopeChainNode *innermost_scope;
 };
 
 // The core of the analysis code. This analyses the parse output of a single

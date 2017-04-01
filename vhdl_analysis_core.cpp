@@ -75,6 +75,9 @@ static AST::Entity *analyze_entity(
 
     AST::Entity *ret = new AST::Entity();
 
+    // Store the given root declarative region (owned by entity)
+    ret->root_decl_region = s.innermost_scope;
+
     copy_line_no(ret, pt);
     ret->file_name = s.file_name;
 
@@ -102,6 +105,10 @@ static AST::Entity *analyze_entity(
 static bool analyze_design_unit(
     VhdlParseTreeNode *pt, AnalyzerCoreStateBlob &s) {
 
+    // Root declarative region
+    ScopeChainNode *root_decl_region = new ScopeChainNode();
+    s.innermost_scope = root_decl_region;
+
     // Not implemented
     assert(pt->pieces[1] == nullptr);
 
@@ -121,7 +128,6 @@ static bool analyze_design_unit(
             assert(!"Don't know how to handle this parse tree node!");
     }
 
-    // FIXME: WTF
     AST::AbstractNode *old_node;
     if ((old_node = s.work_lib->FindDesignUnit(*name_of_node))) {
 
@@ -185,6 +191,7 @@ bool YaVHDL::Analyser::do_vhdl_analysis(
     state.errors = &errors;
     state.warnings = &warnings;
     state.file_name = file_name;
+    state.innermost_scope = nullptr;
 
     return analyze_design_file(pt, state);
 }

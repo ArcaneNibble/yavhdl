@@ -23,26 +23,25 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef VHDL_AST_ENTITY_H
-#define VHDL_AST_ENTITY_H
+#ifndef VHDL_ANALYSIS_SCOPECHAINNODE_H
+#define VHDL_ANALYSIS_SCOPECHAINNODE_H
+
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 #include "vhdl_analysis_identifier.h"
-#include "vhdl_analysis_scopechainnode.h"
+#include "vhdl_analysis_scopetrait.h"
 #include "vhdl_ast_abstractnode.h"
-#include "vhdl_ast_haslinenotrait.h"
 
-namespace YaVHDL::Analyser::AST
+namespace YaVHDL::Analyser
 {
 
-class Entity : public AbstractNode, public HasLinenoTrait {
+// This is just used to turn ScopeTrait into a concrete class and add a parent
+// pointer. The visibility and overloading rules are not implemented here.
+class ScopeChainNode : public ScopeTrait {
 public:
-    ~Entity();
-    void debug_print();
-
-    Identifier *id;
-
-    // This is needed for matching architectures
-    ScopeChainNode *root_decl_region;
+    ScopeChainNode *parent;
 };
 
 }
