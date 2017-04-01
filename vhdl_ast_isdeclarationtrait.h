@@ -23,29 +23,21 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef VHDL_AST_ENTITY_H
-#define VHDL_AST_ENTITY_H
-
-#include "vhdl_analysis_identifier.h"
-#include "vhdl_analysis_scopechainnode.h"
-#include "vhdl_analysis_scopetrait.h"
-#include "vhdl_ast_abstractnode.h"
-#include "vhdl_ast_haslinenotrait.h"
-#include "vhdl_ast_isdeclarationtrait.h"
+#ifndef VHDL_AST_ISDECLARATIONTRAIT_H
+#define VHDL_AST_ISDECLARATIONTRAIT_H
 
 namespace YaVHDL::Analyser::AST
 {
 
-class Entity : public AbstractNode, public HasLinenoTrait,
-               public IsDeclarationTrait, public ScopeTrait {
+// This is an empty marker class for AST nodes that represent declarations.
+// We need this to tell whether we are shadowing a name or doing something
+// that is potentially an error.
+class IsDeclarationTrait {
 public:
-    ~Entity();
-    void debug_print();
+    virtual ~IsDeclarationTrait() {};
 
-    Identifier *id;
-
-    // This is needed for matching architectures
-    ScopeChainNode *root_decl_region;
+protected:
+    IsDeclarationTrait() {};
 };
 
 }
