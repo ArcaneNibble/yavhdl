@@ -1,0 +1,23 @@
+{
+    "type": "DesignDatabase",
+    "libraries": [{
+        "type": "Library",
+        "id": "worklib",
+        "units": [
+            {
+                "type": "Entity",
+                "id": "test",
+                "first_line": 1, "first_column": 1,
+                "last_line": 1, "last_column": 25,
+                "file_name": "analyser_json_tests/entity_empty2.vhd"
+            },
+            {
+                "type": "Entity",
+                "id": "test2",
+                "first_line": 2, "first_column": 1,
+                "last_line": 2, "last_column": 26,
+                "file_name": "analyser_json_tests/entity_empty2.vhd"
+            }
+        ]
+    }]
+}
