@@ -23,56 +23,24 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "vhdl_ast_entity.h"
+#include "vhdl_ast_enumerationtypedecl.h"
 
 #include <iostream>
 
 using namespace YaVHDL::Analyser;
 using namespace YaVHDL::Analyser::AST;
 
-Entity::~Entity() {
+EnumerationTypeDecl::~EnumerationTypeDecl() {
     delete this->id;
-    delete this->root_decl_region;
 }
 
-void Entity::debug_print() {
-    std::cout << "{\"type\": \"Entity\"";
+void EnumerationTypeDecl::debug_print() {
+    std::cout << "{\"type\": \"EnumerationTypeDecl\"";
 
     std::cout << ", \"id\": ";
     this->id->debug_print();
 
     this->debug_print_lineno();
-
-    std::cout << ", \"decls\": [";
-    bool first_thing = true;
-    for (auto i = this->items_id.begin(); i != this->items_id.end(); i++) {
-        for (auto j = i->second.begin(); j != i->second.end(); j++) {
-            if (!first_thing) {
-                std::cout << ",";
-            }
-            (*j)->debug_print();
-            first_thing = false;
-        }
-    }
-    for (auto i = this->items_char.begin(); i != this->items_char.end(); i++) {
-        for (auto j = i->second.begin(); j != i->second.end(); j++) {
-            if (!first_thing) {
-                std::cout << ",";
-            }
-            (*j)->debug_print();
-            first_thing = false;
-        }
-    }
-    for (auto i = this->items_str.begin(); i != this->items_str.end(); i++) {
-        for (auto j = i->second.begin(); j != i->second.end(); j++) {
-            if (!first_thing) {
-                std::cout << ",";
-            }
-            (*j)->debug_print();
-            first_thing = false;
-        }
-    }
-    std::cout << "]";
 
     std::cout << "}";
 }

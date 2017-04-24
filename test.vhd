@@ -1,2 +1,6 @@
-entity test is begin end;
-entity test2 is begin end;
+entity test is
+    type foo is (foo, bar);
+    --type test is ('a', 'b');
+    type testtype is (foo, bar);
+    type foo is (baz);
+begin end;

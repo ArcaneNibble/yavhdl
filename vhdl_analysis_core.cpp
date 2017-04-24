@@ -29,6 +29,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 
 #include "vhdl_ast_entity.h"
+#include "vhdl_ast_enumerationtypedecl.h"
 
 using namespace std;
 using namespace YaVHDL::Analyser;
@@ -68,6 +69,76 @@ static Identifier *analyze_identifier(VhdlParseTreeNode *pt) {
         default:
             assert(!"Don't know how to handle this parse tree node!");
     }
+}
+
+enum DeclarativePartType {
+    ArchitectureDeclarativePart,
+    BlockDeclarativePart,
+    ConfigurationDeclarativePart,
+    EntityDeclarativePart,
+    GenerateStatementBody,
+    PackageBodyDeclarativePart,
+    PackageDeclarativePart,
+    ProcessDeclarativePart,
+    ProtectedTypeDeclarativePart,
+    ProtectedTypeBodyDeclarativePart,
+    SubprogramDeclarativePart,
+};
+
+static bool analyze_type_decl(VhdlParseTreeNode *pt, ScopeTrait *tgt,
+    DeclarativePartType type, AnalyzerCoreStateBlob &s) {
+
+    Identifier *type_name = analyze_identifier(pt->pieces[0]);
+    
+    switch(pt->pieces[1]->type) {
+        case PT_ENUMERATION_TYPE_DEFINITION: {
+            std::cout << "-----asdfasdf-----\n";
+
+            AST::EnumerationTypeDecl *d = new AST::EnumerationTypeDecl();
+            copy_line_no(d, pt);
+            d->id = type_name;
+
+            // TODO
+            tgt->AddItem(*type_name, d);
+
+            break;
+        }
+        default:
+            assert(!"Don't know how to handle this parse tree node!");
+    }
+
+    return true;
+}
+
+static bool analyze_declarative_item(VhdlParseTreeNode *pt, ScopeTrait *tgt,
+    DeclarativePartType type, AnalyzerCoreStateBlob &s) {
+
+    switch(pt->type) {
+        case PT_FULL_TYPE_DECLARATION:
+            return analyze_type_decl(pt, tgt, type, s);
+
+        default:
+            assert(!"Don't know how to handle this parse tree node!");
+    }
+};
+
+static bool analyze_declaration_list(VhdlParseTreeNode *pt, ScopeTrait *tgt,
+    DeclarativePartType type, AnalyzerCoreStateBlob &s) {
+
+    bool no_errors = true;
+
+    switch (pt->type) {
+        case PT_DECLARATION_LIST:
+            no_errors &= analyze_declaration_list(pt->pieces[0], tgt, type, s);
+            no_errors &= analyze_declarative_item(pt->pieces[1], tgt, type, s);
+            break;
+
+        default:
+            no_errors &= analyze_declarative_item(pt, tgt, type, s);
+            break;
+    }
+
+    return no_errors;
 }
 
 static AST::Entity *analyze_entity(
@@ -123,6 +194,16 @@ static AST::Entity *analyze_entity(
     }
 
     // TODO
+
+    // Declarations
+    if (pt->pieces[2]) {
+        bool no_errors = analyze_declaration_list(
+            pt->pieces[2], ret, EntityDeclarativePart, s);
+        if (!no_errors) {
+            s.work_lib->DropTentativeDesignUnit();
+            return nullptr;
+        }
+    }
 
     // Add the thing we analyzed to the library for real
     s.work_lib->CommitTentativeDesignUnit();
