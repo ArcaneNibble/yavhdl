@@ -30,6 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "vhdl_ast_entity.h"
 #include "vhdl_ast_enumerationtypedecl.h"
+#include "vhdl_ast_isoverloadabletrait.h"
 
 using namespace std;
 using namespace YaVHDL::Analyser;
@@ -85,6 +86,43 @@ enum DeclarativePartType {
     SubprogramDeclarativePart,
 };
 
+static bool try_add_declaration(Identifier id, AST::AbstractNode *n,
+    ScopeTrait *tgt) {
+
+    auto existing = tgt->FindItem(id);
+    if (existing.size() == 0) {
+        // We are adding a new thing; this should always work
+        tgt->AddItem(id, n);
+        return true;
+    } else {
+        // Are the existing things overloadable? (Must always be the same)
+        bool existing_overloadable = false;
+        AST::IsOverloadableTrait *x =
+            dynamic_cast<AST::IsOverloadableTrait *>(existing[0]);
+        if (x) {
+            existing_overloadable = true;
+        }
+
+        bool this_overloadable = false;
+        x = dynamic_cast<AST::IsOverloadableTrait *>(n);
+        if (x) {
+            this_overloadable = true;
+        }
+
+        // TODO: Implicit declarations?
+
+        if (!(existing_overloadable == true && this_overloadable == true)) {
+            // Definitely fail
+            return false;
+        } else {
+            // Both are overloadable
+            // TODO: Type profile
+            tgt->AddItem(id, n);
+            return true;
+        }
+    }
+}
+
 static bool analyze_type_decl(VhdlParseTreeNode *pt, ScopeTrait *tgt,
     DeclarativePartType type, AnalyzerCoreStateBlob &s) {
 
@@ -98,8 +136,16 @@ static bool analyze_type_decl(VhdlParseTreeNode *pt, ScopeTrait *tgt,
             copy_line_no(d, pt);
             d->id = type_name;
 
+            if (!try_add_declaration(*type_name, d, tgt)) {
+                dump_current_location(pt, s, true);
+                *s.errors += "ERROR: Duplicate declaration of type ";
+                *s.errors += type_name->pretty_name;
+                *s.errors += "!\n";
+                delete d;
+                return false;
+            }
+
             // TODO
-            tgt->AddItem(*type_name, d);
 
             break;
         }

@@ -33,6 +33,7 @@ using namespace YaVHDL::Analyser::AST;
 Entity::~Entity() {
     delete this->id;
     delete this->root_decl_region;
+    this->_DeleteScopedSubitems();
 }
 
 void Entity::debug_print() {
