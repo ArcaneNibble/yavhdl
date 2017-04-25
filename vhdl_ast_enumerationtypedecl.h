@@ -27,15 +27,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define VHDL_AST_ENUMERATIONTYPEDECL_H
 
 #include "vhdl_analysis_identifier.h"
-#include "vhdl_analysis_scopechainnode.h"
-#include "vhdl_analysis_scopetrait.h"
 #include "vhdl_ast_abstractnode.h"
+#include "vhdl_ast_enumerationlitdecl.h"
 #include "vhdl_ast_haslinenotrait.h"
 
 #include <vector>
 
 namespace YaVHDL::Analyser::AST
 {
+
+class EnumerationLitDecl;
 
 class EnumerationTypeDecl : public AbstractNode, public HasLinenoTrait {
 public:
@@ -45,7 +46,7 @@ public:
     Identifier *id;
 
     // Non-owning reference to the enumeration literals that this contains.
-    std::vector<void *> literals;
+    std::vector<EnumerationLitDecl *> literals;
 };
 
 }

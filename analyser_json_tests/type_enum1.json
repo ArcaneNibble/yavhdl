@@ -1,0 +1,30 @@
+{
+    "type": "DesignDatabase",
+    "libraries": [{
+        "type": "Library",
+        "id": "worklib",
+        "units": [
+            {
+                "type": "Entity",
+                "id": "test",
+                "first_line": 1, "first_column": 1,
+                "last_line": 3, "last_column": 10,
+                "file_name": "analyser_json_tests/type_enum1.vhd",
+                "decls": [
+                    "__is_a_set",
+                    {
+                        "type": "EnumerationTypeDecl",
+                        "id": "test",
+                        "first_line": 2, "first_column": 5,
+                        "last_line": 2, "last_column": 23
+                    },{
+                        "type": "EnumerationLitDecl",
+                        "id": "foo",
+                        "idx": 0,
+                        "enum_name": "test"
+                    }
+                ]
+            }
+        ]
+    }]
+}

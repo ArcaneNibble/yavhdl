@@ -1,0 +1,50 @@
+{
+    "type": "DesignDatabase",
+    "libraries": [{
+        "type": "Library",
+        "id": "worklib",
+        "units": [
+            {
+                "type": "Entity",
+                "id": "test",
+                "first_line": 1, "first_column": 1,
+                "last_line": 4, "last_column": 10,
+                "file_name": "analyser_json_tests/type_enum4_overload.vhd",
+                "decls": [
+                    "__is_a_set",
+                    {
+                        "type": "EnumerationTypeDecl",
+                        "id": "test1",
+                        "first_line": 2, "first_column": 5,
+                        "last_line": 2, "last_column": 29
+                    },{
+                        "type": "EnumerationTypeDecl",
+                        "id": "test2",
+                        "first_line": 3, "first_column": 5,
+                        "last_line": 3, "last_column": 29
+                    },{
+                        "type": "EnumerationLitDecl",
+                        "id": "foo",
+                        "idx": 0,
+                        "enum_name": "test1"
+                    },{
+                        "type": "EnumerationLitDecl",
+                        "id": "bar",
+                        "idx": 1,
+                        "enum_name": "test1"
+                    },{
+                        "type": "EnumerationLitDecl",
+                        "id": "foo",
+                        "idx": 0,
+                        "enum_name": "test2"
+                    },{
+                        "type": "EnumerationLitDecl",
+                        "id": "baz",
+                        "idx": 1,
+                        "enum_name": "test2"
+                    }
+                ]
+            }
+        ]
+    }]
+}

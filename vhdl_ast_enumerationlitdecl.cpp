@@ -23,20 +23,36 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef VHDL_AST_ISOVERLOADABLETRAIT_H
-#define VHDL_AST_ISOVERLOADABLETRAIT_H
+#include "vhdl_ast_enumerationlitdecl.h"
 
-namespace YaVHDL::Analyser::AST
-{
+#include <iostream>
 
-class IsOverloadableTrait {
-public:
-    virtual ~IsOverloadableTrait() {};
+#include "util.h"
 
-protected:
-    IsOverloadableTrait() {};
-};
+using namespace YaVHDL::Analyser;
+using namespace YaVHDL::Analyser::AST;
 
+EnumerationLitDecl::~EnumerationLitDecl() {
+    delete this->id;
 }
 
-#endif
+void EnumerationLitDecl::debug_print() {
+    std::cout << "{\"type\": \"EnumerationLitDecl\"";
+
+    if (!this->is_char_lit) {
+        std::cout << ", \"id\": ";
+        this->id->debug_print();
+    } else {
+        std::cout << ", \"chr\": \"";
+        YaVHDL::Util::print_chr_escaped(this->c);
+        std::cout << "\"";
+    }
+
+    std::cout << ", \"idx\": ";
+    std::cout << this->idx;
+
+    std::cout << ", \"enum_name\": ";
+    this->corresponding_type_decl->id->debug_print();
+
+    std::cout << "}";
+}

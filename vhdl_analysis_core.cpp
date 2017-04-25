@@ -28,6 +28,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cassert>
 #include <iostream>
 
+#include "util.h"
 #include "vhdl_ast_entity.h"
 #include "vhdl_ast_enumerationtypedecl.h"
 #include "vhdl_ast_isoverloadabletrait.h"
@@ -86,19 +87,58 @@ enum DeclarativePartType {
     SubprogramDeclarativePart,
 };
 
-static bool try_add_declaration(Identifier id, AST::AbstractNode *n,
+static bool compare_parameter_result_type_profiles(
+    pair<AST::AbstractNode *, vector<AST::AbstractNode *>> x,
+    pair<AST::AbstractNode *, vector<AST::AbstractNode *>> y) {
+
+    // Compare arg count
+    if (x.second.size() != y.second.size()) {
+        return false;
+    }
+
+    // Compare args
+    for (size_t i = 0; i < x.second.size(); i++) {
+        if (x.second[i] != y.second[i]) {
+            return false;
+        }
+    }
+
+    // Compare return type
+    if (x.first != y.first) {
+        return false;
+    }
+
+    return true;
+}
+
+static pair<AST::AbstractNode *, vector<AST::AbstractNode *>>
+    get_parameter_result_type_profile(AST::IsOverloadableTrait *n) {
+
+    AST::EnumerationLitDecl *lit = dynamic_cast<AST::EnumerationLitDecl *>(n);
+    if (lit) {
+        // Treat this as a function that takes no arguments and returns the
+        // type of the corresponding enum.
+
+        // TODO: subtypes
+
+        return {lit->corresponding_type_decl, {}};
+    }
+
+    assert(!"Don't know how to get parameter/result type profile here!");
+}
+
+template<typename T> bool try_add_declaration(T name, AST::AbstractNode *n,
     ScopeTrait *tgt) {
 
-    auto existing = tgt->FindItem(id);
+    auto existing = tgt->FindItem(name);
     if (existing.size() == 0) {
         // We are adding a new thing; this should always work
-        tgt->AddItem(id, n);
+        tgt->AddItem(name, n);
         return true;
     } else {
         // Are the existing things overloadable? (Must always be the same)
         bool existing_overloadable = false;
-        AST::IsOverloadableTrait *x =
-            dynamic_cast<AST::IsOverloadableTrait *>(existing[0]);
+        auto x = dynamic_cast<AST::IsOverloadableTrait *>(existing[0]);
         if (x) {
             existing_overloadable = true;
         }
@@ -116,11 +156,100 @@ static bool try_add_declaration(Identifier id, AST::AbstractNode *n,
             return false;
         } else {
             // Both are overloadable
-            // TODO: Type profile
-            tgt->AddItem(id, n);
-            return true;
+
+            // Check the type profiles
+            auto new_typeprof = get_parameter_result_type_profile(x);
+            bool found_conflict = false;
+            for (size_t i = 0; i < existing.size(); i++) {
+                auto y = dynamic_cast<AST::IsOverloadableTrait *>(existing[i]);
+                auto exist_typeprof = get_parameter_result_type_profile(y);
+
+                if (compare_parameter_result_type_profiles(
+                    new_typeprof, exist_typeprof)) {
+
+                    found_conflict = true;
+                    break;
+                }
+            }
+
+            if (!found_conflict) {
+                tgt->AddItem(name, n);
+                return true;
+            } else {
+                return false;
+            }
         }
     }
+}
+
+static bool analyze_enum_lit(VhdlParseTreeNode *pt, ScopeTrait *tgt,
+    AnalyzerCoreStateBlob &s, uint64_t idx, AST::EnumerationTypeDecl *e,
+    VhdlParseTreeNode *pt_for_loc) {
+
+    auto x = new AST::EnumerationLitDecl();
+    x->idx = idx;
+    x->corresponding_type_decl = e;
+
+    if (pt->type == PT_LIT_CHAR) {
+        x->id = nullptr;
+        x->c = pt->chr;
+        x->is_char_lit = true;
+    } else {
+        x->id = analyze_identifier(pt);
+        x->c = 0;
+        x->is_char_lit = false;
+    }
+
+    // Done setting up, try to add it
+    if (x->is_char_lit) {
+        if (!try_add_declaration(x->c, x, tgt)) {
+            dump_current_location(pt_for_loc, s, true);
+            *s.errors += "ERROR: Duplicate declaration of enum literal '";
+            *s.errors +=
+                YaVHDL::Util::latin1_prettyprint_table[(unsigned)x->c];
+            *s.errors += "'!\n";
+            delete x;
+            return false;
+        }
+    } else {
+        if (!try_add_declaration(*x->id, x, tgt)) {
+            dump_current_location(pt_for_loc, s, true);
+            *s.errors += "ERROR: Duplicate declaration of enum literal ";
+            *s.errors += x->id->pretty_name;
+            *s.errors += "!\n";
+            delete x;
+            return false;
+        }
+    }
+
+    // Add it to the type decl as well
+    e->literals.push_back(x);
+
+    return true;
+}
+
+static bool analyze_enum_lits(VhdlParseTreeNode *pt, ScopeTrait *tgt,
+    AnalyzerCoreStateBlob &s, uint64_t *idx, AST::EnumerationTypeDecl *e,
+    VhdlParseTreeNode *pt_for_loc) {
+
+    bool no_errors = true;
+
+    switch (pt->type) {
+        case PT_ENUM_LITERAL_LIST:
+            no_errors &= analyze_enum_lits(pt->pieces[0], tgt, s, idx, e,
+                pt_for_loc);
+            (*idx)++;
+            no_errors &= analyze_enum_lit(pt->pieces[1], tgt, s, *idx, e,
+                pt_for_loc);
+            break;
+
+        default:
+            no_errors &= analyze_enum_lit(pt, tgt, s, *idx, e,
+                pt_for_loc);
+            break;
+    }
+
+    return no_errors;
 }
 
 static bool analyze_type_decl(VhdlParseTreeNode *pt, ScopeTrait *tgt,
@@ -130,8 +259,7 @@ static bool analyze_type_decl(VhdlParseTreeNode *pt, ScopeTrait *tgt,
     
     switch(pt->pieces[1]->type) {
         case PT_ENUMERATION_TYPE_DEFINITION: {
-            std::cout << "-----asdfasdf-----\n";
-
+            // The main declaration
             AST::EnumerationTypeDecl *d = new AST::EnumerationTypeDecl();
             copy_line_no(d, pt);
             d->id = type_name;
@@ -145,7 +273,13 @@ static bool analyze_type_decl(VhdlParseTreeNode *pt, ScopeTrait *tgt,
                 return false;
             }
 
-            // TODO
+            // The literals
+            uint64_t idx = 0;
+            bool lits_ok = analyze_enum_lits(pt->pieces[1]->pieces[0],
+                tgt, s, &idx, d, pt);
+            if (!lits_ok) {
+                return false;
+            }
 
             break;
         }

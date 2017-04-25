@@ -23,18 +23,35 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef VHDL_AST_ISOVERLOADABLETRAIT_H
-#define VHDL_AST_ISOVERLOADABLETRAIT_H
+#ifndef VHDL_AST_ENUMERATIONLITDECL_H
+#define VHDL_AST_ENUMERATIONLITDECL_H
+
+#include "vhdl_analysis_identifier.h"
+#include "vhdl_ast_abstractnode.h"
+#include "vhdl_ast_enumerationtypedecl.h"
+#include "vhdl_ast_isoverloadabletrait.h"
+
+#include <cstdint>
 
 namespace YaVHDL::Analyser::AST
 {
 
-class IsOverloadableTrait {
-public:
-    virtual ~IsOverloadableTrait() {};
+class EnumerationTypeDecl;
 
-protected:
-    IsOverloadableTrait() {};
+class EnumerationLitDecl : public AbstractNode, public IsOverloadableTrait {
+public:
+    ~EnumerationLitDecl();
+    void debug_print();
+
+    Identifier *id;
+    char c;
+
+    bool is_char_lit;
+
+    uint64_t idx;
+    // Non-owning reference to the enumeration type declaration that created
+    // this particular literal.
+    EnumerationTypeDecl *corresponding_type_decl;
 };
 
 }

@@ -55,7 +55,9 @@ void HasLinenoTrait::debug_print_lineno() {
     std::cout << ", \"last_column\": ";
     std::cout << this->last_column;
 
-    std::cout << ", \"file_name\": \"";
-    YaVHDL::Util::print_string_escaped(&this->file_name);
-    std::cout << "\"";
+    if (this->file_name.length()) {
+        std::cout << ", \"file_name\": \"";
+        YaVHDL::Util::print_string_escaped(&this->file_name);
+        std::cout << "\"";
+    }
 }
