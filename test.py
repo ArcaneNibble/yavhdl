@@ -9,6 +9,29 @@ import sys
 import traceback
 
 
+# XXX NOTE: THIS CLASS IS EVIL
+# The dict must not be mutated after using this
+class hack_hashable_dict(dict):
+    def __hash__(self):
+        return hash(tuple(sorted(self.items())))
+
+
+def do_set_hack(x):
+    if type(x) == dict:
+        return hack_hashable_dict({k: do_set_hack(v) for k, v in x.items()})
+    elif type(x) == list:
+        if len(x) == 0:
+            return x
+
+        if x[0] != "__is_a_set":
+            return [do_set_hack(x) for x in x]
+
+        # We actually have a set now
+        return set((do_set_hack(x) for x in x[1:]))
+    else:
+        return x
+
+
 def do_parser_tests():
     print("*" * 80)
     print("Running parser tests...")
@@ -282,7 +305,7 @@ def do_analyser_json_tests():
                 continue
 
             # Compare
-            if prog_output != reference:
+            if do_set_hack(prog_output) != do_set_hack(reference):
                 failures = True
                 print("\x1b[31m✗")
                 print("Test output mismatch!\x1b[0m")

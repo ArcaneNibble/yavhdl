@@ -5,7 +5,7 @@
         "id": "worklib",
         "units": [
             {
-                "decls": [],
+                "decls": ["__is_a_set"],
                 "type": "Entity",
                 "id": "test",
                 "first_line": 1, "first_column": 1,

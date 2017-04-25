@@ -45,32 +45,23 @@ void Entity::debug_print() {
     this->debug_print_lineno();
 
     std::cout << ", \"decls\": [";
-    bool first_thing = true;
+    std::cout << "\"__is_a_set\"";
     for (auto i = this->items_id.begin(); i != this->items_id.end(); i++) {
         for (auto j = i->second.begin(); j != i->second.end(); j++) {
-            if (!first_thing) {
-                std::cout << ",";
-            }
+            std::cout << ",";
             (*j)->debug_print();
-            first_thing = false;
         }
     }
     for (auto i = this->items_char.begin(); i != this->items_char.end(); i++) {
         for (auto j = i->second.begin(); j != i->second.end(); j++) {
-            if (!first_thing) {
-                std::cout << ",";
-            }
+            std::cout << ",";
             (*j)->debug_print();
-            first_thing = false;
         }
     }
     for (auto i = this->items_str.begin(); i != this->items_str.end(); i++) {
         for (auto j = i->second.begin(); j != i->second.end(); j++) {
-            if (!first_thing) {
-                std::cout << ",";
-            }
+            std::cout << ",";
             (*j)->debug_print();
-            first_thing = false;
         }
     }
     std::cout << "]";

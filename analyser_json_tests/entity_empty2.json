@@ -5,7 +5,7 @@
         "id": "worklib",
         "units": [
             {
-                "decls": [],
+                "decls": ["__is_a_set"],
                 "type": "Entity",
                 "id": "test",
                 "first_line": 1, "first_column": 1,
@@ -13,7 +13,7 @@
                 "file_name": "analyser_json_tests/entity_empty2.vhd"
             },
             {
-                "decls": [],
+                "decls": ["__is_a_set"],
                 "type": "Entity",
                 "id": "test2",
                 "first_line": 2, "first_column": 1,
