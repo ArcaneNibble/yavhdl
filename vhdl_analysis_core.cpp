@@ -32,6 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "vhdl_ast_entity.h"
 #include "vhdl_ast_enumerationtypedecl.h"
 #include "vhdl_ast_isoverloadabletrait.h"
+#include "vhdl_ast_subtypedecl.h"
 
 using namespace std;
 using namespace YaVHDL::Analyser;
@@ -290,12 +291,38 @@ static bool analyze_type_decl(VhdlParseTreeNode *pt, ScopeTrait *tgt,
     return true;
 }
 
+static bool analyze_subtype_decl(VhdlParseTreeNode *pt, ScopeTrait *tgt,
+    DeclarativePartType type, AnalyzerCoreStateBlob &s) {
+
+    auto x = new AST::SubtypeDecl();
+    x->id = analyze_identifier(pt->pieces[0]);
+    copy_line_no(x, pt);
+
+    // FIXME: Is it necessary to add this to the target scope first so that
+    // the name hiding rules are followed correctly? It does not seem like it
+    // will make any observable difference?
+
+    if (!try_add_declaration(*x->id, x, tgt)) {
+        dump_current_location(pt, s, true);
+        *s.errors += "ERROR: Duplicate declaration of subtype ";
+        *s.errors += x->id->pretty_name;
+        *s.errors += "!\n";
+        delete x;
+        return false;
+    }
+
+    return true;
+}
+
 static bool analyze_declarative_item(VhdlParseTreeNode *pt, ScopeTrait *tgt,
     DeclarativePartType type, AnalyzerCoreStateBlob &s) {
 
     switch(pt->type) {
         case PT_FULL_TYPE_DECLARATION:
             return analyze_type_decl(pt, tgt, type, s);
+
+        case PT_SUBTYPE_DECLARATION:
+            return analyze_subtype_decl(pt, tgt, type, s);
 
         default:
             assert(!"Don't know how to handle this parse tree node!");
