@@ -26,6 +26,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define VHDL_PARSER_IN_GLUE
 #include "vhdl_parser_glue.h"
 
+#include <cstring>
+
 void frontend_vhdl_yyerror(YYLTYPE *locp, yyscan_t scanner,
     VhdlParseTreeNode **, std::string &errors, const char *msg) {
     errors += "Error ";
@@ -35,36 +37,48 @@ void frontend_vhdl_yyerror(YYLTYPE *locp, yyscan_t scanner,
     errors += "\n";
 }
 
-VhdlParseTreeNode *YaVHDL::Parser::VhdlParserParseFile(
-    const char *fn, std::string &errors) {
+VhdlParseTreeNode *VhdlParserParseFile(
+    const char *fn, char **errors) {
     yyscan_t myscanner;
     VhdlParseTreeNode *parse_output;
 
-    errors.clear();
+    std::string errors_cpp;
 
     FILE *f = fopen(fn, "rb");
     if (!f) {
-        errors += "Error opening file \"";
-        errors += fn;
-        errors += "\"\n";
+        errors_cpp += "Error opening file \"";
+        errors_cpp += fn;
+        errors_cpp += "\"\n";
+        *errors = strdup(errors_cpp.c_str());
         return nullptr;
     }
 
     int ret = frontend_vhdl_yylex_init(&myscanner);
     if (ret != 0) {
-        errors += "yylex_init error!\n";
+        errors_cpp += "yylex_init error!\n";
+        *errors = strdup(errors_cpp.c_str());
         return nullptr;
     }
 
     frontend_vhdl_yyset_in(f, myscanner);
-    ret = frontend_vhdl_yyparse(myscanner, &parse_output, errors);
+    ret = frontend_vhdl_yyparse(myscanner, &parse_output, errors_cpp);
     frontend_vhdl_yylex_destroy(myscanner);
     fclose(f);
 
     if (ret != 0) {
-        errors += "Parse error!\n";
+        errors_cpp += "Parse error!\n";
+        *errors = strdup(errors_cpp.c_str());
         return nullptr;
     }
 
+    *errors = strdup(errors_cpp.c_str());
     return parse_output;
+}
+
+void VhdlParserFreePT(YaVHDL::Parser::VhdlParseTreeNode *pt) {
+    delete pt;
+}
+
+void VhdlParserFreeErrors(char *errors) {
+    free(errors);
 }

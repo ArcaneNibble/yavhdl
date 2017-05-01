@@ -35,14 +35,6 @@ namespace YaVHDL::Util
 void print_chr_escaped(char c);
 void print_string_escaped(std::string *s);
 
-// Character encoding stuff
-extern const unsigned char latin1_lcase_table[256];
-extern const char * const latin1_prettyprint_table[256];
-bool is_valid_for_basic_id(char c);
-bool is_valid_for_ext_id(char c);
-// Must be in ISO-8859-1 and already checked with is_valid_for_basic_id
-bool is_valid_basic_id(const char *c);
-
 }
 
 #endif

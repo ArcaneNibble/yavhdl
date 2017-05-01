@@ -43,8 +43,8 @@ int main(int argc, char **argv) {
 
     int ret = 0;
 
-    std::string errors = std::string();
-    VhdlParseTreeNode *parse_output = VhdlParserParseFile(argv[1], errors);
+    char *errors;
+    VhdlParseTreeNode *parse_output = VhdlParserParseFile(argv[1], &errors);
     if (parse_output) {
         parse_output->debug_print();
     } else {
@@ -52,7 +52,8 @@ int main(int argc, char **argv) {
         cout << errors;
     }
     cout << "\n";
-    delete parse_output;
+    VhdlParserFreePT(parse_output);
+    VhdlParserFreeErrors(errors);
 
     return ret;
 }

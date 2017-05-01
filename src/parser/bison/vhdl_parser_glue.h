@@ -33,13 +33,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "vhdl_parse_tree.h"
 
-namespace YaVHDL::Parser
-{
-
-// Main wrapper for low-level parser function.
-VhdlParseTreeNode *VhdlParserParseFile(const char *fn, std::string &errors);
-
-}
+// Main wrapper for low-level parser function. Memory needs to be freed using
+// the below functions (present just to ensure we have a pure C interface).
+extern "C" YaVHDL::Parser::VhdlParseTreeNode *VhdlParserParseFile(
+    const char *fn, char **errors);
+extern "C" void VhdlParserFreePT(YaVHDL::Parser::VhdlParseTreeNode *pt);
+extern "C" void VhdlParserFreeErrors(char *errors);
 
 // All the code below here is miscellaneous junk needed for the lexer/parser
 // to talk to each other correctly.
