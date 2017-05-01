@@ -76,9 +76,13 @@ VhdlParseTreeNode *VhdlParserParseFile(
 }
 
 void VhdlParserFreePT(YaVHDL::Parser::VhdlParseTreeNode *pt) {
-    delete pt;
+    pt->delete_self();
 }
 
-void VhdlParserFreeErrors(char *errors) {
+void VhdlParserFreeString(char *errors) {
     free(errors);
+}
+
+char *VhdlParserCifyString(std::string *str) {
+    return strdup(str->c_str());
 }

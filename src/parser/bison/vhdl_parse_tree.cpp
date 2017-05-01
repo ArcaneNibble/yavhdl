@@ -421,7 +421,7 @@ VhdlParseTreeNode::VhdlParseTreeNode(enum ParseTreeNodeType type) {
 }
 
 // Destroy a parse tree node and free associated data
-VhdlParseTreeNode::~VhdlParseTreeNode() {
+void VhdlParseTreeNode::delete_self() {
     // Destroy contents
     delete this->str;
     delete this->str2;
@@ -429,8 +429,12 @@ VhdlParseTreeNode::~VhdlParseTreeNode() {
     // Just in case nodes don't track their count, free the maximum rather than
     // the stored count. This is safe because freeing null is safe.
     for (int i = 0; i < NUM_FIXED_PIECES; i++) {
-        delete this->pieces[i];
+        if (this->pieces[i]) {
+            this->pieces[i]->delete_self();
+        }
     }
+
+    delete this;
 }
 
 // Pretty-print the node into a JSON-like format

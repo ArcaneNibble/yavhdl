@@ -26,10 +26,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef VHDL_PARSE_TREE_H
 #define VHDL_PARSE_TREE_H
 
+#ifndef RUNNING_RUST_BINDGEN
 #include <string>
+#endif
 
+#ifndef RUNNING_RUST_BINDGEN
 namespace YaVHDL::Parser
 {
+#endif
 
 enum ParseTreeNodeType
 {
@@ -419,8 +423,13 @@ struct VhdlParseTreeNode {
     enum ParseTreeNodeType type;
 
     // Contents
+#ifndef RUNNING_RUST_BINDGEN
     std::string *str;
     std::string *str2;
+#else
+    void *str;
+    void *str2;
+#endif
     char chr;
     int integer;
     bool boolean;
@@ -444,11 +453,15 @@ struct VhdlParseTreeNode {
     int last_column;
 
     VhdlParseTreeNode(enum ParseTreeNodeType type);
-    ~VhdlParseTreeNode();
+
+    // Force POD
+    void delete_self();
 
     void debug_print();
 };
 
+#ifndef RUNNING_RUST_BINDGEN
 }
+#endif
 
 #endif

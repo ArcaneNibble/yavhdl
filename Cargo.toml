@@ -1,9 +1,12 @@
 [package]
-
 name = "yavhdl"
 version = "0.0.1"
 authors = ["Robert Ou <rqou@robertou.com>"]
+build = "build.rs"
 
 [lib]
 name = "yavhdl"
 crate-type = ["staticlib"]
+
+[build-dependencies]
+bindgen = "0.23"

@@ -31,11 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 
-extern "C" void hello_rust();
-
 int main(int argc, char **argv) {
-    hello_rust();
-
     if (argc < 2) {
         cout << "Usage: " << argv[0] << " file.vhd\n";
         return -1;
@@ -53,7 +49,7 @@ int main(int argc, char **argv) {
     }
     cout << "\n";
     VhdlParserFreePT(parse_output);
-    VhdlParserFreeErrors(errors);
+    VhdlParserFreeString(errors);
 
     return ret;
 }

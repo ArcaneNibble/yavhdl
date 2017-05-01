@@ -29,17 +29,29 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef VHDL_PARSER_GLUE_H
 #define VHDL_PARSER_GLUE_H
 
+#ifndef RUNNING_RUST_BINDGEN
 #include <string>
+#endif
 
 #include "vhdl_parse_tree.h"
 
 // Main wrapper for low-level parser function. Memory needs to be freed using
 // the below functions (present just to ensure we have a pure C interface).
+#ifndef RUNNING_RUST_BINDGEN
 extern "C" YaVHDL::Parser::VhdlParseTreeNode *VhdlParserParseFile(
     const char *fn, char **errors);
 extern "C" void VhdlParserFreePT(YaVHDL::Parser::VhdlParseTreeNode *pt);
-extern "C" void VhdlParserFreeErrors(char *errors);
+extern "C" void VhdlParserFreeString(char *errors);
+extern "C" char *VhdlParserCifyString(std::string *str);
+#else
+extern "C" VhdlParseTreeNode *VhdlParserParseFile(
+    const char *fn, char **errors);
+extern "C" void VhdlParserFreePT(VhdlParseTreeNode *pt);
+extern "C" void VhdlParserFreeString(char *errors);
+extern "C" char *VhdlParserCifyString(void *str);
+#endif
 
+#ifndef RUNNING_RUST_BINDGEN
 // All the code below here is miscellaneous junk needed for the lexer/parser
 // to talk to each other correctly.
 #if defined(VHDL_PARSER_IN_LEXER) || \
@@ -73,6 +85,7 @@ int frontend_vhdl_yylex
     defined(VHDL_PARSER_IN_GLUE)
 void frontend_vhdl_yyerror(YYLTYPE *locp, yyscan_t scanner,
     VhdlParseTreeNode **, std::string &errors, const char *msg);
+#endif
 #endif
 
 #endif
