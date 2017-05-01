@@ -21,4 +21,4 @@ cd ..
 cargo build
 
 # Demo parts (proving the C interface works)
-g++ -std=c++11 -Wall -ggdb3 -I src/parser/bison -I build -o vhdl_parser src/parser/demo/*.cpp build/yavhdl_bison.a
+g++ -std=c++11 -Wall -ggdb3 -I src/parser/bison -I build -o vhdl_parser src/parser/demo/*.cpp build/yavhdl_bison.a target/debug/libyavhdl.a -ldl -lrt -lpthread -lgcc_s -lc -lm -lrt -lutil
