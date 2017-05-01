@@ -25,8 +25,30 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <iostream>
 
+#include "vhdl_parse_tree.h"
+#define VHDL_PARSER_IN_GLUE
+#include "vhdl_parser_glue.h"
+
 using namespace std;
 
 int main(int argc, char **argv) {
-    cout << "Hello world!\n";
+    if (argc < 2) {
+        cout << "Usage: " << argv[0] << " file.vhd\n";
+        return -1;
+    }
+
+    int ret = 0;
+
+    std::string errors = std::string();
+    VhdlParseTreeNode *parse_output = VhdlParserParseFile(argv[1], errors);
+    if (parse_output) {
+        parse_output->debug_print();
+    } else {
+        ret = 1;
+        cout << errors;
+    }
+    cout << "\n";
+    delete parse_output;
+
+    return ret;
 }
