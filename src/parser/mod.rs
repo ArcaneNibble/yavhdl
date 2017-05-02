@@ -36,15 +36,15 @@ use std::ffi::OsStr;
 use std::os::unix::ffi::OsStrExt;
 use std::os::raw::*;
 
-pub use self::ffi::ParseTreeNodeType as ParseTreeNodeType;
-pub use self::ffi::ParseTreeOperatorType as ParseTreeOperatorType;
-pub use self::ffi::ParseTreeRangeDirection as ParseTreeRangeDirection;
-pub use self::ffi::ParseTreeForceMode as ParseTreeForceMode;
-pub use self::ffi::ParseTreeFunctionPurity as ParseTreeFunctionPurity;
-pub use self::ffi::ParseTreeInterfaceObjectMode as ParseTreeInterfaceObjectMode;
-pub use self::ffi::ParseTreeSubprogramKind as ParseTreeSubprogramKind;
-pub use self::ffi::ParseTreeEntityClass as ParseTreeEntityClass;
-pub use self::ffi::ParseTreeSignalKind as ParseTreeSignalKind;
+pub use self::ffi::ParseTreeNodeType;
+pub use self::ffi::ParseTreeOperatorType;
+pub use self::ffi::ParseTreeRangeDirection;
+pub use self::ffi::ParseTreeForceMode;
+pub use self::ffi::ParseTreeFunctionPurity;
+pub use self::ffi::ParseTreeInterfaceObjectMode;
+pub use self::ffi::ParseTreeSubprogramKind;
+pub use self::ffi::ParseTreeEntityClass;
+pub use self::ffi::ParseTreeSignalKind;
 
 // FIXME: Copypasta problems?
 pub struct VhdlParseTreeNode {
@@ -115,7 +115,7 @@ unsafe fn rustify_node(
         inner_nodes.push(rustify_node(this_child, false));
     }
 
-    let ret = VhdlParseTreeNode {
+    VhdlParseTreeNode {
         node_type: (*input).type_,
         chr: (*input).chr as u8,
         integer: (*input).integer,
@@ -142,14 +142,12 @@ unsafe fn rustify_node(
 
         raw_node: input,
         is_root: is_root,
-    };
-
-    ret
+    }
 }
 
 pub fn parse_file(filename: &OsStr) -> (Option<VhdlParseTreeNode>, String) {
     unsafe {
-        let mut errors: *mut c_char = ptr::null_mut::<c_char>();
+        let mut errors = ptr::null_mut::<c_char>();
         let ret = ffi::VhdlParserParseFile(
             filename.as_bytes().as_ptr() as *const i8,
             &mut errors);
