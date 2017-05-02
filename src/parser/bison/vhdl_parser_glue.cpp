@@ -86,3 +86,7 @@ void VhdlParserFreeString(char *errors) {
 char *VhdlParserCifyString(std::string *str) {
     return strdup(str->c_str());
 }
+
+void VhdlParseTreeNodeDebugPrint(YaVHDL::Parser::VhdlParseTreeNode *pt) {
+    pt->debug_print();
+}

@@ -6,7 +6,7 @@ build = "build.rs"
 
 [lib]
 name = "yavhdl"
-crate-type = ["staticlib"]
+crate-type = ["rlib", "staticlib"]
 
 [build-dependencies]
 bindgen = "0.23"

@@ -43,12 +43,15 @@ extern "C" YaVHDL::Parser::VhdlParseTreeNode *VhdlParserParseFile(
 extern "C" void VhdlParserFreePT(YaVHDL::Parser::VhdlParseTreeNode *pt);
 extern "C" void VhdlParserFreeString(char *errors);
 extern "C" char *VhdlParserCifyString(std::string *str);
+extern "C" void VhdlParseTreeNodeDebugPrint(
+    YaVHDL::Parser::VhdlParseTreeNode *pt);
 #else
 extern "C" VhdlParseTreeNode *VhdlParserParseFile(
     const char *fn, char **errors);
 extern "C" void VhdlParserFreePT(VhdlParseTreeNode *pt);
 extern "C" void VhdlParserFreeString(char *errors);
 extern "C" char *VhdlParserCifyString(void *str);
+extern "C" void VhdlParseTreeNodeDebugPrint(VhdlParseTreeNode *pt);
 #endif
 
 #ifndef RUNNING_RUST_BINDGEN

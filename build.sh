@@ -14,11 +14,11 @@ g++ -std=c++11 -Wall -ggdb3 -c -I ../src/parser/bison -I . ../src/parser/bison/v
 g++ -std=c++11 -Wall -ggdb3 -c -I ../src/parser/bison -I . ../src/parser/bison/vhdl_parser_glue.cpp
 g++ -std=c++11 -Wall -ggdb3 -c -I ../src/parser/bison -I . ../src/parser/bison/util.cpp
 
-ar rcs yavhdl_bison.a *.o
+ar rcs libyavhdl_bison.a *.o
 cd ..
 
 # Rust part
 cargo build
 
 # Demo parts (proving the C interface works)
-g++ -std=c++11 -Wall -ggdb3 -I src/parser/bison -I build -o vhdl_parser src/parser/demo/*.cpp build/yavhdl_bison.a target/debug/libyavhdl.a -ldl -lrt -lpthread -lgcc_s -lc -lm -lrt -lutil
+ln -sf target/debug/vhdl_parser

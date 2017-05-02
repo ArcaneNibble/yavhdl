@@ -1,3 +1,28 @@
+/*
+Copyright (c) 2016-2017, Robert Ou <rqou@robertou.com>
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice,
+   this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
 mod ffi {
 #![allow(dead_code)]
 #![allow(non_camel_case_types)]
@@ -24,8 +49,8 @@ pub use self::ffi::ParseTreeSignalKind as ParseTreeSignalKind;
 // FIXME: Copypasta problems?
 pub struct VhdlParseTreeNode {
     pub node_type: ParseTreeNodeType,
-    pub str1: String,
-    pub str2: String,
+    pub str1: Vec<u8>,
+    pub str2: Vec<u8>,
     pub chr: u8,
     pub integer: i32,
     pub boolean: bool,
@@ -45,7 +70,9 @@ pub struct VhdlParseTreeNode {
     pub last_line: i32,
     pub last_column: i32,
 
-    raw_node: *mut ffi::VhdlParseTreeNode
+    raw_node: *mut ffi::VhdlParseTreeNode,
+    // We only want to call free on the root
+    is_root: bool,
 }
 
 unsafe fn rustify_str(input: *mut c_char) -> String {
@@ -58,13 +85,22 @@ unsafe fn rustify_str(input: *mut c_char) -> String {
     string_rs
 }
 
-unsafe fn rustify_stdstring(input: *mut c_void) -> String {
+unsafe fn rustify_stdstring(input: *mut c_void) -> Vec<u8> {
+    if input.is_null() {
+        return vec![];
+    }
+
     let null_terminated_string = ffi::VhdlParserCifyString(input);
-    rustify_str(null_terminated_string)
+    let string_rs = CStr::from_ptr(null_terminated_string);
+    let string_rs = string_rs.to_bytes().to_vec();
+    // Free the C string
+    ffi::VhdlParserFreeString(null_terminated_string);
+
+    string_rs
 }
 
 unsafe fn rustify_node(
-    input: *mut ffi::VhdlParseTreeNode) -> VhdlParseTreeNode {
+    input: *mut ffi::VhdlParseTreeNode, is_root: bool) -> VhdlParseTreeNode {
 
     let str1 = rustify_stdstring((*input).str);
     let str2 = rustify_stdstring((*input).str2);
@@ -76,7 +112,7 @@ unsafe fn rustify_node(
         if this_child.is_null() {
             break;
         }
-        inner_nodes.push(rustify_node(this_child));
+        inner_nodes.push(rustify_node(this_child, false));
     }
 
     let ret = VhdlParseTreeNode {
@@ -105,6 +141,7 @@ unsafe fn rustify_node(
         pieces: inner_nodes,
 
         raw_node: input,
+        is_root: is_root,
     };
 
     ret
@@ -123,7 +160,7 @@ pub fn parse_file(filename: &OsStr) -> (Option<VhdlParseTreeNode>, String) {
             (None, errors_rs)
         } else {
             // Need to Rust-ify the struct
-            (Some(rustify_node(ret)), errors_rs)
+            (Some(rustify_node(ret, true)), errors_rs)
         }
     }
 }
@@ -131,7 +168,9 @@ pub fn parse_file(filename: &OsStr) -> (Option<VhdlParseTreeNode>, String) {
 impl Drop for VhdlParseTreeNode {
     fn drop(&mut self) {
         unsafe {
-            ffi::VhdlParserFreePT(self.raw_node);
+            if self.is_root {
+                ffi::VhdlParserFreePT(self.raw_node);
+            }
         }
     }
 }
@@ -139,8 +178,7 @@ impl Drop for VhdlParseTreeNode {
 impl VhdlParseTreeNode {
     pub fn debug_print(&self) {
         unsafe {
-            // FIXME: This isn't a C function, does it matter?
-            ffi::VhdlParseTreeNode_debug_print(self.raw_node);
+            ffi::VhdlParseTreeNodeDebugPrint(self.raw_node);
         }
     }
 }

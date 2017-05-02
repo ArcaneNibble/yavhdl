@@ -23,33 +23,24 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <iostream>
+use std::env;
+use std::process;
 
-#include "vhdl_parse_tree.h"
-#define VHDL_PARSER_IN_GLUE
-#include "vhdl_parser_glue.h"
+extern crate yavhdl;
+use yavhdl::parser;
 
-using namespace std;
-
-int main(int argc, char **argv) {
-    if (argc < 2) {
-        cout << "Usage: " << argv[0] << " file.vhd\n";
-        return -1;
+fn main() {
+    let args: Vec<_> = env::args_os().collect();
+    if args.len() < 2 {
+        println!("Usage: {} file.vhd", args[0].to_string_lossy());
+        process::exit(-1);
     }
 
-    int ret = 0;
-
-    char *errors;
-    VhdlParseTreeNode *parse_output = VhdlParserParseFile(argv[1], &errors);
-    if (parse_output) {
-        parse_output->debug_print();
+    let (parse_output, parse_messages) = parser::parse_file(&args[1]);
+    if let Some(pt) = parse_output {
+        pt.debug_print();
     } else {
-        ret = 1;
-        cout << errors;
+        println!("{}", parse_messages);
+        process::exit(1);
     }
-    cout << "\n";
-    VhdlParserFreePT(parse_output);
-    VhdlParserFreeString(errors);
-
-    return ret;
 }
