@@ -62,8 +62,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Make the parser reentrant
 %define api.pure
 %lex-param {void *scanner} {std::string &errors}
-%parse-param {void *scanner}
-    {VhdlParseTreeNode **parse_output} {std::string &errors}
+    {std::set<VhdlParseTreeNode *> &to_delete_queue}
+%parse-param {void *scanner} {VhdlParseTreeNode **parse_output}
+    {std::string &errors} {std::set<VhdlParseTreeNode *> &to_delete_queue}
 %locations
 
 %glr-parser
@@ -77,6 +78,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 %debug
 
 %define api.value.type {struct VhdlParseTreeNode *}
+
+%destructor {
+    if ($$) {
+        if (!(*parse_output) || $$ != *parse_output) {
+            to_delete_queue.insert($$);
+        }
+    }
+} <>
 
 //////////////////////// Reserved words, section 15.10 ////////////////////////
 

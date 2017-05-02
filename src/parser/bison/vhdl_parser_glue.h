@@ -30,6 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define VHDL_PARSER_GLUE_H
 
 #ifndef RUNNING_RUST_BINDGEN
+#include <set>
 #include <string>
 #endif
 
@@ -66,7 +67,7 @@ using namespace YaVHDL::Parser;
 #if defined(VHDL_PARSER_IN_LEXER)
 #define YY_DECL int frontend_vhdl_yylex \
     (YYSTYPE * yylval_param, YYLTYPE * yylloc_param , yyscan_t yyscanner, \
-     std::string &errors)
+     std::string &errors, std::set<VhdlParseTreeNode *> &to_delete_queue)
 
 #include "vhdl_parser_yy.hpp"
 #endif
@@ -80,14 +81,15 @@ using namespace YaVHDL::Parser;
 #if defined(VHDL_PARSER_IN_BISON)
 int frontend_vhdl_yylex
     (YYSTYPE * yylval_param, YYLTYPE * yylloc_param , yyscan_t yyscanner,
-     std::string &errors);
+     std::string &errors, std::set<VhdlParseTreeNode *> &to_delete_queue);
 #endif
 
 #if defined(VHDL_PARSER_IN_LEXER) || \
     defined(VHDL_PARSER_IN_BISON) || \
     defined(VHDL_PARSER_IN_GLUE)
 void frontend_vhdl_yyerror(YYLTYPE *locp, yyscan_t scanner,
-    VhdlParseTreeNode **, std::string &errors, const char *msg);
+    VhdlParseTreeNode **, std::string &errors,
+    std::set<VhdlParseTreeNode *> &to_delete_queueconst, const char *msg);
 #endif
 #endif
 

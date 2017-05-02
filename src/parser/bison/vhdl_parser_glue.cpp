@@ -29,7 +29,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cstring>
 
 void frontend_vhdl_yyerror(YYLTYPE *locp, yyscan_t scanner,
-    VhdlParseTreeNode **, std::string &errors, const char *msg) {
+    VhdlParseTreeNode **, std::string &errors, 
+    std::set<VhdlParseTreeNode *> &to_delete_queueconst, const char *msg) {
     errors += "Error ";
     errors += msg;
     errors += " on line ";
@@ -40,9 +41,10 @@ void frontend_vhdl_yyerror(YYLTYPE *locp, yyscan_t scanner,
 VhdlParseTreeNode *VhdlParserParseFile(
     const char *fn, char **errors) {
     yyscan_t myscanner;
-    VhdlParseTreeNode *parse_output;
+    VhdlParseTreeNode *parse_output = nullptr;
 
     std::string errors_cpp;
+    std::set<VhdlParseTreeNode *> to_delete_queue;
 
     FILE *f = fopen(fn, "rb");
     if (!f) {
@@ -61,8 +63,12 @@ VhdlParseTreeNode *VhdlParserParseFile(
     }
 
     frontend_vhdl_yyset_in(f, myscanner);
-    ret = frontend_vhdl_yyparse(myscanner, &parse_output, errors_cpp);
+    ret = frontend_vhdl_yyparse(myscanner, &parse_output, errors_cpp,
+        to_delete_queue);
     frontend_vhdl_yylex_destroy(myscanner);
+    for (auto x = to_delete_queue.begin(); x != to_delete_queue.end(); x++) {
+        (*x)->delete_self();
+    }
     fclose(f);
 
     if (ret != 0) {

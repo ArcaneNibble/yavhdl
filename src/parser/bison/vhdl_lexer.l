@@ -273,12 +273,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 }
 <EXT_ID>[\x20-\x7E\xA0-\xFF]    { UNUPDATE_COL(); yymore(); }
 <EXT_ID>\n  {
-    frontend_vhdl_yyerror(yylloc, yyscanner, nullptr, errors,
+    frontend_vhdl_yyerror(yylloc, yyscanner, nullptr, errors, to_delete_queue,
         "Illegal newline in extended identifier");
     return LEXER_ERROR;
 }
 <EXT_ID>.   {
-    frontend_vhdl_yyerror(yylloc, yyscanner, nullptr, errors,
+    frontend_vhdl_yyerror(yylloc, yyscanner, nullptr, errors, to_delete_queue,
         "Illegal extended identifier contents");
     return LEXER_ERROR;
 }
@@ -312,12 +312,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 }
 <STRING>[\x20-\x7E\xA0-\xFF]    { UNUPDATE_COL(); yymore(); }
 <STRING>\n  {
-    frontend_vhdl_yyerror(yylloc, yyscanner, nullptr, errors,
+    frontend_vhdl_yyerror(yylloc, yyscanner, nullptr, errors, to_delete_queue,
         "Illegal newline in string");
     return LEXER_ERROR;
 }
 <STRING>.   {
-    frontend_vhdl_yyerror(yylloc, yyscanner, nullptr, errors,
+    frontend_vhdl_yyerror(yylloc, yyscanner, nullptr, errors, to_delete_queue,
         "Illegal string contents");
     return LEXER_ERROR;
 }
@@ -368,12 +368,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 }
 <BITSTRING>[\x20-\x7E\xA0-\xFF]    { UNUPDATE_COL(); yymore(); }
 <BITSTRING>\n  {
-    frontend_vhdl_yyerror(yylloc, yyscanner, nullptr, errors,
+    frontend_vhdl_yyerror(yylloc, yyscanner, nullptr, errors, to_delete_queue,
         "Illegal newline in string");
     return LEXER_ERROR;
 }
 <BITSTRING>.   {
-    frontend_vhdl_yyerror(yylloc, yyscanner, nullptr, errors,
+    frontend_vhdl_yyerror(yylloc, yyscanner, nullptr, errors, to_delete_queue,
         "Illegal string contents");
     return LEXER_ERROR;
 }
