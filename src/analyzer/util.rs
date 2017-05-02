@@ -128,6 +128,36 @@ static LATIN1_PRETTYPRINT_TABLE: [&str; 256] = [
     "ø",     "ù",     "ú",     "û",     "ü",     "ý",     "þ",     "ÿ",
 ];
 
+fn char_valid_for_basic_id(c: u8) -> bool {
+    match c {
+        // Upper-case letters
+        0x41...0x5a => true,
+        0xc0...0xd6 => true,
+        0xd8...0xde => true,
+        // Lower-case letters
+        0x61...0x7a => true,
+        0xdf...0xf6 => true,
+        0xf8...0xff => true,
+        // Underscore
+        0x5f => true,
+        // Digits
+        0x30...0x39 => true,
+        _ => false
+    }
+}
+
+fn char_valid_for_ext_id(c: u8) -> bool {
+    match c {
+        // Cannot be C0 controls
+        0x00...0x1f => false,
+        // Cannot be C1 controls
+        0x80...0x9f => false,
+        // Cannot be delete
+        0x7f => false,
+        _ => true
+    }
+}
+
 struct Latin1Str<'a> {
     bytes: &'a [u8],
 }
@@ -139,6 +169,59 @@ impl<'a> Latin1Str<'a> {
             utf8str.push_str(LATIN1_PRETTYPRINT_TABLE[*c as usize]);
         }
         utf8str
+    }
+
+    pub fn valid_for_basic_id(&self) -> bool {
+        // Needs to be at least one character long
+        if self.bytes.len() == 0 {
+            return false;
+        }
+
+        // Validate all characters
+        for c in self.bytes {
+            if !(char_valid_for_basic_id(*c)) {
+                return false;
+            }
+        }
+
+        // First character cannot be a digit or underscore
+        if !(match self.bytes[0] {
+            0x30...0x39 => false,
+            0x5f => false,
+            _ => true
+        }) {
+            return false;
+        }
+
+        // Cannot have consecutive underscores
+        for i in 1..self.bytes.len() {
+            if self.bytes[i - 1] == 0x5f && self.bytes[i] == 0x5f {
+                return false;
+            }
+        }
+
+        // Cannot end with an underscore
+        if self.bytes[self.bytes.len() - 1] == 0x5f {
+            return false;
+        }
+
+        true
+    }
+
+    pub fn valid_for_ext_id(&self) -> bool {
+        // Needs to be at least one character long
+        if self.bytes.len() == 0 {
+            return false;
+        }
+
+        // Validate all characters
+        for c in self.bytes {
+            if !(char_valid_for_ext_id(*c)) {
+                return false;
+            }
+        }
+
+        true
     }
 }
 
@@ -153,14 +236,20 @@ mod tests {
     use super::*;
 
     #[test]
-    fn latin1_pretty_name_1() {
+    fn latin1_pretty_name() {
         let x = Latin1Str {bytes: b"test"};
         assert_eq!(x.pretty_name(), "test");
+        let x = Latin1Str {bytes: b"te\xC0st\xFE"};
+        assert_eq!(x.pretty_name(), "teÀstþ");
     }
 
     #[test]
-    fn latin1_pretty_name_2() {
-        let x = Latin1Str {bytes: b"te\xC0st\xFE"};
-        assert_eq!(x.pretty_name(), "teÀstþ");
+    fn basic_id_validator() {
+        assert!((Latin1Str {bytes: b"foo"}).valid_for_basic_id());
+        assert!((Latin1Str {bytes: b"foo012"}).valid_for_basic_id());
+        assert!((Latin1Str {bytes: b"foo_012"}).valid_for_basic_id());
+        assert!(!(Latin1Str {bytes: b"f__oo"}).valid_for_basic_id());
+        assert!(!(Latin1Str {bytes: b"foo_"}).valid_for_basic_id());
+        assert!(!(Latin1Str {bytes: b"_foo"}).valid_for_basic_id());
     }
 }
