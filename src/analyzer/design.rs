@@ -30,18 +30,27 @@ use analyzer::identifier::*;
 use analyzer::objpools::*;
 
 #[derive(Debug)]
-pub struct Library {
-    id: Identifier,
+pub enum Library {
+    Invalid,
+    X {
+        id: Identifier,
 
-    db_by_name: HashMap<Identifier, ObjPoolIndex<AstNode>>,
-    db_by_order: Vec<ObjPoolIndex<AstNode>>,
-    temp_id: Option<Identifier>,
-    temp_node: Option<ObjPoolIndex<AstNode>>,
+        db_by_name: HashMap<Identifier, ObjPoolIndex<AstNode>>,
+        db_by_order: Vec<ObjPoolIndex<AstNode>>,
+        temp_id: Option<Identifier>,
+        temp_node: Option<ObjPoolIndex<AstNode>>,
+    }
+}
+
+impl Default for Library {
+    fn default() -> Library {
+        Library::Invalid
+    }
 }
 
 impl Library {
     pub fn new(id: Identifier) -> Library {
-        Library {
+        Library::X {
             id: id,
             db_by_name: HashMap::new(),
             db_by_order: Vec::new(),
@@ -53,59 +62,160 @@ impl Library {
     pub fn add_design_unit(&mut self,
         name: Identifier, unit: ObjPoolIndex<AstNode>) {
 
-        self.db_by_name.insert(name, unit);
-        self.db_by_order.push(unit);
+        match self {
+            &mut Library::Invalid => panic!("use of Invalid library"),
+            &mut Library::X {id: ref mut id, db_by_name: ref mut db_by_name,
+                db_by_order: ref mut db_by_order,
+                temp_id: ref mut temp_id, temp_node: ref mut temp_node} => {
+                    db_by_name.insert(name, unit);
+                    db_by_order.push(unit);
+                }
+        }
     }
 
     pub fn find_design_unit(&self, name: Identifier)
         -> Option<ObjPoolIndex<AstNode>> {
 
-        // Check the tentative one first if we have one
-        if let Some(temp_id) = self.temp_id {
-            return self.temp_node;
-        }
+        match self {
+            &Library::Invalid => panic!("use of Invalid library"),
+            &Library::X {id: ref id, db_by_name: ref db_by_name,
+                db_by_order: ref db_by_order,
+                temp_id: ref temp_id, temp_node: ref temp_node} => {
+                    // Check the tentative one first if we have one
+                    if let Some(temp_id) = *temp_id {
+                        return *temp_node;
+                    }
 
-        self.db_by_name.get(&name).cloned()
+                    db_by_name.get(&name).cloned()
+                }
+        }
     }
 
     pub fn tentative_add_design_unit(&mut self,
         name: Identifier, unit: ObjPoolIndex<AstNode>) {
 
-        // Cannot add a new tentative thing if we already have one
-        assert!(self.temp_node.is_none());
+        match self {
+            &mut Library::Invalid => panic!("use of Invalid library"),
+            &mut Library::X {id: ref mut id, db_by_name: ref mut db_by_name,
+                db_by_order: ref mut db_by_order,
+                temp_id: ref mut temp_id, temp_node: ref mut temp_node} => {
+                    // Cannot add a new tentative thing if we already have one
+                    assert!(temp_node.is_none());
 
-        self.temp_id = Some(name);
-        self.temp_node = Some(unit);
+                    *temp_id = Some(name);
+                    *temp_node = Some(unit);
+                }
+        }
     }
 
     pub fn commit_tentative_design_unit(&mut self) {
-        let name = self.temp_id.take().unwrap();
-        let node = self.temp_node.take().unwrap();
+
+        let (name, node) = match self {
+            &mut Library::Invalid => panic!("use of Invalid library"),
+            &mut Library::X {id: ref mut id, db_by_name: ref mut db_by_name,
+                db_by_order: ref mut db_by_order,
+                temp_id: ref mut temp_id, temp_node: ref mut temp_node} => {
+                    (temp_id.take().unwrap(), temp_node.take().unwrap())
+                }
+        };
 
         self.add_design_unit(name, node);
     }
 
     pub fn drop_tentative_design_unit(&mut self) {
-        self.temp_id.take();
-        self.temp_node.take();
+
+        match self {
+            &mut Library::Invalid => panic!("use of Invalid library"),
+            &mut Library::X {id: ref mut id, db_by_name: ref mut db_by_name,
+                db_by_order: ref mut db_by_order,
+                temp_id: ref mut temp_id, temp_node: ref mut temp_node} => {
+                    temp_id.take();
+                    temp_node.take();
+                }
+        }
     }
 
     pub fn debug_print(&self, sp: &StringPool, op: &ObjPool<AstNode>)
         -> String {
 
+        match self {
+            &Library::Invalid => panic!("use of Invalid library"),
+            &Library::X {id: ref id, db_by_name: ref db_by_name,
+                db_by_order: ref db_by_order,
+                temp_id: ref temp_id, temp_node: ref temp_node} => {
+                    let mut s = String::new();
+
+                    s += &format!("{{\"type\": \"Library\", \"id\": {}, \
+                                   \"units\": [",
+                        id.debug_print(sp));
+
+                    let mut first = true;
+                    for unit in db_by_order {
+                        if !first {
+                            s += ", ";
+                        }
+                        first = false;
+
+                        s += &op.get(*unit).debug_print(sp, op);
+                    }
+
+                    s += "]}";
+
+                    s
+                }
+        }
+
+    }
+}
+
+
+#[derive(Debug)]
+pub struct DesignDatabase {
+    db_by_name: HashMap<Identifier, ObjPoolIndex<Library>>,
+    db_by_order: Vec<ObjPoolIndex<Library>>,
+}
+
+impl DesignDatabase {
+    pub fn new() -> DesignDatabase {
+        DesignDatabase {
+            db_by_name: HashMap::new(),
+            db_by_order: Vec::new(),
+        }
+    }
+
+    pub fn populate_builtins(&mut self) {
+        // TODO
+    }
+
+    pub fn add_library(&mut self,
+        name: Identifier, unit: ObjPoolIndex<Library>) {
+
+        self.db_by_name.insert(name, unit);
+        self.db_by_order.push(unit);
+    }
+
+    pub fn find_library(&self, name: Identifier)
+        -> Option<ObjPoolIndex<Library>> {
+
+        self.db_by_name.get(&name).cloned()
+    }
+
+    pub fn debug_print(&self, sp: &StringPool,
+        op_l: &ObjPool<Library>, op_n: &ObjPool<AstNode>) -> String {
+
+
         let mut s = String::new();
 
-        s += &format!("{{\"type\": \"Library\", \"id\": {}, \"units\": [",
-            self.id.debug_print(sp));
+        s += "{\"type\": \"DesignDatabase\", \"libraries\": [";
 
         let mut first = true;
-        for unit in &self.db_by_order {
+        for lib in &self.db_by_order {
             if !first {
                 s += ", ";
             }
             first = false;
 
-            s += &op.get(*unit).debug_print(sp, op);
+            s += &op_l.get(*lib).debug_print(sp, op_n);
         }
 
         s += "]}";
