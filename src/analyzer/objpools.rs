@@ -23,6 +23,7 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+use std::collections::HashMap;
 use std::marker::PhantomData;
 
 use analyzer::util::*;
@@ -30,33 +31,49 @@ use analyzer::util::*;
 // We need this because the Vec can be reallocated around, but we want to keep
 // around some kind of reference into the storage that can keep working after
 // the reallocation happens.
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct StringPoolIndex {
     start: usize,
     end: usize,
 }
 
 pub struct StringPool {
-    storage: Vec<u8>
+    storage: Vec<u8>,
+    hashtable: HashMap<Vec<u8>, StringPoolIndex>,
 }
 
-impl StringPool {
+impl<'a> StringPool {
     pub fn new() -> StringPool {
-        StringPool {storage: Vec::new()}
+        StringPool {
+            storage: Vec::new(),
+            hashtable: HashMap::new(),
+        }
     }
 
-    // TODO: Might interning strings improve performance in the future?
     // TODO: Do we care about freeing things?
     pub fn add_latin1_str(&mut self, inp: &[u8]) -> StringPoolIndex {
+        // We now need to intern the string because we need to ensure that
+        // we always can compare string pool indices. This is needed so that
+        // Identifiers can be compared without having to drag the string
+        // pool around, which is in turn needed so that Identifiers can be
+        // properly hashed.
+        if let Some(existing_idx) = self.hashtable.get(inp) {
+            return *existing_idx;
+        }
+
         let addition_begin = self.storage.len();
-        let addition_length = inp.len();
+        let addition_end = addition_begin + inp.len();
 
         self.storage.extend(inp.iter().cloned());
 
-        StringPoolIndex {
+        let new_idx = StringPoolIndex {
             start: addition_begin,
-            end: addition_begin + addition_length
-        }
+            end: addition_end
+        };
+
+        self.hashtable.insert(inp.to_vec(), new_idx);
+
+        new_idx
     }
 
     pub fn retrieve_latin1_str(&self, i: StringPoolIndex) -> Latin1Str {
@@ -127,6 +144,15 @@ mod tests {
         sp.add_latin1_str(b"test1");
         sp.add_latin1_str(b"test2");
         assert_eq!(sp.storage, b"test1test2");
+    }
+
+    #[test]
+    fn stringpool_interns() {
+        let mut sp = StringPool::new();
+        let x = sp.add_latin1_str(b"test1");
+        let y = sp.add_latin1_str(b"test1");
+        assert_eq!(x, y);
+        assert_eq!(sp.storage, b"test1");
     }
 
     #[derive(Default)]
