@@ -158,6 +158,13 @@ fn char_valid_for_ext_id(c: u8) -> bool {
     }
 }
 
+pub fn print_chr_escaped(s: &mut String, c: u8) {
+    match c {
+        0x20...0x21 | 0x23...0x5b | 0x5D...0x7e => s.push(c as char),
+        _ => s.push_str(&format!("\\u00{:02x}", c)),
+    };
+}
+
 pub struct Latin1Str<'a> {
     bytes: &'a [u8],
 }
@@ -177,6 +184,14 @@ impl<'a> Latin1Str<'a> {
             utf8str.push_str(LATIN1_PRETTYPRINT_TABLE[*c as usize]);
         }
         utf8str
+    }
+
+    pub fn debug_escaped_name(&self) -> String {
+        let mut ret = String::new();
+        for c in self.bytes {
+            print_chr_escaped(&mut ret, *c);
+        }
+        ret
     }
 
     pub fn valid_for_basic_id(&self) -> bool {

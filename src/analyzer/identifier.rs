@@ -23,13 +23,23 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+use std::fmt;
+
 use analyzer::objpools::*;
 use analyzer::util::*;
 
+#[derive(Copy, Clone, Eq, Debug)]
 pub struct Identifier {
     pub orig_name: StringPoolIndex,
     pub canonical_name: StringPoolIndex,
     pub is_extended_id: bool,
+}
+
+impl PartialEq for Identifier {
+    fn eq(&self, other: &Identifier) -> bool {
+        (self.is_extended_id == other.is_extended_id) &&
+        (self.canonical_name == other.canonical_name)
+    }
 }
 
 impl Identifier {
@@ -88,6 +98,16 @@ impl Identifier {
 
         let sp_idx = sp.add_latin1_str(&latin1_name);
         Identifier::new_latin1(sp, sp_idx, ext)
+    }
+
+    fn debug_print(&self, sp: &StringPool) -> String {
+        if self.is_extended_id {
+            format!("\"\\\\{}\\\\\"", sp.retrieve_latin1_str(
+                self.orig_name).debug_escaped_name())
+        } else {
+            format!("\"{}\"", sp.retrieve_latin1_str(
+                self.orig_name).debug_escaped_name())
+        }
     }
 }
 
@@ -190,5 +210,40 @@ mod tests {
 
         let test4 = Identifier::new_unicode(&mut sp, "f😀oo", false);
         assert!(test4.is_err());
+    }
+
+    #[test]
+    fn identifier_eq_and_hash() {
+        let mut sp = StringPool::new();
+
+        let test1 = Identifier::new_unicode(&mut sp, "foo", false).unwrap();
+        let test2 = Identifier::new_unicode(&mut sp, "fOo", false).unwrap();
+        assert_eq!(test1, test2);
+
+        let test1 = Identifier::new_unicode(&mut sp, "foo", false).unwrap();
+        let test2 = Identifier::new_unicode(&mut sp, "foo", true).unwrap();
+        assert!(test1 != test2);
+
+        let test1 = Identifier::new_unicode(&mut sp, "foo", true).unwrap();
+        let test2 = Identifier::new_unicode(&mut sp, "foo", true).unwrap();
+        assert_eq!(test1, test2);
+
+        let test1 = Identifier::new_unicode(&mut sp, "foo", true).unwrap();
+        let test2 = Identifier::new_unicode(&mut sp, "fOo", true).unwrap();
+        assert!(test1 != test2);
+    }
+
+    #[test]
+    fn identifier_debug_print() {
+        let mut sp = StringPool::new();
+
+        let test1 = Identifier::new_unicode(&mut sp, "foo", false).unwrap();
+        assert_eq!(test1.debug_print(&sp), "\"foo\"");
+
+        let test1 = Identifier::new_unicode(&mut sp, "foo", true).unwrap();
+        assert_eq!(test1.debug_print(&sp), "\"\\\\foo\\\\\"");
+
+        let test1 = Identifier::new_unicode(&mut sp, "fÖo", false).unwrap();
+        assert_eq!(test1.debug_print(&sp), "\"f\\u00d6o\"");
     }
 }
