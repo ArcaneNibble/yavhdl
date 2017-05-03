@@ -31,8 +31,8 @@ use analyzer::util::*;
 
 #[derive(Copy, Clone, Eq, Debug)]
 pub struct Identifier {
-    pub orig_name: StringPoolIndex,
-    pub canonical_name: StringPoolIndex,
+    pub orig_name: StringPoolIndexLatin1,
+    pub canonical_name: StringPoolIndexLatin1,
     pub is_extended_id: bool,
 }
 
@@ -51,7 +51,8 @@ impl Hash for Identifier {
 }
 
 impl Identifier {
-    pub fn new_latin1(sp: &mut StringPool, name: StringPoolIndex, ext: bool)
+    pub fn new_latin1(
+        sp: &mut StringPool, name: StringPoolIndexLatin1, ext: bool)
         -> Result<Identifier, &'static str> {
 
         let canonical_name_vec = {

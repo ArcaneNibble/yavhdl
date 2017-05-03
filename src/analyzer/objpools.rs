@@ -24,22 +24,38 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 use std::collections::HashMap;
+use std::ffi::OsStr;
+use std::os::unix::ffi::OsStrExt;
 use std::marker::PhantomData;
 
 use analyzer::util::*;
 
 // We need this because the Vec can be reallocated around, but we want to keep
 // around some kind of reference into the storage that can keep working after
-// the reallocation happens.
+// the reallocation happens. We need the internal one specifically so that
+// we can ensure different types of strings don't get mixed up.
+
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-pub struct StringPoolIndex {
+struct StringPoolIndexInternal {
+    start: usize,
+    end: usize,
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub struct StringPoolIndexLatin1 {
+    start: usize,
+    end: usize,
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub struct StringPoolIndexOsStr {
     start: usize,
     end: usize,
 }
 
 pub struct StringPool {
     storage: Vec<u8>,
-    hashtable: HashMap<Vec<u8>, StringPoolIndex>,
+    hashtable: HashMap<Vec<u8>, StringPoolIndexInternal>,
 }
 
 impl<'a> StringPool {
@@ -51,14 +67,17 @@ impl<'a> StringPool {
     }
 
     // TODO: Do we care about freeing things?
-    pub fn add_latin1_str(&mut self, inp: &[u8]) -> StringPoolIndex {
+    fn add_internal_str(&mut self, inp: &[u8]) -> StringPoolIndexInternal {
         // We now need to intern the string because we need to ensure that
         // we always can compare string pool indices. This is needed so that
         // Identifiers can be compared without having to drag the string
         // pool around, which is in turn needed so that Identifiers can be
         // properly hashed.
         if let Some(existing_idx) = self.hashtable.get(inp) {
-            return *existing_idx;
+            return StringPoolIndexInternal {
+                start: existing_idx.start,
+                end: existing_idx.end,
+            };
         }
 
         let addition_begin = self.storage.len();
@@ -66,7 +85,7 @@ impl<'a> StringPool {
 
         self.storage.extend(inp.iter().cloned());
 
-        let new_idx = StringPoolIndex {
+        let new_idx = StringPoolIndexInternal {
             start: addition_begin,
             end: addition_end
         };
@@ -76,9 +95,30 @@ impl<'a> StringPool {
         new_idx
     }
 
-    pub fn retrieve_latin1_str(&self, i: StringPoolIndex) -> Latin1Str {
+    pub fn add_latin1_str(&mut self, inp: &[u8]) -> StringPoolIndexLatin1 {
+        let int_idx = self.add_internal_str(inp);
+        StringPoolIndexLatin1 {
+            start: int_idx.start,
+            end: int_idx.end,
+        }
+    }
+
+    pub fn retrieve_latin1_str(&self, i: StringPoolIndexLatin1) -> Latin1Str {
         let the_slice = &self.storage[i.start..i.end];
         Latin1Str::new(the_slice)
+    }
+
+    pub fn add_osstr(&mut self, inp: &OsStr) -> StringPoolIndexOsStr {
+        let int_idx = self.add_internal_str(inp.as_bytes());
+        StringPoolIndexOsStr {
+            start: int_idx.start,
+            end: int_idx.end,
+        }
+    }
+
+    pub fn retrieve_osstr(&self, i: StringPoolIndexOsStr) -> &OsStr {
+        let the_slice = &self.storage[i.start..i.end];
+        OsStr::from_bytes(the_slice)
     }
 }
 

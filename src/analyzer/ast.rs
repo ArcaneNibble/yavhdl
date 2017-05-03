@@ -28,6 +28,55 @@ use std::collections::HashMap;
 use analyzer::identifier::*;
 use analyzer::objpools::*;
 
+struct SourceLoc {
+    first_line: i32,
+    first_column: i32,
+    last_line: i32,
+    last_column: i32,
+    file_name: Option<StringPoolIndexOsStr>,
+}
+
+impl Default for SourceLoc {
+    fn default() -> SourceLoc {
+        SourceLoc {
+            first_line: -1,
+            first_column: -1,
+            last_line: -1,
+            last_column: -1,
+            file_name: None
+        }
+    }
+}
+
+impl SourceLoc {
+    pub fn debug_print(&self, sp: &StringPool) -> String {
+        let mut s = format!(", \"first_line\": {}, \"first_column\": {}\
+                             , \"last_line\": {}, \"last_column\": {}",
+                            self.first_line, self.first_column,
+                            self.last_line, self.last_column);
+
+        if let Some(file_name) = self.file_name {
+            s += &format!(", \"file_name\": \"{}\"",
+                sp.retrieve_osstr(file_name).to_string_lossy());
+        }
+
+        s
+    }
+
+    pub fn format_for_error(&self, sp: &StringPool) -> String {
+        match self.file_name {
+            Some(file_name) => {
+                format!("{}:{}:{}",
+                    &sp.retrieve_osstr(file_name).to_string_lossy(),
+                    self.first_line, self.first_column)
+            }
+            None => {
+                format!("<unknown>:{}:{}", self.first_line, self.first_column)
+            }
+        }
+    }
+}
+
 #[derive(Debug)]
 pub enum AstNode {
     Invalid
@@ -41,7 +90,7 @@ impl Default for AstNode {
 pub enum ScopeItemName {
     Identifier(Identifier),
     CharLiteral(u8),
-    StringLiteral(StringPoolIndex),
+    StringLiteral(StringPoolIndexLatin1),
 }
 
 pub struct Scope {
@@ -78,6 +127,8 @@ impl Scope {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    use std::ffi::OsStr;
 
     #[test]
     fn scope_basic() {
@@ -174,5 +225,42 @@ mod tests {
         assert_eq!(test1_result[0], test1_node1);
         assert_eq!(test1_result[1], test1_node2);
         assert_eq!(test1_result[2], test1_node3);
+    }
+
+    #[test]
+    fn sourceloc_test() {
+        let mut sp = StringPool::new();
+
+        let test1 = SourceLoc::default();
+        assert_eq!(test1.debug_print(&sp),
+            ", \"first_line\": -1, \"first_column\": -1\
+             , \"last_line\": -1, \"last_column\": -1");
+        assert_eq!(test1.format_for_error(&sp), "<unknown>:-1:-1");
+
+        let test2 = SourceLoc {
+            first_line: 123,
+            first_column: 456,
+            last_line: 789,
+            last_column: 888,
+            file_name: None
+        };
+        assert_eq!(test2.debug_print(&sp),
+            ", \"first_line\": 123, \"first_column\": 456\
+             , \"last_line\": 789, \"last_column\": 888");
+        assert_eq!(test2.format_for_error(&sp), "<unknown>:123:456");
+
+        let test3_str = sp.add_osstr(OsStr::new("myfile"));
+        let test3 = SourceLoc {
+            first_line: 123,
+            first_column: 456,
+            last_line: 789,
+            last_column: 888,
+            file_name: Some(test3_str)
+        };
+        assert_eq!(test3.debug_print(&sp),
+            ", \"first_line\": 123, \"first_column\": 456\
+             , \"last_line\": 789, \"last_column\": 888\
+             , \"file_name\": \"myfile\"");
+        assert_eq!(test3.format_for_error(&sp), "myfile:123:456");
     }
 }
