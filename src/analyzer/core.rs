@@ -38,7 +38,8 @@ pub struct AnalyzerCoreStateBlob {
     // Object pools
     pub sp: StringPool,
     pub op_n: ObjPool<AstNode>,
-    pub op_s: ObjPool<ScopeChainNode>,
+    pub op_s: ObjPool<Scope>,
+    pub op_sc: ObjPool<ScopeChainNode>,
     pub op_l: ObjPool<Library>,
 
     pub design_db: DesignDatabase,
@@ -57,6 +58,7 @@ impl AnalyzerCoreStateBlob {
             sp: StringPool::new(),
             op_n: ObjPool::new(),
             op_s: ObjPool::new(),
+            op_sc: ObjPool::new(),
             op_l: ObjPool::new(),
             design_db: DesignDatabase::new(),
             errors: String::new(),
@@ -110,6 +112,27 @@ fn analyze_identifier(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode)
     }
 }
 
+enum DeclarativePartType {
+    ArchitectureDeclarativePart,
+    BlockDeclarativePart,
+    ConfigurationDeclarativePart,
+    EntityDeclarativePart,
+    GenerateStatementBody,
+    PackageBodyDeclarativePart,
+    PackageDeclarativePart,
+    ProcessDeclarativePart,
+    ProtectedTypeDeclarativePart,
+    ProtectedTypeBodyDeclarativePart,
+    SubprogramDeclarativePart,
+}
+
+fn analyze_declaration_list(s: &mut AnalyzerCoreStateBlob,
+    pt: &VhdlParseTreeNode, scope: ObjPoolIndex<Scope>,
+    decl_part_type: DeclarativePartType) -> bool {
+
+    false
+}
+
 fn analyze_entity(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode)
     -> bool {
 
@@ -138,12 +161,14 @@ fn analyze_entity(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode)
         return false;
     }
 
+    let e_scope = s.op_s.alloc();
+
     {
         let e = s.op_n.get_mut(e_);
         *e = AstNode::Entity {
             loc: loc,
             id: id,
-            scope: Scope::new(),
+            scope: e_scope,
             // Store the given root declarative region
             root_decl_region: s.innermost_scope.unwrap(),
         };
@@ -168,9 +193,12 @@ fn analyze_entity(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode)
 
     // Declarations
     if let Some(decl_pt) = pt.pieces[2].as_ref() {
-        let e = s.op_n.get_mut(e_);
-
-        // TODO
+        let no_errors = analyze_declaration_list(s, decl_pt, e_scope,
+            DeclarativePartType::EntityDeclarativePart);
+        if !no_errors {
+            s.op_l.get_mut(s.work_lib.unwrap()).drop_tentative_design_unit();
+            return false;
+        }
     }
 
     // Add the thing we analyzed to the library for real
@@ -186,7 +214,7 @@ fn analyze_design_unit(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode)
     let mut no_errors = true;
     
     // Root declarative region
-    let root_decl_region = s.op_s.alloc();
+    let root_decl_region = s.op_sc.alloc();
     s.innermost_scope = Some(root_decl_region);
 
     // Not implemented

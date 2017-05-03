@@ -136,8 +136,8 @@ impl Library {
         }
     }
 
-    pub fn debug_print(&self, sp: &StringPool, op: &ObjPool<AstNode>)
-        -> String {
+    pub fn debug_print(&self, sp: &StringPool, op_n: &ObjPool<AstNode>,
+        op_s: &ObjPool<Scope>) -> String {
 
         match self {
             &Library::Invalid => panic!("use of Invalid library"),
@@ -157,7 +157,7 @@ impl Library {
                         }
                         first = false;
 
-                        s += &op.get(*unit).debug_print(sp, op);
+                        s += &op_n.get(*unit).debug_print(sp, op_n, op_s);
                     }
 
                     s += "]}";
@@ -201,8 +201,8 @@ impl DesignDatabase {
         self.db_by_name.get(&name).cloned()
     }
 
-    pub fn debug_print(&self, sp: &StringPool,
-        op_l: &ObjPool<Library>, op_n: &ObjPool<AstNode>) -> String {
+    pub fn debug_print(&self, sp: &StringPool, op_l: &ObjPool<Library>,
+        op_n: &ObjPool<AstNode>, op_s: &ObjPool<Scope>) -> String {
 
 
         let mut s = String::new();
@@ -216,7 +216,7 @@ impl DesignDatabase {
             }
             first = false;
 
-            s += &op_l.get(*lib).debug_print(sp, op_n);
+            s += &op_l.get(*lib).debug_print(sp, op_n, op_s);
         }
 
         s += "]}";

@@ -92,5 +92,5 @@ fn main() {
         }
     }
 
-    println!("{}", s.design_db.debug_print(&s.sp, &s.op_l, &s.op_n));
+    println!("{}", s.design_db.debug_print(&s.sp, &s.op_l, &s.op_n, &s.op_s));
 }

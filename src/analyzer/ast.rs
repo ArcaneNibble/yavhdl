@@ -92,6 +92,12 @@ pub struct Scope {
     items: HashMap<ScopeItemName, Vec<ObjPoolIndex<AstNode>>>,
 }
 
+impl Default for Scope {
+    fn default() -> Scope {
+        Scope::new()
+    }
+}
+
 impl Scope {
     pub fn new() -> Scope {
         Scope {items: HashMap::new()}
@@ -168,7 +174,7 @@ pub enum AstNode {
     Entity {
         loc: SourceLoc,
         id: Identifier,
-        scope: Scope,
+        scope: ObjPoolIndex<Scope>,
 
         // This is needed for matching architectures
         root_decl_region: ObjPoolIndex<ScopeChainNode>
@@ -192,15 +198,16 @@ impl AstNode {
         }
     }
 
-    pub fn debug_print(&self, sp: &StringPool, op: &ObjPool<AstNode>)
-        -> String {
+    pub fn debug_print(&self, sp: &StringPool, op_n: &ObjPool<AstNode>,
+        op_s: &ObjPool<Scope>) -> String {
 
         match self {
             &AstNode::EnumerationLitDecl {
                 idx: idx, lit: lit,
                 corresponding_type_decl: corresponding_type_decl_
             } => {
-                let corresponding_type_decl = op.get(corresponding_type_decl_);
+                let corresponding_type_decl =
+                    op_n.get(corresponding_type_decl_);
 
                 format!("{{\"type\": \"EnumerationLitDecl\"{}, \"idx\": {}\
                          , \"enum_name\": {}}}",
@@ -223,7 +230,7 @@ impl AstNode {
                     id.debug_print(sp), loc.debug_print(sp))
             },
 
-            &AstNode::Entity {loc: loc, id: id, scope: ref scope, ..} => {
+            &AstNode::Entity {loc: loc, id: id, scope: scope, ..} => {
                 let mut s = String::new();
 
                 s += &format!("{{\"type\": \"Entity\", \"id\": {}{}",
@@ -231,10 +238,11 @@ impl AstNode {
 
                 s += ", \"decls\": [\"__is_a_set\"";
 
-                for (_, decl_values) in &scope.items {
+                for (_, decl_values) in &op_s.get(scope).items {
                     for decl_value in decl_values {
                         s += ",";
-                        s += &op.get(*decl_value).debug_print(sp, op);
+                        s += &op_n.get(*decl_value).debug_print(
+                            sp, op_n, op_s);
                     }
                 }
 
