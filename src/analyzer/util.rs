@@ -158,11 +158,19 @@ fn char_valid_for_ext_id(c: u8) -> bool {
     }
 }
 
-struct Latin1Str<'a> {
+pub struct Latin1Str<'a> {
     bytes: &'a [u8],
 }
 
 impl<'a> Latin1Str<'a> {
+    pub fn new(inp: &[u8]) -> Latin1Str {
+        Latin1Str {bytes: inp}
+    }
+
+    pub fn raw_name(&self) -> &[u8] {
+        self.bytes
+    }
+
     pub fn pretty_name(&self) -> String {
         let mut utf8str = String::new();
         for c in self.bytes {
@@ -237,19 +245,21 @@ mod tests {
 
     #[test]
     fn latin1_pretty_name() {
-        let x = Latin1Str {bytes: b"test"};
+        let x = Latin1Str::new(b"test");
         assert_eq!(x.pretty_name(), "test");
-        let x = Latin1Str {bytes: b"te\xC0st\xFE"};
+        assert_eq!(x.raw_name(), b"test");
+        let x = Latin1Str::new(b"te\xC0st\xFE");
+        assert_eq!(x.raw_name(), b"te\xC0st\xFE");
         assert_eq!(x.pretty_name(), "teÀstþ");
     }
 
     #[test]
     fn basic_id_validator() {
-        assert!((Latin1Str {bytes: b"foo"}).valid_for_basic_id());
-        assert!((Latin1Str {bytes: b"foo012"}).valid_for_basic_id());
-        assert!((Latin1Str {bytes: b"foo_012"}).valid_for_basic_id());
-        assert!(!(Latin1Str {bytes: b"f__oo"}).valid_for_basic_id());
-        assert!(!(Latin1Str {bytes: b"foo_"}).valid_for_basic_id());
-        assert!(!(Latin1Str {bytes: b"_foo"}).valid_for_basic_id());
+        assert!((Latin1Str::new(b"foo").valid_for_basic_id()));
+        assert!((Latin1Str::new(b"foo012").valid_for_basic_id()));
+        assert!((Latin1Str::new(b"foo_012").valid_for_basic_id()));
+        assert!(!(Latin1Str::new(b"f__oo").valid_for_basic_id()));
+        assert!(!(Latin1Str::new(b"foo_").valid_for_basic_id()));
+        assert!(!(Latin1Str::new(b"_foo").valid_for_basic_id()));
     }
 }
