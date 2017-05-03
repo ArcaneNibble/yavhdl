@@ -24,6 +24,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 mod ast;
+mod design;
 mod identifier;
 mod objpools;
 mod util;
