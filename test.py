@@ -142,96 +142,6 @@ def do_parser_tests():
     return failures
 
 
-def do_analyser_native_tests():
-    print("*" * 80)
-    print("Running analyser native code tests...")
-    print("*" * 80)
-
-    # Gather tests
-    test_files = os.listdir("analyser_native_tests")
-    test_files_real = []
-    test_files_set = set()
-    for f in sorted(test_files):
-        name, ext = os.path.basename(f).rsplit(".", 1)
-        cpp_name = "analyser_native_tests/" + name + ".cpp"
-        out_name = "analyser_native_tests/" + name + ".out"
-        if (os.path.isfile(cpp_name) and os.path.isfile(out_name)):
-            this_test = (cpp_name, out_name, name)
-            if name not in test_files_set:
-                print("Found test \"" + name + "\"")
-                test_files_real.append(this_test)
-                test_files_set.add(name)
-
-    print("Found " + str(len(test_files_real)) + " tests")
-
-    # Run each test
-    failures = False
-    for cpp_file, out_file, base_name in test_files_real:
-        print(base_name + ": ", end='')
-
-        # Try compiling it
-        subp = subprocess.run(['g++', '-Wall', '-ggdb3',
-                               '-I', '.', '-o',
-                               cpp_file + '.bin', cpp_file,
-                               'vhdl_analyser_bits.a'],
-                              stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE)
-
-        if subp.returncode != 0:
-            failures = True
-            print("\x1b[31m✗")
-            print("Compiling failed!\x1b[0m")
-            print("\x1b[33m----- stdout -----\x1b[0m")
-            sys.stdout.buffer.write(subp.stdout)
-            print("\x1b[33m----- stderr -----\x1b[0m")
-            sys.stdout.buffer.write(subp.stderr)
-            continue
-
-        # Load reference
-        with open(out_file, 'rb') as inf:
-            reference = inf.read().decode('utf-8')
-
-        # Invoke the binary itself
-        subp = subprocess.run([cpp_file + '.bin'],
-                              stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE)
-
-        if subp.returncode != 0:
-            failures = True
-            print("\x1b[31m✗")
-            print("Running compiled output failed!\x1b[0m")
-            print("\x1b[33m----- stdout -----\x1b[0m")
-            sys.stdout.buffer.write(subp.stdout)
-            print("\x1b[33m----- stderr -----\x1b[0m")
-            sys.stdout.buffer.write(subp.stderr)
-            continue
-
-        # Compare
-        output = subp.stdout.decode('utf-8')
-        if output != reference or subp.stderr != b'':
-            failures = True
-            print("\x1b[31m✗")
-            print("Test output mismatch!\x1b[0m")
-            # Re-encode in sorted order for proper diffing
-            print("\x1b[33m----- expected -----\x1b[0m")
-            print(reference)
-            print("\x1b[33m----- actual -----\x1b[0m")
-            print(output)
-            print("\x1b[33m----- diff -----\x1b[0m")
-            udiff = difflib.unified_diff(reference.split('\n'),
-                                         output.split('\n'),
-                                         fromfile="expected_output",
-                                         tofile="test_output",
-                                         lineterm='')
-            print('\n'.join(udiff))
-            continue
-
-        # All good!
-        print("\x1b[32m✓\x1b[0m")
-
-    return failures
-
-
 # FIXME: Fix copypasta
 def do_analyser_json_tests():
     print("*" * 80)
@@ -352,7 +262,6 @@ def main():
 
     failures = False
     failures = failures or do_parser_tests()
-    failures = failures or do_analyser_native_tests()
     failures = failures or do_analyser_json_tests()
 
     if failures:
