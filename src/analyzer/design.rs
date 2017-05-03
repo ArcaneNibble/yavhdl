@@ -59,6 +59,7 @@ impl Library {
         }
     }
 
+    // FIXME: This matching stuff is pretty ugly
     pub fn add_design_unit(&mut self,
         name: Identifier, unit: ObjPoolIndex<AstNode>) {
 

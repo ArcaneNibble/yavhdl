@@ -24,7 +24,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 mod ast;
+mod core;
 mod design;
 mod identifier;
 mod objpools;
 mod util;
+
+pub use self::core::*;
+pub use self::identifier::*;
+pub use self::design::*;

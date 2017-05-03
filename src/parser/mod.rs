@@ -31,7 +31,7 @@ include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 }
 
 use std::ptr;
-use std::ffi::CStr;
+use std::ffi::{CStr, CString};
 use std::ffi::OsStr;
 use std::os::unix::ffi::OsStrExt;
 use std::os::raw::*;
@@ -149,7 +149,7 @@ pub fn parse_file(filename: &OsStr) -> (Option<VhdlParseTreeNode>, String) {
     unsafe {
         let mut errors = ptr::null_mut::<c_char>();
         let ret = ffi::VhdlParserParseFile(
-            filename.as_bytes().as_ptr() as *const i8,
+            CString::new(filename.as_bytes()).unwrap().as_ptr() as *const i8,
             &mut errors);
 
         let errors_rs = rustify_str(errors);

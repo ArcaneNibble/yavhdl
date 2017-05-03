@@ -20,5 +20,6 @@ cd ..
 # Rust part
 cargo build
 
-# Demo parts (proving the C interface works)
+# Demo parts
 ln -sf target/debug/vhdl_parser
+ln -sf target/debug/vhdl_analyzer

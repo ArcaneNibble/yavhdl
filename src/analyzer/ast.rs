@@ -30,7 +30,7 @@ use analyzer::objpools::*;
 use analyzer::util::*;
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-struct SourceLoc {
+pub struct SourceLoc {
     first_line: i32,
     first_column: i32,
     last_line: i32,
@@ -123,6 +123,15 @@ impl Scope {
 pub struct ScopeChainNode {
     pub this_scope: Scope,
     pub parent: Option<ObjPoolIndex<ScopeChainNode>>,
+}
+
+impl Default for ScopeChainNode {
+    fn default() -> ScopeChainNode {
+        ScopeChainNode {
+            this_scope: Scope::new(),
+            parent: None,
+        }
+    }
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
