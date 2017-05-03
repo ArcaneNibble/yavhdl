@@ -27,7 +27,9 @@ use std::collections::HashMap;
 
 use analyzer::identifier::*;
 use analyzer::objpools::*;
+use analyzer::util::*;
 
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 struct SourceLoc {
     first_line: i32,
     first_column: i32,
@@ -77,14 +79,6 @@ impl SourceLoc {
     }
 }
 
-#[derive(Debug)]
-pub enum AstNode {
-    Invalid
-}
-
-impl Default for AstNode {
-    fn default() -> AstNode { AstNode::Invalid }
-}
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum ScopeItemName {
@@ -121,6 +115,87 @@ impl Scope {
             None
         }
 
+    }
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum EnumerationLiteral {
+    Identifier(Identifier),
+    CharLiteral(u8),
+}
+
+impl EnumerationLiteral {
+    pub fn to_scope_item_name(&self) -> ScopeItemName {
+        match self {
+            &EnumerationLiteral::Identifier(id) =>
+                ScopeItemName::Identifier(id),
+            &EnumerationLiteral::CharLiteral(c) =>
+                ScopeItemName::CharLiteral(c),
+        }
+    }
+}
+
+
+#[derive(Debug)]
+pub enum AstNode {
+    Invalid,
+    EnumerationLitDecl {
+        lit: EnumerationLiteral,
+        idx: u64,
+        corresponding_type_decl: ObjPoolIndex<AstNode>,
+    },
+    EnumerationTypeDecl {
+        loc: SourceLoc,
+        id: Identifier,
+        literals: Vec<ObjPoolIndex<AstNode>>,
+    }
+}
+
+impl Default for AstNode {
+    fn default() -> AstNode { AstNode::Invalid }
+}
+
+impl AstNode {
+    pub fn is_an_overloadable_decl(&self) -> bool {
+        match self {
+            &AstNode::EnumerationLitDecl{..} => true,
+            _ => false,
+        }
+    }
+
+    pub fn debug_print(&self, sp: &StringPool, op: &ObjPool<AstNode>)
+        -> String {
+
+        match self {
+            &AstNode::EnumerationLitDecl {
+                idx: idx, lit: lit,
+                corresponding_type_decl: corresponding_type_decl_
+            } => {
+                let corresponding_type_decl = op.get(corresponding_type_decl_);
+
+                format!("{{\"type\": \"EnumerationLitDecl\"{}, \"idx\": {}\
+                         , \"enum_name\": {}}}",
+                    match lit {
+                        EnumerationLiteral::Identifier(id) =>
+                            id.debug_print(sp),
+                        EnumerationLiteral::CharLiteral(c) =>
+                            get_chr_escaped(c),
+                    },
+                    idx,
+                    match corresponding_type_decl {
+                        &AstNode::EnumerationTypeDecl{id: id, ..} =>
+                            id.debug_print(sp),
+                        _ => panic!("AST invariant violated!")
+                    })
+            }
+
+            &AstNode::EnumerationTypeDecl {loc: loc, id: id, ..} => {
+                format!("{{\"type\": \"EnumerationTypeDecl\", \"id\": {}{}}}",
+                    id.debug_print(sp), loc.debug_print(sp))
+            }
+
+            _ => panic!("don't know how to print this AstNode!")
+        }
     }
 }
 

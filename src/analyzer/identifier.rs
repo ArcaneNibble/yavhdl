@@ -109,7 +109,7 @@ impl Identifier {
         Identifier::new_latin1(sp, sp_idx, ext)
     }
 
-    fn debug_print(&self, sp: &StringPool) -> String {
+    pub fn debug_print(&self, sp: &StringPool) -> String {
         if self.is_extended_id {
             format!("\"\\\\{}\\\\\"", sp.retrieve_latin1_str(
                 self.orig_name).debug_escaped_name())
