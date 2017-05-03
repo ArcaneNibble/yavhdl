@@ -31,7 +31,7 @@ use analyzer::util::*;
 // We need this because the Vec can be reallocated around, but we want to keep
 // around some kind of reference into the storage that can keep working after
 // the reallocation happens.
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct StringPoolIndex {
     start: usize,
     end: usize,

@@ -24,6 +24,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 use std::fmt;
+use std::hash::{Hash, Hasher};
 
 use analyzer::objpools::*;
 use analyzer::util::*;
@@ -39,6 +40,13 @@ impl PartialEq for Identifier {
     fn eq(&self, other: &Identifier) -> bool {
         (self.is_extended_id == other.is_extended_id) &&
         (self.canonical_name == other.canonical_name)
+    }
+}
+
+impl Hash for Identifier {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.canonical_name.hash(state);
+        self.is_extended_id.hash(state);
     }
 }
 
@@ -114,6 +122,7 @@ impl Identifier {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::hash::SipHasher;
 
     #[test]
     fn identifier_basic() {
@@ -212,12 +221,19 @@ mod tests {
         assert!(test4.is_err());
     }
 
+    fn hash<T: Hash>(t: &T) -> u64 {
+        let mut s = SipHasher::new();
+        t.hash(&mut s);
+        s.finish()
+    }
+
     #[test]
     fn identifier_eq_and_hash() {
         let mut sp = StringPool::new();
 
         let test1 = Identifier::new_unicode(&mut sp, "foo", false).unwrap();
         let test2 = Identifier::new_unicode(&mut sp, "fOo", false).unwrap();
+        assert_eq!(hash(&test1), hash(&test2));
         assert_eq!(test1, test2);
 
         let test1 = Identifier::new_unicode(&mut sp, "foo", false).unwrap();
@@ -226,6 +242,7 @@ mod tests {
 
         let test1 = Identifier::new_unicode(&mut sp, "foo", true).unwrap();
         let test2 = Identifier::new_unicode(&mut sp, "foo", true).unwrap();
+        assert_eq!(hash(&test1), hash(&test2));
         assert_eq!(test1, test2);
 
         let test1 = Identifier::new_unicode(&mut sp, "foo", true).unwrap();
