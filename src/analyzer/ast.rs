@@ -31,11 +31,11 @@ use analyzer::util::*;
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct SourceLoc {
-    first_line: i32,
-    first_column: i32,
-    last_line: i32,
-    last_column: i32,
-    file_name: Option<StringPoolIndexOsStr>,
+    pub first_line: i32,
+    pub first_column: i32,
+    pub last_line: i32,
+    pub last_column: i32,
+    pub file_name: Option<StringPoolIndexOsStr>,
 }
 
 impl Default for SourceLoc {
@@ -249,6 +249,15 @@ impl AstNode {
             }
 
             _ => panic!("don't know how to print this AstNode!")
+        }
+    }
+
+    pub fn loc(&self) -> Option<SourceLoc> {
+        match self {
+            &AstNode::EnumerationTypeDecl {loc: loc, ..} => Some(loc),
+            &AstNode::Entity {loc: loc, ..} => Some(loc),
+            &AstNode::SubtypeDecl {loc: loc, ..} => Some(loc),
+            _ => None
         }
     }
 }

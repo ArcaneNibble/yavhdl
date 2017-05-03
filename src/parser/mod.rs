@@ -56,7 +56,7 @@ pub struct VhdlParseTreeNode {
     pub boolean: bool,
     pub boolean2: bool,
     pub boolean3: bool,
-    pub pieces: Vec<VhdlParseTreeNode>,
+    pub pieces: Vec<Option<VhdlParseTreeNode>>,
     pub op_type: ParseTreeOperatorType,
     pub range_dir: ParseTreeRangeDirection,
     pub force_mode: ParseTreeForceMode,
@@ -109,10 +109,11 @@ unsafe fn rustify_node(
     // Recursively convert inner nodes first
     for i in 0..ffi::NUM_FIXED_PIECES {
         let this_child = (*input).pieces[i as usize];
-        if this_child.is_null() {
-            break;
-        }
-        inner_nodes.push(rustify_node(this_child, false));
+        inner_nodes.push(if this_child.is_null() {
+            None
+        } else {
+            Some(rustify_node(this_child, false))
+        });
     }
 
     VhdlParseTreeNode {

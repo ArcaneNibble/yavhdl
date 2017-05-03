@@ -179,7 +179,7 @@ def do_analyser_json_tests():
             print(base_name + " (expect fail): ", end='')
 
         # Run parser
-        subp = subprocess.run(['./vhdl_analyser', 'worklib', vhd_file],
+        subp = subprocess.run(['./vhdl_analyzer', 'worklib', vhd_file],
                               stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
 

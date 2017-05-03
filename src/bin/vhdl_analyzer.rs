@@ -80,7 +80,7 @@ fn main() {
             println!("Analyzing file \"{}\"...", args[i].to_string_lossy());
             s.errors.clear();
             s.warnings.clear();
-            let ret = vhdl_analyze_file(&mut s, pt);
+            let ret = vhdl_analyze_file(&mut s, &pt, work_lib_idx, &args[i]);
             print!("{}", s.warnings);
             if !ret {
                 // An error occurred
