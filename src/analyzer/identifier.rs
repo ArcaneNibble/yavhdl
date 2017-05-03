@@ -73,6 +73,22 @@ impl Identifier {
             is_extended_id: ext,
         })
     }
+
+    pub fn new_unicode(sp: &mut StringPool, name: &str, ext: bool)
+        -> Result<Identifier, &'static str> {
+
+        let mut latin1_name = Vec::<u8>::new();
+        for c in name.chars() {
+            if c >= '\u{0100}' {
+                return Err("name contains characters outside Latin-1 range");
+            }
+
+            latin1_name.push(c as u8);
+        }
+
+        let sp_idx = sp.add_latin1_str(&latin1_name);
+        Identifier::new_latin1(sp, sp_idx, ext)
+    }
 }
 
 #[cfg(test)]
@@ -145,5 +161,34 @@ mod tests {
         assert_eq!(sp.retrieve_latin1_str(
             test3.orig_name).pretty_name(), "fÖo×¼");
         assert!(test3.is_extended_id);
+    }
+
+    #[test]
+    fn identifier_unicode() {
+        let mut sp = StringPool::new();
+
+        let test1 = Identifier::new_unicode(&mut sp, "FoO", false).unwrap();
+        assert_eq!(sp.retrieve_latin1_str(
+            test1.orig_name).raw_name(), b"FoO");
+        assert_eq!(sp.retrieve_latin1_str(
+            test1.canonical_name).raw_name(), b"foo");
+        assert_eq!(sp.retrieve_latin1_str(
+            test1.orig_name).pretty_name(), "FoO");
+        assert!(!test1.is_extended_id);
+
+        let test2 = Identifier::new_unicode(&mut sp, "fÖo", false).unwrap();
+        assert_eq!(sp.retrieve_latin1_str(
+            test2.orig_name).raw_name(), b"f\xD6o");
+        assert_eq!(sp.retrieve_latin1_str(
+            test2.canonical_name).raw_name(), b"f\xF6o");
+        assert_eq!(sp.retrieve_latin1_str(
+            test2.orig_name).pretty_name(), "fÖo");
+        assert!(!test2.is_extended_id);
+
+        let test3 = Identifier::new_unicode(&mut sp, "fooĀ", false);
+        assert!(test3.is_err());
+
+        let test4 = Identifier::new_unicode(&mut sp, "f😀oo", false);
+        assert!(test4.is_err());
     }
 }
