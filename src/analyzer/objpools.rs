@@ -83,6 +83,7 @@ impl<'a> StringPool {
 }
 
 
+#[derive(Eq, Hash, Debug)]
 pub struct ObjPoolIndex<T> {
     i: usize,
     type_marker: PhantomData<T>
@@ -93,6 +94,12 @@ impl<T> Copy for ObjPoolIndex<T> { }
 impl<T> Clone for ObjPoolIndex<T> {
     fn clone(&self) -> ObjPoolIndex<T> {
         *self
+    }
+}
+
+impl<T> PartialEq for ObjPoolIndex<T> {
+    fn eq(&self, other: &ObjPoolIndex<T>) -> bool {
+        self.i == other.i
     }
 }
 
