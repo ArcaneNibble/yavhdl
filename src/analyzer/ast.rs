@@ -87,6 +87,7 @@ pub enum ScopeItemName {
     StringLiteral(StringPoolIndexLatin1),
 }
 
+#[derive(Debug)]
 pub struct Scope {
     items: HashMap<ScopeItemName, Vec<ObjPoolIndex<AstNode>>>,
 }
@@ -116,6 +117,12 @@ impl Scope {
         }
 
     }
+}
+
+#[derive(Debug)]
+pub struct ScopeChainNode {
+    pub this_scope: Scope,
+    pub parent: Option<ObjPoolIndex<ScopeChainNode>>,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -148,6 +155,14 @@ pub enum AstNode {
         loc: SourceLoc,
         id: Identifier,
         literals: Vec<ObjPoolIndex<AstNode>>,
+    },
+    Entity {
+        loc: SourceLoc,
+        id: Identifier,
+        scope: Scope,
+
+        // This is needed for matching architectures
+        root_decl_region: ObjPoolIndex<ScopeChainNode>
     }
 }
 
@@ -187,12 +202,32 @@ impl AstNode {
                             id.debug_print(sp),
                         _ => panic!("AST invariant violated!")
                     })
-            }
+            },
 
             &AstNode::EnumerationTypeDecl {loc: loc, id: id, ..} => {
                 format!("{{\"type\": \"EnumerationTypeDecl\", \"id\": {}{}}}",
                     id.debug_print(sp), loc.debug_print(sp))
-            }
+            },
+
+            &AstNode::Entity {loc: loc, id: id, scope: ref scope, ..} => {
+                let mut s = String::new();
+
+                s += &format!("{{\"type\": \"Entity\", \"id\": {}{}",
+                    id.debug_print(sp), loc.debug_print(sp));
+
+                s += ", \"decls\": [\"__is_a_set\"";
+
+                for (_, decl_values) in &scope.items {
+                    for decl_value in decl_values {
+                        s += ",";
+                        s += &op.get(*decl_value).debug_print(sp, op);
+                    }
+                }
+
+                s += "]}";
+
+                s
+            },
 
             _ => panic!("don't know how to print this AstNode!")
         }
