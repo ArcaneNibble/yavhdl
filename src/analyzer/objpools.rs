@@ -30,12 +30,13 @@ use analyzer::util::*;
 // We need this because the Vec can be reallocated around, but we want to keep
 // around some kind of reference into the storage that can keep working after
 // the reallocation happens.
-struct StringPoolIndex {
+#[derive(Copy, Clone)]
+pub struct StringPoolIndex {
     start: usize,
     end: usize,
 }
 
-struct StringPool {
+pub struct StringPool {
     storage: Vec<u8>
 }
 
@@ -58,19 +59,27 @@ impl StringPool {
         }
     }
 
-    pub fn retrieve_latin1_str(&self, i: &StringPoolIndex) -> Latin1Str {
+    pub fn retrieve_latin1_str(&self, i: StringPoolIndex) -> Latin1Str {
         let the_slice = &self.storage[i.start..i.end];
         Latin1Str::new(the_slice)
     }
 }
 
 
-struct ObjPoolIndex<T> {
+pub struct ObjPoolIndex<T> {
     i: usize,
     type_marker: PhantomData<T>
 }
 
-struct ObjPool<T> {
+impl<T> Copy for ObjPoolIndex<T> { }
+
+impl<T> Clone for ObjPoolIndex<T> {
+    fn clone(&self) -> ObjPoolIndex<T> {
+        *self
+    }
+}
+
+pub struct ObjPool<T> {
     storage: Vec<T>
 }
 
@@ -88,11 +97,11 @@ impl<T: Default> ObjPool<T> {
         ObjPoolIndex::<T> {i: i, type_marker: PhantomData}
     }
 
-    pub fn get(&self, i: &ObjPoolIndex<T>) -> &T {
+    pub fn get(&self, i: ObjPoolIndex<T>) -> &T {
         &self.storage[i.i]
     }
 
-    pub fn get_mut(&mut self, i: &ObjPoolIndex<T>) -> &mut T {
+    pub fn get_mut(&mut self, i: ObjPoolIndex<T>) -> &mut T {
         &mut self.storage[i.i]
     }
 }
@@ -106,8 +115,8 @@ mod tests {
         let mut sp = StringPool::new();
         let x = sp.add_latin1_str(b"test1");
         let y = sp.add_latin1_str(b"test2");
-        let sx = sp.retrieve_latin1_str(&x);
-        let sy = sp.retrieve_latin1_str(&y);
+        let sx = sp.retrieve_latin1_str(x);
+        let sy = sp.retrieve_latin1_str(y);
         assert_eq!(sx.raw_name(), b"test1");
         assert_eq!(sy.raw_name(), b"test2");
     }
@@ -131,15 +140,15 @@ mod tests {
         let x = pool.alloc();
         let y = pool.alloc();
         {
-            let o = pool.get_mut(&x);
+            let o = pool.get_mut(x);
             o.foo = 123;
         }
         {
-            let o = pool.get_mut(&y);
+            let o = pool.get_mut(y);
             o.foo = 456;
         }
-        let ox = pool.get(&x);
-        let oy = pool.get(&y);
+        let ox = pool.get(x);
+        let oy = pool.get(y);
         assert_eq!(ox.foo, 123);
         assert_eq!(oy.foo, 456);
     }
