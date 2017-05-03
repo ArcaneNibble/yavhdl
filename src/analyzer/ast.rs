@@ -163,6 +163,11 @@ pub enum AstNode {
 
         // This is needed for matching architectures
         root_decl_region: ObjPoolIndex<ScopeChainNode>
+    },
+    SubtypeDecl {
+        loc: SourceLoc,
+        id: Identifier,
+        // TODO
     }
 }
 
@@ -228,6 +233,11 @@ impl AstNode {
 
                 s
             },
+
+            &AstNode::SubtypeDecl {loc: loc, id: id} => {
+                format!("{{\"type\": \"SubtypeDecl\", \"id\": {}{}}}",
+                    id.debug_print(sp), loc.debug_print(sp))
+            }
 
             _ => panic!("don't know how to print this AstNode!")
         }
