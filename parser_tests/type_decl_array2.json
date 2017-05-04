@@ -27,7 +27,10 @@
                         "y": {"type": "PT_LIT_DECIMAL", "str": "3"}
                     }
                 },
-                "element": {"type": "PT_BASIC_ID", "str": "foo"}
+                "element": {
+                    "type": "PT_SUBTYPE_INDICATION",
+                    "type_mark": {"type": "PT_BASIC_ID", "str": "foo"}
+                }
             }
         }
     }

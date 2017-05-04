@@ -10,15 +10,18 @@
             "last_column": 25,
             "last_line": 2,
             "subtype": {
-                "attribute": {
-                    "str": "bar",
-                    "type": "PT_BASIC_ID"
-                },
-                "name": {
-                    "str": "foo",
-                    "type": "PT_BASIC_ID"
-                },
-                "type": "PT_NAME_ATTRIBUTE"
+                "type": "PT_SUBTYPE_INDICATION",
+                "type_mark": {
+                    "attribute": {
+                        "str": "bar",
+                        "type": "PT_BASIC_ID"
+                    },
+                    "name": {
+                        "str": "foo",
+                        "type": "PT_BASIC_ID"
+                    },
+                    "type": "PT_NAME_ATTRIBUTE"
+                }
             },
             "type": "PT_SUBTYPE_DECLARATION"
         },

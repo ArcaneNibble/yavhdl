@@ -10,8 +10,11 @@
             "last_column": 21,
             "last_line": 2,
             "subtype": {
-                "str": "foo",
-                "type": "PT_BASIC_ID"
+                "type": "PT_SUBTYPE_INDICATION",
+                "type_mark": {
+                    "str": "foo",
+                    "type": "PT_BASIC_ID"
+                }
             },
             "type": "PT_SUBTYPE_DECLARATION"
         },

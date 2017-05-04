@@ -3,8 +3,11 @@
         "declarations": {
             "expression": {
                 "alloc": {
-                    "str": "foo",
-                    "type": "PT_BASIC_ID"
+                    "type": "PT_SUBTYPE_INDICATION",
+                    "type_mark": {
+                        "str": "foo",
+                        "type": "PT_BASIC_ID"
+                    }
                 },
                 "type": "PT_ALLOCATOR"
             },
@@ -17,8 +20,11 @@
             "last_column": 12,
             "last_line": 3,
             "subtype": {
-                "str": "b",
-                "type": "PT_BASIC_ID"
+                "type": "PT_SUBTYPE_INDICATION",
+                "type_mark": {
+                    "str": "b",
+                    "type": "PT_BASIC_ID"
+                }
             },
             "type": "PT_CONSTANT_DECLARATION"
         },

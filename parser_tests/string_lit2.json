@@ -10,7 +10,10 @@
             "first_line": 2, "first_column": 5,
             "last_line": 2, "last_column": 36,
             "identifiers": {"type": "PT_BASIC_ID", "str": "foo"},
-            "subtype": {"type": "PT_BASIC_ID", "str": "bar"},
+            "subtype": {
+                "type": "PT_SUBTYPE_INDICATION",
+                "type_mark": {"type": "PT_BASIC_ID", "str": "bar"}
+            },
             "expression": {"type": "PT_LIT_STRING", "str": "hel\"lo"}
         }
     }

@@ -14,7 +14,10 @@
                 "rest": {"type": "PT_BASIC_ID", "str": "foo"},
                 "this_piece": {"type": "PT_BASIC_ID", "str": "foo2"}
             },
-            "subtype": {"type": "PT_BASIC_ID", "str": "bar"},
+            "subtype": {
+                "type": "PT_SUBTYPE_INDICATION",
+                "type_mark": {"type": "PT_BASIC_ID", "str": "bar"}
+            },
             "expression": {"type": "PT_BASIC_ID", "str": "baz"},
             "shared": false
         }

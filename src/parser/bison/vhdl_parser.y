@@ -1433,7 +1433,12 @@ subtype_declaration:
     }
 
 subtype_indication:
-    type_mark
+    type_mark {
+        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
+        $$->pieces[0] = $1;
+        $$->pieces[1] = nullptr;
+        $$->pieces[2] = nullptr;
+    }
     | resolution_indication type_mark {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
         $$->pieces[0] = $2;
@@ -1473,7 +1478,12 @@ discrete_subtype_indication:
 
 _allocator_subtype_indication:
     // Resolution indications not allowed
-    type_mark
+    type_mark {
+        $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
+        $$->pieces[0] = $1;
+        $$->pieces[1] = nullptr;
+        $$->pieces[2] = nullptr;
+    }
     | type_mark _allocator_constraint {
         $$ = new VhdlParseTreeNode(PT_SUBTYPE_INDICATION);
         $$->pieces[0] = $1;

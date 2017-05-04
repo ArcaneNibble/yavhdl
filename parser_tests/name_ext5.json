@@ -14,8 +14,11 @@
                     "up_count": 0
                 },
                 "subtype_indication": {
-                    "str": "t",
-                    "type": "PT_BASIC_ID"
+                    "type": "PT_SUBTYPE_INDICATION",
+                    "type_mark": {
+                        "str": "t",
+                        "type": "PT_BASIC_ID"
+                    }
                 },
                 "type": "PT_NAME_EXT_CONST"
             },
@@ -28,8 +31,11 @@
             "last_column": 25,
             "last_line": 3,
             "subtype": {
-                "str": "b",
-                "type": "PT_BASIC_ID"
+                "type": "PT_SUBTYPE_INDICATION",
+                "type_mark": {
+                    "str": "b",
+                    "type": "PT_BASIC_ID"
+                }
             },
             "type": "PT_CONSTANT_DECLARATION"
         },
