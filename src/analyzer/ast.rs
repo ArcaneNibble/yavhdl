@@ -203,11 +203,10 @@ impl AstNode {
 
         match self {
             &AstNode::EnumerationLitDecl {
-                idx: idx, lit: lit,
-                corresponding_type_decl: corresponding_type_decl_
+                idx, lit, corresponding_type_decl
             } => {
                 let corresponding_type_decl =
-                    op_n.get(corresponding_type_decl_);
+                    op_n.get(corresponding_type_decl);
 
                 format!("{{\"type\": \"EnumerationLitDecl\"{}, \"idx\": {}\
                          , \"enum_name\": {}}}",
@@ -219,18 +218,18 @@ impl AstNode {
                     },
                     idx,
                     match corresponding_type_decl {
-                        &AstNode::EnumerationTypeDecl{id: id, ..} =>
+                        &AstNode::EnumerationTypeDecl{id, ..} =>
                             id.debug_print(sp),
                         _ => panic!("AST invariant violated!")
                     })
             },
 
-            &AstNode::EnumerationTypeDecl {loc: loc, id: id, ..} => {
+            &AstNode::EnumerationTypeDecl {loc, id, ..} => {
                 format!("{{\"type\": \"EnumerationTypeDecl\", \"id\": {}{}}}",
                     id.debug_print(sp), loc.debug_print(sp))
             },
 
-            &AstNode::Entity {loc: loc, id: id, scope: scope, ..} => {
+            &AstNode::Entity {loc, id, scope, ..} => {
                 let mut s = String::new();
 
                 s += &format!("{{\"type\": \"Entity\", \"id\": {}{}",
@@ -251,7 +250,7 @@ impl AstNode {
                 s
             },
 
-            &AstNode::SubtypeDecl {loc: loc, id: id} => {
+            &AstNode::SubtypeDecl {loc, id} => {
                 format!("{{\"type\": \"SubtypeDecl\", \"id\": {}{}}}",
                     id.debug_print(sp), loc.debug_print(sp))
             }
@@ -262,9 +261,9 @@ impl AstNode {
 
     pub fn loc(&self) -> Option<SourceLoc> {
         match self {
-            &AstNode::EnumerationTypeDecl {loc: loc, ..} => Some(loc),
-            &AstNode::Entity {loc: loc, ..} => Some(loc),
-            &AstNode::SubtypeDecl {loc: loc, ..} => Some(loc),
+            &AstNode::EnumerationTypeDecl {loc, ..} => Some(loc),
+            &AstNode::Entity {loc, ..} => Some(loc),
+            &AstNode::SubtypeDecl {loc, ..} => Some(loc),
             _ => None
         }
     }

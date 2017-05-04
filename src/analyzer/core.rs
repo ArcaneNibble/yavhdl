@@ -162,8 +162,7 @@ fn get_parameter_result_type_profile(s: &AnalyzerCoreStateBlob,
 
     let node = s.op_n.get(node_idx);
     match node {
-        &AstNode::EnumerationLitDecl {
-            corresponding_type_decl: corresponding_type_decl, ..} => {
+        &AstNode::EnumerationLitDecl {corresponding_type_decl, ..} => {
             // Treat this as a function that takes no arguments and returns the
             // type of the corresponding enum.
 
@@ -274,11 +273,9 @@ fn analyze_enum_lit(s: &mut AnalyzerCoreStateBlob,
     {
         let e = s.op_n.get_mut(e_);
         match e {
-            &mut AstNode::EnumerationTypeDecl{
-                literals: ref mut literals, ..} => {
-
+            &mut AstNode::EnumerationTypeDecl{ref mut literals, ..} => {
                 literals.push(x_);
-            }
+            },
             _ => panic!("AST invariant violated!")
         }
     }

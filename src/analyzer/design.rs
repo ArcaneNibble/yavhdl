@@ -65,12 +65,10 @@ impl Library {
 
         match self {
             &mut Library::Invalid => panic!("use of Invalid library"),
-            &mut Library::X {id: ref mut id, db_by_name: ref mut db_by_name,
-                db_by_order: ref mut db_by_order,
-                temp_id: ref mut temp_id, temp_node: ref mut temp_node} => {
-                    db_by_name.insert(name, unit);
-                    db_by_order.push(unit);
-                }
+            &mut Library::X {ref mut db_by_name, ref mut db_by_order, ..} => {
+                db_by_name.insert(name, unit);
+                db_by_order.push(unit);
+            }
         }
     }
 
@@ -79,16 +77,17 @@ impl Library {
 
         match self {
             &Library::Invalid => panic!("use of Invalid library"),
-            &Library::X {id: ref id, db_by_name: ref db_by_name,
-                db_by_order: ref db_by_order,
-                temp_id: ref temp_id, temp_node: ref temp_node} => {
-                    // Check the tentative one first if we have one
-                    if let Some(temp_id) = *temp_id {
+            &Library::X {ref db_by_name, ref temp_id, ref temp_node, ..} => {
+
+                // Check the tentative one first if we have one
+                if let Some(temp_id) = *temp_id {
+                    if temp_id == name {
                         return *temp_node;
                     }
-
-                    db_by_name.get(&name).cloned()
                 }
+
+                db_by_name.get(&name).cloned()
+            }
         }
     }
 
@@ -97,15 +96,14 @@ impl Library {
 
         match self {
             &mut Library::Invalid => panic!("use of Invalid library"),
-            &mut Library::X {id: ref mut id, db_by_name: ref mut db_by_name,
-                db_by_order: ref mut db_by_order,
-                temp_id: ref mut temp_id, temp_node: ref mut temp_node} => {
-                    // Cannot add a new tentative thing if we already have one
-                    assert!(temp_node.is_none());
+            &mut Library::X {ref mut temp_id, ref mut temp_node, ..} => {
 
-                    *temp_id = Some(name);
-                    *temp_node = Some(unit);
-                }
+                // Cannot add a new tentative thing if we already have one
+                assert!(temp_node.is_none());
+
+                *temp_id = Some(name);
+                *temp_node = Some(unit);
+            }
         }
     }
 
@@ -113,11 +111,9 @@ impl Library {
 
         let (name, node) = match self {
             &mut Library::Invalid => panic!("use of Invalid library"),
-            &mut Library::X {id: ref mut id, db_by_name: ref mut db_by_name,
-                db_by_order: ref mut db_by_order,
-                temp_id: ref mut temp_id, temp_node: ref mut temp_node} => {
-                    (temp_id.take().unwrap(), temp_node.take().unwrap())
-                }
+            &mut Library::X {ref mut temp_id, ref mut temp_node, ..} => {
+                (temp_id.take().unwrap(), temp_node.take().unwrap())
+            }
         };
 
         self.add_design_unit(name, node);
@@ -127,12 +123,10 @@ impl Library {
 
         match self {
             &mut Library::Invalid => panic!("use of Invalid library"),
-            &mut Library::X {id: ref mut id, db_by_name: ref mut db_by_name,
-                db_by_order: ref mut db_by_order,
-                temp_id: ref mut temp_id, temp_node: ref mut temp_node} => {
-                    temp_id.take();
-                    temp_node.take();
-                }
+            &mut Library::X {ref mut temp_id, ref mut temp_node, ..} => {
+                temp_id.take();
+                temp_node.take();
+            }
         }
     }
 
@@ -141,9 +135,7 @@ impl Library {
 
         match self {
             &Library::Invalid => panic!("use of Invalid library"),
-            &Library::X {id: ref id, db_by_name: ref db_by_name,
-                db_by_order: ref db_by_order,
-                temp_id: ref temp_id, temp_node: ref temp_node} => {
+            &Library::X {ref id, ref db_by_order, ..} => {
                     let mut s = String::new();
 
                     s += &format!("{{\"type\": \"Library\", \"id\": {}, \
