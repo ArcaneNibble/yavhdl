@@ -4,6 +4,9 @@ version = "0.0.1"
 authors = ["Robert Ou <rqou@robertou.com>"]
 build = "build.rs"
 
+[profile.release]
+lto = true
+
 [lib]
 name = "yavhdl"
 crate-type = ["rlib", "staticlib"]
