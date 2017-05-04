@@ -123,7 +123,7 @@ impl<'a> StringPool {
 }
 
 
-#[derive(Eq, Hash, Debug)]
+#[derive(Hash, Debug)]
 pub struct ObjPoolIndex<T> {
     i: usize,
     type_marker: PhantomData<T>
@@ -142,6 +142,8 @@ impl<T> PartialEq for ObjPoolIndex<T> {
         self.i == other.i
     }
 }
+
+impl<T> Eq for ObjPoolIndex<T> { }
 
 pub struct ObjPool<T> {
     storage: Vec<T>

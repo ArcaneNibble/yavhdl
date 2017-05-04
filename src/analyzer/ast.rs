@@ -213,9 +213,9 @@ impl AstNode {
                          , \"enum_name\": {}}}",
                     match lit {
                         EnumerationLiteral::Identifier(id) =>
-                            id.debug_print(sp),
+                            format!(", \"id\": {}", id.debug_print(sp)),
                         EnumerationLiteral::CharLiteral(c) =>
-                            get_chr_escaped(c),
+                            format!(", \"chr\": \"{}\"", get_chr_escaped(c)),
                     },
                     idx,
                     match corresponding_type_decl {

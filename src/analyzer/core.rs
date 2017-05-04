@@ -27,6 +27,7 @@ use analyzer::ast::*;
 use analyzer::design::*;
 use analyzer::identifier::*;
 use analyzer::objpools::*;
+use analyzer::util::*;
 
 use parser::*;
 
@@ -112,6 +113,7 @@ fn analyze_identifier(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode)
     }
 }
 
+#[derive(Copy, Clone)]
 enum DeclarativePartType {
     ArchitectureDeclarativePart,
     BlockDeclarativePart,
@@ -126,11 +128,268 @@ enum DeclarativePartType {
     SubprogramDeclarativePart,
 }
 
+#[derive(Eq)]
+struct ParameterResultTypeProfile {
+    result: Option<ObjPoolIndex<AstNode>>,
+    params: Vec<ObjPoolIndex<AstNode>>,
+}
+
+impl PartialEq for ParameterResultTypeProfile {
+    fn eq(&self, other: &ParameterResultTypeProfile) -> bool {
+        // Compare arg count
+        if self.params.len() != other.params.len() {
+            return false;
+        }
+
+        // Compare args
+        for i in 0..self.params.len() {
+            if self.params[i] != other.params[i] {
+                return false;
+            }
+        }
+
+        // Compare return type
+        if self.result != other.result {
+            return false;
+        }
+
+        true
+    }
+}
+
+fn get_parameter_result_type_profile(s: &AnalyzerCoreStateBlob,
+    node_idx: ObjPoolIndex<AstNode>) -> ParameterResultTypeProfile {
+
+    let node = s.op_n.get(node_idx);
+    match node {
+        &AstNode::EnumerationLitDecl {
+            corresponding_type_decl: corresponding_type_decl, ..} => {
+            // Treat this as a function that takes no arguments and returns the
+            // type of the corresponding enum.
+
+            // TODO: subtypes
+
+            ParameterResultTypeProfile {
+                result: Some(corresponding_type_decl),
+                params: vec![],
+            }
+        }
+        _ =>
+            panic!("Don't know how to get parameter/result type profile here!")
+    }
+}
+
+fn try_add_declaration(s: &mut AnalyzerCoreStateBlob, name: ScopeItemName,
+    node: ObjPoolIndex<AstNode>, scope: ObjPoolIndex<Scope>) -> bool {
+
+    // This seems to be needed because the borrow checker doesn't seem to
+    // understand that the None case shouldn't need the borrow still.
+    let has_existing = s.op_s.get(scope).get(name).is_some();
+    if !has_existing {
+        // We are adding a new thing; this should always work
+        s.op_s.get_mut(scope).add(name, node);
+        true
+    } else {
+        let found_conflict = {
+            let existing = s.op_s.get(scope).get(name).unwrap();
+            // Are the existing things overloadable? (Must always be the same)
+            let existing_overloadable =
+                s.op_n.get(existing[0]).is_an_overloadable_decl();
+
+            let this_overloadable =
+                s.op_n.get(node).is_an_overloadable_decl();
+
+            // TODO: Implicit declarations?
+
+            if !(existing_overloadable && this_overloadable) {
+                // Definitely fail
+                true
+            } else {
+                // Both are overloadable
+
+                // Check the type profiles
+                let typeprof_of_new =
+                    get_parameter_result_type_profile(s, node);
+                let mut found_conflict = false;
+                for existing_i in existing {
+                    let typeprof_of_existing =
+                        get_parameter_result_type_profile(s, *existing_i);
+
+                    if typeprof_of_new == typeprof_of_existing {
+                        found_conflict = true;
+                        break;
+                    }
+                }
+
+                found_conflict
+            }
+        };
+
+        if !found_conflict {
+            s.op_s.get_mut(scope).add(name, node);
+            true
+        } else {
+            false
+        }
+    }
+}
+
+fn analyze_enum_lit(s: &mut AnalyzerCoreStateBlob,
+    lit_pt: &VhdlParseTreeNode, scope: ObjPoolIndex<Scope>, idx: &mut u64,
+    e_: ObjPoolIndex<AstNode>, pt_for_loc: &VhdlParseTreeNode) -> bool {
+
+    let x_ = s.op_n.alloc();
+
+    let lit = match lit_pt.node_type {
+        ParseTreeNodeType::PT_LIT_CHAR =>
+            EnumerationLiteral::CharLiteral(lit_pt.chr),
+        _ => EnumerationLiteral::Identifier(analyze_identifier(
+            s, lit_pt))
+    };
+
+    {
+        let x = s.op_n.get_mut(x_);
+        *x = AstNode::EnumerationLitDecl {
+            lit: lit,
+            idx: *idx,
+            corresponding_type_decl: e_,
+        };
+    }
+
+    // Done setting up, try to add it
+    if !try_add_declaration(s, lit.to_scope_item_name(), x_, scope) {
+        dump_current_location(s, pt_for_loc, true);
+        s.errors += &format!(
+            "ERROR: Duplicate declaration of enum literal {}!\n",
+            match lit {
+                EnumerationLiteral::Identifier(id) =>
+                    s.sp.retrieve_latin1_str(id.orig_name).pretty_name(),
+                EnumerationLiteral::CharLiteral(c) =>
+                    get_chr_escaped(c),
+            });
+        return false;
+    }
+
+    // Add it to the type decl as well
+    {
+        let e = s.op_n.get_mut(e_);
+        match e {
+            &mut AstNode::EnumerationTypeDecl{
+                literals: ref mut literals, ..} => {
+
+                literals.push(x_);
+            }
+            _ => panic!("AST invariant violated!")
+        }
+    }
+
+    true
+}
+
+fn analyze_enum_lits(s: &mut AnalyzerCoreStateBlob,
+    lit_pt: &VhdlParseTreeNode, scope: ObjPoolIndex<Scope>, idx: &mut u64,
+    e_: ObjPoolIndex<AstNode>, pt_for_loc: &VhdlParseTreeNode) -> bool {
+
+    let mut no_errors = true;
+
+    match lit_pt.node_type {
+        ParseTreeNodeType::PT_ENUM_LITERAL_LIST => {
+            no_errors &= analyze_enum_lits(s,
+                &lit_pt.pieces[0].as_ref().unwrap(), scope, idx, e_,
+                pt_for_loc);
+            (*idx) += 1;
+            no_errors &= analyze_enum_lit(s,
+                &lit_pt.pieces[1].as_ref().unwrap(), scope, idx, e_,
+                pt_for_loc);
+        },
+        _ => {
+            no_errors &= analyze_enum_lit(s, lit_pt, scope, idx, e_,
+                pt_for_loc);
+        },
+    };
+
+    no_errors
+}
+
+fn analyze_type_decl(s: &mut AnalyzerCoreStateBlob,
+    pt: &VhdlParseTreeNode, scope: ObjPoolIndex<Scope>,
+    decl_part_type: DeclarativePartType) -> bool {
+
+    let id = analyze_identifier(s, &pt.pieces[0].as_ref().unwrap());
+
+    let typedef_pt = pt.pieces[1].as_ref().unwrap();
+    match typedef_pt.node_type {
+        ParseTreeNodeType::PT_ENUMERATION_TYPE_DEFINITION => {
+            // The main declaration
+            let d_ = s.op_n.alloc();
+
+            let loc = pt_loc(s, pt);
+
+            {
+                let d = s.op_n.get_mut(d_);
+                *d = AstNode::EnumerationTypeDecl {
+                    loc: loc,
+                    id: id,
+                    literals: Vec::new(),
+                };
+            }
+
+            if !try_add_declaration(s, ScopeItemName::Identifier(id),
+                d_, scope) {
+
+                dump_current_location(s, pt, true);
+                s.errors += &format!(
+                    "ERROR: Duplicate declaration of type {}!\n",
+                    s.sp.retrieve_latin1_str(id.orig_name).pretty_name());
+                return false;
+            }
+
+            // The literals
+            let mut idx: u64 = 0;
+            let lits_ok = analyze_enum_lits(s,
+                &typedef_pt.pieces[0].as_ref().unwrap(), scope, &mut idx,
+                d_, pt);
+            if !lits_ok {
+                return false;
+            }
+        },
+        _ => panic!("Don't know how to handle this parse tree node!")
+    }
+
+    true
+}
+
+fn analyze_declarative_item(s: &mut AnalyzerCoreStateBlob,
+    pt: &VhdlParseTreeNode, scope: ObjPoolIndex<Scope>,
+    decl_part_type: DeclarativePartType) -> bool {
+
+    match pt.node_type {
+        ParseTreeNodeType::PT_FULL_TYPE_DECLARATION =>
+            analyze_type_decl(s, pt, scope, decl_part_type),
+        _ => panic!("Don't know how to handle this parse tree node!")
+    }
+}
+
 fn analyze_declaration_list(s: &mut AnalyzerCoreStateBlob,
     pt: &VhdlParseTreeNode, scope: ObjPoolIndex<Scope>,
     decl_part_type: DeclarativePartType) -> bool {
 
-    false
+    let mut no_errors = true;
+
+    match pt.node_type {
+        ParseTreeNodeType::PT_DECLARATION_LIST => {
+            no_errors &= analyze_declaration_list(
+                s, &pt.pieces[0].as_ref().unwrap(), scope, decl_part_type);
+            no_errors &= analyze_declarative_item(
+                s, &pt.pieces[1].as_ref().unwrap(), scope, decl_part_type);
+        },
+        _ => {
+            no_errors &= analyze_declarative_item(
+                s, pt, scope, decl_part_type);
+        },
+    };
+
+    no_errors
 }
 
 fn analyze_entity(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode)

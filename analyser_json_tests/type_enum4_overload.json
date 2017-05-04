@@ -16,12 +16,16 @@
                         "type": "EnumerationTypeDecl",
                         "id": "test1",
                         "first_line": 2, "first_column": 5,
-                        "last_line": 2, "last_column": 29
+                        "last_line": 2, "last_column": 29,
+                        "file_name": "analyser_json_tests/type_enum4_overload.vhd"
+
                     },{
                         "type": "EnumerationTypeDecl",
                         "id": "test2",
                         "first_line": 3, "first_column": 5,
-                        "last_line": 3, "last_column": 29
+                        "last_line": 3, "last_column": 29,
+                        "file_name": "analyser_json_tests/type_enum4_overload.vhd"
+
                     },{
                         "type": "EnumerationLitDecl",
                         "id": "foo",

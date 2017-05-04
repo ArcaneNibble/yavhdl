@@ -16,7 +16,8 @@
                         "type": "EnumerationTypeDecl",
                         "id": "test",
                         "first_line": 2, "first_column": 5,
-                        "last_line": 2, "last_column": 23
+                        "last_line": 2, "last_column": 23,
+                        "file_name": "analyser_json_tests/type_enum1.vhd"
                     },{
                         "type": "EnumerationLitDecl",
                         "id": "foo",
