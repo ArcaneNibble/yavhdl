@@ -356,6 +356,40 @@ fn analyze_type_decl(s: &mut AnalyzerCoreStateBlob,
     true
 }
 
+fn analyze_subtype_decl(s: &mut AnalyzerCoreStateBlob,
+    pt: &VhdlParseTreeNode, scope: ObjPoolIndex<Scope>,
+    decl_part_type: DeclarativePartType) -> bool {
+
+    let x_ = s.op_n.alloc();
+
+    let id = analyze_identifier(s, &pt.pieces[0].as_ref().unwrap());
+    let loc = pt_loc(s, pt);
+
+    {
+        let x = s.op_n.get_mut(x_);
+        *x = AstNode::SubtypeDecl {
+            loc: loc,
+            id: id,
+        };
+    }
+
+    // FIXME: Is it necessary to add this to the target scope first so that
+    // the name hiding rules are followed correctly? It does not seem like it
+    // will make any observable difference?
+
+    if !try_add_declaration(s, ScopeItemName::Identifier(id), x_, scope) {
+        dump_current_location(s, pt, true);
+        s.errors += &format!(
+            "ERROR: Duplicate declaration of subtype {}!\n",
+            s.sp.retrieve_latin1_str(id.orig_name).pretty_name());
+        return false;
+    }
+
+    // TODO: the actual hard part
+
+    true
+}
+
 fn analyze_declarative_item(s: &mut AnalyzerCoreStateBlob,
     pt: &VhdlParseTreeNode, scope: ObjPoolIndex<Scope>,
     decl_part_type: DeclarativePartType) -> bool {
@@ -363,6 +397,8 @@ fn analyze_declarative_item(s: &mut AnalyzerCoreStateBlob,
     match pt.node_type {
         ParseTreeNodeType::PT_FULL_TYPE_DECLARATION =>
             analyze_type_decl(s, pt, scope, decl_part_type),
+        ParseTreeNodeType::PT_SUBTYPE_DECLARATION =>
+            analyze_subtype_decl(s, pt, scope, decl_part_type),
         _ => panic!("Don't know how to handle this parse tree node!")
     }
 }
