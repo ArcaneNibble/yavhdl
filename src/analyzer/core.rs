@@ -353,15 +353,105 @@ fn analyze_type_decl(s: &mut AnalyzerCoreStateBlob,
     true
 }
 
-fn analyze_subtype_indication(s: &mut AnalyzerCoreStateBlob,
+// The point of these functions is to do _only_ scope and visibility logic
+// (not overloading). There are three cases: overloadable (can get multiple),
+// non-overloadable and a single thing ("normal"), and non-overloadable and
+// multiple things (e.g. use clauses)
+// TODO: Braindump better
+fn analyze_name_single_nonoverloadable(s: &mut AnalyzerCoreStateBlob,
     pt: &VhdlParseTreeNode) -> Option<ObjPoolIndex<AstNode>> {
+
+    match pt.node_type {
+        ParseTreeNodeType::PT_BASIC_ID | ParseTreeNodeType::PT_EXT_ID => {
+            // a simple_name
+            let id = ScopeItemName::Identifier(analyze_identifier(s, pt));
+
+            // This part has the actual scope chain walking!
+            let mut cur_scope_node = s.innermost_scope;
+            let mut found_result = None;
+            while cur_scope_node.is_some() {
+                let cur_scope_node_ = s.op_sc.get(cur_scope_node.unwrap());
+
+                if let &ScopeChainNode::X{this_scope, parent} =
+                    cur_scope_node_ {
+
+                    // Try to find the thing
+                    if let Some(maybe_found_thing) =
+                        s.op_s.get(this_scope).get(id) {
+
+                        // We potentially found some things, so we need to
+                        // handle aliases (TODO) and if this thing isn't
+                        // actually a non-overloadable thing (otherwise we
+                        // are actually done already)
+
+                        // This should always be true
+                        assert!(maybe_found_thing.len() > 0);
+
+                        // Everything found must either all be overloadable
+                        // or none can be overloadable (it cannot be mixed)
+                        if s.op_n.get(maybe_found_thing[0])
+                            .is_an_overloadable_decl() {
+
+                            // Bad, was an overloadable thing
+                            break;
+                        } else {
+                            // Wow, we are done!
+                            // FIXME: Aliases
+                            assert!(maybe_found_thing.len() == 1);
+                            found_result = Some(maybe_found_thing[0]);
+                            break;
+                        }
+                    }
+
+                    cur_scope_node = parent;
+                } else {
+                    panic!("AST invariant violated!")
+                }
+            }
+
+            found_result
+        },
+        ParseTreeNodeType::PT_LIT_STRING | ParseTreeNodeType::PT_LIT_CHAR => {
+            // This is an operator_symbol or a character_literal and so are
+            // definitely not what we want because this particular function
+            // yields only non-overloadable things.
+            None
+        },
+        _ => panic!("Don't know how to handle this parse tree node!")
+    }
+}
+
+fn analyze_subtype_indication(s: &mut AnalyzerCoreStateBlob,
+    pt: &VhdlParseTreeNode, pt_for_loc: &VhdlParseTreeNode)
+    -> Option<ObjPoolIndex<AstNode>> {
 
     match pt.node_type {
         ParseTreeNodeType::PT_SUBTYPE_INDICATION => {
             // We have an absolutely normal subtype_indication
-            let x_ = s.op_n.alloc();
 
-            None
+            // TODO: Not implemented
+            assert!(pt.pieces[1].is_none());
+            assert!(pt.pieces[2].is_none());
+
+            let type_mark = analyze_name_single_nonoverloadable(
+                s, &pt.pieces[0].as_ref().unwrap());
+
+            if type_mark.is_none() {
+                dump_current_location(s, pt_for_loc, true);
+                s.errors +=
+                    "ERROR: Bad name for type_mark\n";
+                return None;
+            }
+
+            let x_ = s.op_n.alloc();
+            {
+                let x = s.op_n.get_mut(x_);
+                *x = AstNode::SubtypeIndication {
+                    type_mark: type_mark.unwrap(),
+                };
+            }
+
+            Some(x_)
         },
         _ => panic!("Don't know how to handle this parse tree node!")
     }
@@ -374,7 +464,7 @@ fn analyze_subtype_decl(s: &mut AnalyzerCoreStateBlob,
     let id = analyze_identifier(s, &pt.pieces[0].as_ref().unwrap());
     let loc = pt_loc(s, pt);
     let subtype_indication_ = analyze_subtype_indication(s,
-        &pt.pieces[1].as_ref().unwrap());
+        &pt.pieces[1].as_ref().unwrap(), pt);
 
     if subtype_indication_.is_none() {
         return false;
@@ -406,34 +496,38 @@ fn analyze_subtype_decl(s: &mut AnalyzerCoreStateBlob,
 }
 
 fn analyze_declarative_item(s: &mut AnalyzerCoreStateBlob,
-    pt: &VhdlParseTreeNode, scope: ObjPoolIndex<Scope>,
-    decl_part_type: DeclarativePartType) -> bool {
+    pt: &VhdlParseTreeNode, decl_scope: ObjPoolIndex<Scope>,
+    use_scope: ObjPoolIndex<Scope>, decl_part_type: DeclarativePartType)
+    -> bool {
 
     match pt.node_type {
         ParseTreeNodeType::PT_FULL_TYPE_DECLARATION =>
-            analyze_type_decl(s, pt, scope, decl_part_type),
+            analyze_type_decl(s, pt, decl_scope, decl_part_type),
         ParseTreeNodeType::PT_SUBTYPE_DECLARATION =>
-            analyze_subtype_decl(s, pt, scope, decl_part_type),
+            analyze_subtype_decl(s, pt, decl_scope, decl_part_type),
         _ => panic!("Don't know how to handle this parse tree node!")
     }
 }
 
 fn analyze_declaration_list(s: &mut AnalyzerCoreStateBlob,
-    pt: &VhdlParseTreeNode, scope: ObjPoolIndex<Scope>,
-    decl_part_type: DeclarativePartType) -> bool {
+    pt: &VhdlParseTreeNode, decl_scope: ObjPoolIndex<Scope>,
+    use_scope: ObjPoolIndex<Scope>, decl_part_type: DeclarativePartType)
+    -> bool {
 
     let mut no_errors = true;
 
     match pt.node_type {
         ParseTreeNodeType::PT_DECLARATION_LIST => {
             no_errors &= analyze_declaration_list(
-                s, &pt.pieces[0].as_ref().unwrap(), scope, decl_part_type);
+                s, &pt.pieces[0].as_ref().unwrap(), decl_scope, use_scope,
+                decl_part_type);
             no_errors &= analyze_declarative_item(
-                s, &pt.pieces[1].as_ref().unwrap(), scope, decl_part_type);
+                s, &pt.pieces[1].as_ref().unwrap(), decl_scope, use_scope,
+                decl_part_type);
         },
         _ => {
             no_errors &= analyze_declarative_item(
-                s, pt, scope, decl_part_type);
+                s, pt, decl_scope, use_scope, decl_part_type);
         },
     };
 
@@ -522,7 +616,7 @@ fn analyze_entity(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode)
     // Declarations
     if let Some(decl_pt) = pt.pieces[2].as_ref() {
         let no_errors = analyze_declaration_list(s, decl_pt, decl_scope,
-            DeclarativePartType::EntityDeclarativePart);
+            use_scope, DeclarativePartType::EntityDeclarativePart);
         if !no_errors {
             s.op_l.get_mut(s.work_lib.unwrap()).drop_tentative_design_unit();
             return false;
@@ -543,6 +637,14 @@ fn analyze_design_unit(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode)
     
     // Root declarative region
     let root_decl_region = s.op_sc.alloc();
+    let root_decl_region_scope = s.op_s.alloc();
+    {
+        let root_decl_region_ = s.op_sc.get_mut(root_decl_region);
+        *root_decl_region_ = ScopeChainNode::X {
+            this_scope: root_decl_region_scope,
+            parent: None,
+        };
+    }
     s.innermost_scope = Some(root_decl_region);
 
     // Not implemented

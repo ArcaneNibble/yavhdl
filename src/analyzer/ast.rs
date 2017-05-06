@@ -252,7 +252,7 @@ impl AstNode {
             },
 
             &AstNode::SubtypeDecl {loc, id, subtype_indication} => {
-                format!("{{\"type\": \"SubtypeDecl\", \"id\": {}{}
+                format!("{{\"type\": \"SubtypeDecl\", \"id\": {}{}\
                          , \"subtype_indication\": {}}}",
                     id.debug_print(sp), loc.debug_print(sp),
                     op_n.get(subtype_indication).debug_print(sp, op_n, op_s))
