@@ -1,4 +1,4 @@
 entity test is
     type test1 is (foo);
-    subtype test2 is test1;
+    subtype test2 is test;
 begin end;

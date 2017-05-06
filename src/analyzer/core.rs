@@ -534,8 +534,8 @@ fn analyze_declaration_list(s: &mut AnalyzerCoreStateBlob,
     no_errors
 }
 
-fn analyze_entity(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode)
-    -> bool {
+fn analyze_entity(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode,
+    tgt_scope: ObjPoolIndex<Scope>) -> bool {
 
     // Location information
     let loc = pt_loc(s, pt);
@@ -609,6 +609,7 @@ fn analyze_entity(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode)
             scope_chain: decl_sc,
         };
     }
+    s.op_s.get_mut(tgt_scope).add(ScopeItemName::Identifier(id), e_);
     s.op_l.get_mut(s.work_lib.unwrap()).tentative_add_design_unit(id, e_);
 
     // TODO
@@ -652,7 +653,8 @@ fn analyze_design_unit(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode)
 
     match pt.pieces[0].as_ref().unwrap().node_type {
         ParseTreeNodeType::PT_ENTITY => {
-            no_errors &= analyze_entity(s, &pt.pieces[0].as_ref().unwrap());
+            no_errors &= analyze_entity(
+                s, &pt.pieces[0].as_ref().unwrap(), root_decl_region_scope);
         },
         _ => panic!("Don't know how to handle this parse tree node!")
     };
