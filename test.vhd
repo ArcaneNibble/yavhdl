@@ -1,3 +1,3 @@
-entity test is
-    subtype test is test;
-begin end;
+package test is
+    subtype test2 is test1;
+end;

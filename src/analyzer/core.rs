@@ -115,17 +115,17 @@ fn analyze_identifier(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode)
 
 #[derive(Copy, Clone)]
 enum DeclarativePartType {
-    ArchitectureDeclarativePart,
-    BlockDeclarativePart,
-    ConfigurationDeclarativePart,
+    // ArchitectureDeclarativePart,
+    // BlockDeclarativePart,
+    // ConfigurationDeclarativePart,
     EntityDeclarativePart,
-    GenerateStatementBody,
-    PackageBodyDeclarativePart,
-    PackageDeclarativePart,
-    ProcessDeclarativePart,
-    ProtectedTypeDeclarativePart,
-    ProtectedTypeBodyDeclarativePart,
-    SubprogramDeclarativePart,
+    // GenerateStatementBody,
+    // PackageBodyDeclarativePart,
+    // PackageDeclarativePart,
+    // ProcessDeclarativePart,
+    // ProtectedTypeDeclarativePart,
+    // ProtectedTypeBodyDeclarativePart,
+    // SubprogramDeclarativePart,
 }
 
 #[derive(Eq)]
@@ -356,6 +356,20 @@ fn analyze_type_decl(s: &mut AnalyzerCoreStateBlob,
     true
 }
 
+fn analyze_subtype_indication(s: &mut AnalyzerCoreStateBlob,
+    pt: &VhdlParseTreeNode) -> Option<ObjPoolIndex<AstNode>> {
+
+    match pt.node_type {
+        ParseTreeNodeType::PT_SUBTYPE_INDICATION => {
+            // We have an absolutely normal subtype_indication
+            let x_ = s.op_n.alloc();
+
+            None
+        },
+        _ => panic!("Don't know how to handle this parse tree node!")
+    }
+}
+
 fn analyze_subtype_decl(s: &mut AnalyzerCoreStateBlob,
     pt: &VhdlParseTreeNode, scope: ObjPoolIndex<Scope>,
     decl_part_type: DeclarativePartType) -> bool {
@@ -364,12 +378,19 @@ fn analyze_subtype_decl(s: &mut AnalyzerCoreStateBlob,
 
     let id = analyze_identifier(s, &pt.pieces[0].as_ref().unwrap());
     let loc = pt_loc(s, pt);
+    let subtype_indication_ = analyze_subtype_indication(s,
+        &pt.pieces[1].as_ref().unwrap());
+
+    if subtype_indication_.is_none() {
+        return false;
+    }
 
     {
         let x = s.op_n.get_mut(x_);
         *x = AstNode::SubtypeDecl {
             loc: loc,
             id: id,
+            subtype_indication: subtype_indication_.unwrap(),
         };
     }
 
@@ -384,8 +405,6 @@ fn analyze_subtype_decl(s: &mut AnalyzerCoreStateBlob,
             s.sp.retrieve_latin1_str(id.orig_name).pretty_name());
         return false;
     }
-
-    // TODO: the actual hard part
 
     true
 }
@@ -453,16 +472,39 @@ fn analyze_entity(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode)
         return false;
     }
 
-    let e_scope = s.op_s.alloc();
+    // Create scopes and chain them up properly.
+    // FIXME: Do note that we cheat a bunch here and don't pop off scope chain
+    // nodes when things fail. This is fine because the next design unit
+    // will start with an empty scope chain. However, we do need to remember
+    // to remove these on success except on toplevel design units.
+    let use_scope = s.op_s.alloc();
+    let decl_scope = s.op_s.alloc();
+    let use_sc = s.op_sc.alloc();
+    let decl_sc = s.op_sc.alloc();
+    {
+        let use_sc_ = s.op_sc.get_mut(use_sc);
+        *use_sc_ = ScopeChainNode::X {
+            this_scope: use_scope,
+            parent: s.innermost_scope
+        };
+    }
+    {
+        let decl_sc_ = s.op_sc.get_mut(decl_sc);
+        *decl_sc_ = ScopeChainNode::X {
+            this_scope: decl_scope,
+            parent: Some(use_sc),
+        }
+    }
+    s.innermost_scope = Some(decl_sc);
 
+    // Set up the actual entity object
     {
         let e = s.op_n.get_mut(e_);
         *e = AstNode::Entity {
             loc: loc,
             id: id,
-            scope: e_scope,
-            // Store the given root declarative region
-            root_decl_region: s.innermost_scope.unwrap(),
+            scope: decl_scope,
+            scope_chain: decl_sc,
         };
     }
 
@@ -485,7 +527,7 @@ fn analyze_entity(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode)
 
     // Declarations
     if let Some(decl_pt) = pt.pieces[2].as_ref() {
-        let no_errors = analyze_declaration_list(s, decl_pt, e_scope,
+        let no_errors = analyze_declaration_list(s, decl_pt, decl_scope,
             DeclarativePartType::EntityDeclarativePart);
         if !no_errors {
             s.op_l.get_mut(s.work_lib.unwrap()).drop_tentative_design_unit();

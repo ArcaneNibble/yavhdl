@@ -126,17 +126,17 @@ impl Scope {
 }
 
 #[derive(Debug)]
-pub struct ScopeChainNode {
-    pub this_scope: Scope,
-    pub parent: Option<ObjPoolIndex<ScopeChainNode>>,
+pub enum ScopeChainNode {
+    Invalid,
+    X {
+        this_scope: ObjPoolIndex<Scope>,
+        parent: Option<ObjPoolIndex<ScopeChainNode>>,
+    }
 }
 
 impl Default for ScopeChainNode {
     fn default() -> ScopeChainNode {
-        ScopeChainNode {
-            this_scope: Scope::new(),
-            parent: None,
-        }
+        ScopeChainNode::Invalid
     }
 }
 
@@ -177,13 +177,18 @@ pub enum AstNode {
         scope: ObjPoolIndex<Scope>,
 
         // This is needed for matching architectures
-        root_decl_region: ObjPoolIndex<ScopeChainNode>
+        // TODO: explain what is happening here
+        scope_chain: ObjPoolIndex<ScopeChainNode>
     },
     SubtypeDecl {
         loc: SourceLoc,
         id: Identifier,
+        subtype_indication: ObjPoolIndex<AstNode>,
+    },
+    SubtypeIndication {
+        type_mark: ObjPoolIndex<AstNode>,
         // TODO
-    }
+    },
 }
 
 impl Default for AstNode {
@@ -217,11 +222,7 @@ impl AstNode {
                             format!(", \"chr\": \"{}\"", get_chr_escaped(c)),
                     },
                     idx,
-                    match corresponding_type_decl {
-                        &AstNode::EnumerationTypeDecl{id, ..} =>
-                            id.debug_print(sp),
-                        _ => panic!("AST invariant violated!")
-                    })
+                    corresponding_type_decl.id().unwrap().debug_print(sp))
             },
 
             &AstNode::EnumerationTypeDecl {loc, id, ..} => {
@@ -250,9 +251,19 @@ impl AstNode {
                 s
             },
 
-            &AstNode::SubtypeDecl {loc, id} => {
-                format!("{{\"type\": \"SubtypeDecl\", \"id\": {}{}}}",
-                    id.debug_print(sp), loc.debug_print(sp))
+            &AstNode::SubtypeDecl {loc, id, subtype_indication} => {
+                format!("{{\"type\": \"SubtypeDecl\", \"id\": {}{}
+                         , \"subtype_indication\": {}}}",
+                    id.debug_print(sp), loc.debug_print(sp),
+                    op_n.get(subtype_indication).debug_print(sp, op_n, op_s))
+            },
+
+            &AstNode::SubtypeIndication {type_mark} => {
+                let type_mark = op_n.get(type_mark);
+
+                format!("{{\"type\": \"SubtypeIndication\"\
+                         , \"type_mark\": {}}}",
+                    type_mark.id().unwrap().debug_print(sp))
             }
 
             _ => panic!("don't know how to print this AstNode!")
@@ -264,6 +275,15 @@ impl AstNode {
             &AstNode::EnumerationTypeDecl {loc, ..} => Some(loc),
             &AstNode::Entity {loc, ..} => Some(loc),
             &AstNode::SubtypeDecl {loc, ..} => Some(loc),
+            _ => None
+        }
+    }
+
+    pub fn id(&self) -> Option<Identifier> {
+        match self {
+            &AstNode::EnumerationTypeDecl {id, ..} => Some(id),
+            &AstNode::Entity {id, ..} => Some(id),
+            &AstNode::SubtypeDecl {id, ..} => Some(id),
             _ => None
         }
     }
