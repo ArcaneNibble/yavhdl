@@ -237,8 +237,6 @@ fn analyze_enum_lit(s: &mut AnalyzerCoreStateBlob,
     lit_pt: &VhdlParseTreeNode, scope: ObjPoolIndex<Scope>, idx: &mut u64,
     e_: ObjPoolIndex<AstNode>, pt_for_loc: &VhdlParseTreeNode) -> bool {
 
-    let x_ = s.op_n.alloc();
-
     let lit = match lit_pt.node_type {
         ParseTreeNodeType::PT_LIT_CHAR =>
             EnumerationLiteral::CharLiteral(lit_pt.chr),
@@ -246,6 +244,7 @@ fn analyze_enum_lit(s: &mut AnalyzerCoreStateBlob,
             s, lit_pt))
     };
 
+    let x_ = s.op_n.alloc();
     {
         let x = s.op_n.get_mut(x_);
         *x = AstNode::EnumerationLitDecl {
@@ -318,10 +317,8 @@ fn analyze_type_decl(s: &mut AnalyzerCoreStateBlob,
     match typedef_pt.node_type {
         ParseTreeNodeType::PT_ENUMERATION_TYPE_DEFINITION => {
             // The main declaration
-            let d_ = s.op_n.alloc();
-
             let loc = pt_loc(s, pt);
-
+            let d_ = s.op_n.alloc();
             {
                 let d = s.op_n.get_mut(d_);
                 *d = AstNode::EnumerationTypeDecl {
@@ -374,8 +371,6 @@ fn analyze_subtype_decl(s: &mut AnalyzerCoreStateBlob,
     pt: &VhdlParseTreeNode, scope: ObjPoolIndex<Scope>,
     decl_part_type: DeclarativePartType) -> bool {
 
-    let x_ = s.op_n.alloc();
-
     let id = analyze_identifier(s, &pt.pieces[0].as_ref().unwrap());
     let loc = pt_loc(s, pt);
     let subtype_indication_ = analyze_subtype_indication(s,
@@ -385,6 +380,7 @@ fn analyze_subtype_decl(s: &mut AnalyzerCoreStateBlob,
         return false;
     }
 
+    let x_ = s.op_n.alloc();
     {
         let x = s.op_n.get_mut(x_);
         *x = AstNode::SubtypeDecl {
@@ -447,13 +443,24 @@ fn analyze_declaration_list(s: &mut AnalyzerCoreStateBlob,
 fn analyze_entity(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode)
     -> bool {
 
-    let e_ = s.op_n.alloc();
-
     // Location information
     let loc = pt_loc(s, pt);
 
     // Our name
     let id = analyze_identifier(s, &pt.pieces[0].as_ref().unwrap());
+
+    // Verify that the id at the end (if any) is the same as the one in the
+    // beginning
+    if let Some(tail_id_pt) = pt.pieces[4].as_ref() {
+        let tail_id = analyze_identifier(s, tail_id_pt);
+        if tail_id != id {
+            dump_current_location(s, pt, true);
+            s.errors +=
+                "ERROR: Name at end of entity must match name at beginning\n";
+            s.op_l.get_mut(s.work_lib.unwrap()).drop_tentative_design_unit();
+            return false;
+        }
+    }
 
     // Check for duplicate entity
     let old_node_idx = s.op_l.get(s.work_lib.unwrap()).find_design_unit(id);
@@ -498,6 +505,7 @@ fn analyze_entity(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode)
     s.innermost_scope = Some(decl_sc);
 
     // Set up the actual entity object
+    let e_ = s.op_n.alloc();
     {
         let e = s.op_n.get_mut(e_);
         *e = AstNode::Entity {
@@ -507,21 +515,7 @@ fn analyze_entity(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode)
             scope_chain: decl_sc,
         };
     }
-
     s.op_l.get_mut(s.work_lib.unwrap()).tentative_add_design_unit(id, e_);
-
-    // Verify that the id at the end (if any) is the same as the one in the
-    // beginning
-    if let Some(tail_id_pt) = pt.pieces[4].as_ref() {
-        let tail_id = analyze_identifier(s, tail_id_pt);
-        if tail_id != id {
-            dump_current_location(s, pt, true);
-            s.errors +=
-                "ERROR: Name at end of entity must match name at beginning\n";
-            s.op_l.get_mut(s.work_lib.unwrap()).drop_tentative_design_unit();
-            return false;
-        }
-    }
 
     // TODO
 
