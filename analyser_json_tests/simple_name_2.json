@@ -1,0 +1,8 @@
+{
+    "type": "DesignDatabase",
+    "libraries": [{
+        "type": "Library",
+        "id": "worklib",
+        "units": []
+    }]
+}
