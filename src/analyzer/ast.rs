@@ -158,6 +158,14 @@ impl EnumerationLiteral {
 }
 
 
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum AstNodeKind {
+    Invalid,
+    Other,
+    Type,
+}
+
+
 #[derive(Debug)]
 pub enum AstNode {
     Invalid,
@@ -196,10 +204,37 @@ impl Default for AstNode {
 }
 
 impl AstNode {
+    pub fn kind(&self) -> AstNodeKind {
+        match self {
+            &AstNode::Invalid => AstNodeKind::Invalid,
+            &AstNode::EnumerationTypeDecl{..} | &AstNode::SubtypeDecl{..} =>
+                AstNodeKind::Type,
+            _ => AstNodeKind::Other,
+        }
+    }
+
     pub fn is_an_overloadable_decl(&self) -> bool {
         match self {
             &AstNode::EnumerationLitDecl{..} => true,
             _ => false,
+        }
+    }
+
+    pub fn loc(&self) -> Option<SourceLoc> {
+        match self {
+            &AstNode::EnumerationTypeDecl {loc, ..} => Some(loc),
+            &AstNode::Entity {loc, ..} => Some(loc),
+            &AstNode::SubtypeDecl {loc, ..} => Some(loc),
+            _ => None
+        }
+    }
+
+    pub fn id(&self) -> Option<Identifier> {
+        match self {
+            &AstNode::EnumerationTypeDecl {id, ..} => Some(id),
+            &AstNode::Entity {id, ..} => Some(id),
+            &AstNode::SubtypeDecl {id, ..} => Some(id),
+            _ => None
         }
     }
 
@@ -267,24 +302,6 @@ impl AstNode {
             }
 
             _ => panic!("don't know how to print this AstNode!")
-        }
-    }
-
-    pub fn loc(&self) -> Option<SourceLoc> {
-        match self {
-            &AstNode::EnumerationTypeDecl {loc, ..} => Some(loc),
-            &AstNode::Entity {loc, ..} => Some(loc),
-            &AstNode::SubtypeDecl {loc, ..} => Some(loc),
-            _ => None
-        }
-    }
-
-    pub fn id(&self) -> Option<Identifier> {
-        match self {
-            &AstNode::EnumerationTypeDecl {id, ..} => Some(id),
-            &AstNode::Entity {id, ..} => Some(id),
-            &AstNode::SubtypeDecl {id, ..} => Some(id),
-            _ => None
         }
     }
 }

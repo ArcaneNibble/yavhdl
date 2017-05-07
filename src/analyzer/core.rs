@@ -438,8 +438,13 @@ fn analyze_subtype_indication(s: &mut AnalyzerCoreStateBlob,
 
             if type_mark.is_none() {
                 dump_current_location(s, pt_for_loc, true);
-                s.errors +=
-                    "ERROR: Bad name for type_mark\n";
+                s.errors +=  "ERROR: Bad name for type_mark\n";
+                return None;
+            }
+
+            if s.op_n.get(type_mark.unwrap()).kind() != AstNodeKind::Type {
+                dump_current_location(s, pt_for_loc, true);
+                s.errors += "ERROR: name is not a type\n";
                 return None;
             }
 
