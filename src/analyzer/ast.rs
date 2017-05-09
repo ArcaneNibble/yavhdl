@@ -162,6 +162,7 @@ pub enum AstNodeKind {
     Invalid,
     Other,
     ScalarType,
+    Subtype,
     DeclarativeRegion,
 }
 
@@ -192,6 +193,7 @@ pub enum AstNode {
         loc: SourceLoc,
         id: Identifier,
         subtype_indication: ObjPoolIndex<AstNode>,
+        base_type_kind: AstNodeKind,
     },
     SubtypeIndication {
         type_mark: ObjPoolIndex<AstNode>,
@@ -206,9 +208,16 @@ impl Default for AstNode {
 impl AstNode {
     pub fn kind(&self) -> AstNodeKind {
         match self {
+            &AstNode::SubtypeDecl{base_type_kind, ..} => base_type_kind,
+            _ => self.real_kind(),
+        }
+    }
+
+    pub fn real_kind(&self) -> AstNodeKind {
+        match self {
             &AstNode::Invalid => AstNodeKind::Invalid,
-            &AstNode::EnumerationTypeDecl{..} | &AstNode::SubtypeDecl{..} =>
-                AstNodeKind::ScalarType,
+            &AstNode::EnumerationTypeDecl{..} => AstNodeKind::ScalarType,
+            &AstNode::SubtypeDecl{..} => AstNodeKind::Subtype,
             &AstNode::Entity{..} => AstNodeKind::DeclarativeRegion,
             _ => AstNodeKind::Other,
         }
@@ -294,7 +303,7 @@ impl AstNode {
                 s
             },
 
-            &AstNode::SubtypeDecl {loc, id, subtype_indication} => {
+            &AstNode::SubtypeDecl {loc, id, subtype_indication, ..} => {
                 format!("{{\"type\": \"SubtypeDecl\", \"id\": {}{}\
                          , \"subtype_indication\": {}}}",
                     id.debug_print(sp), loc.debug_print(sp),

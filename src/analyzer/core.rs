@@ -536,6 +536,12 @@ fn analyze_subtype_decl(s: &mut AnalyzerCoreStateBlob,
         return false;
     }
 
+    let base_type = match s.op_n.get(subtype_indication_.unwrap()) {
+        &AstNode::SubtypeIndication{type_mark, ..} => type_mark,
+        _ => panic!("AST invariant violated!"),
+    };
+    let base_type_kind = s.op_n.get(base_type).kind();
+
     let x_ = s.op_n.alloc();
     {
         let x = s.op_n.get_mut(x_);
@@ -543,6 +549,7 @@ fn analyze_subtype_decl(s: &mut AnalyzerCoreStateBlob,
             loc: loc,
             id: id,
             subtype_indication: subtype_indication_.unwrap(),
+            base_type_kind: base_type_kind,
         };
     }
 
