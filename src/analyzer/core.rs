@@ -286,25 +286,20 @@ fn analyze_enum_lits(s: &mut AnalyzerCoreStateBlob,
     lit_pt: &VhdlParseTreeNode, scope: ObjPoolIndex<Scope>, idx: &mut u64,
     e_: ObjPoolIndex<AstNode>, pt_for_loc: &VhdlParseTreeNode) -> bool {
 
-    let mut no_errors = true;
-
     match lit_pt.node_type {
         ParseTreeNodeType::PT_ENUM_LITERAL_LIST => {
-            no_errors &= analyze_enum_lits(s,
-                &lit_pt.pieces[0].as_ref().unwrap(), scope, idx, e_,
-                pt_for_loc);
+            if !analyze_enum_lits(s, &lit_pt.pieces[0].as_ref().unwrap(),
+                                  scope, idx, e_, pt_for_loc) {
+                return false;
+            }
             (*idx) += 1;
-            no_errors &= analyze_enum_lit(s,
-                &lit_pt.pieces[1].as_ref().unwrap(), scope, idx, e_,
-                pt_for_loc);
+            analyze_enum_lit(s, &lit_pt.pieces[1].as_ref().unwrap(),
+                             scope, idx, e_, pt_for_loc)
         },
         _ => {
-            no_errors &= analyze_enum_lit(s, lit_pt, scope, idx, e_,
-                pt_for_loc);
+            analyze_enum_lit(s, lit_pt, scope, idx, e_, pt_for_loc)
         },
-    };
-
-    no_errors
+    }
 }
 
 fn analyze_type_decl(s: &mut AnalyzerCoreStateBlob,
@@ -519,24 +514,21 @@ fn analyze_declaration_list(s: &mut AnalyzerCoreStateBlob,
     use_scope: ObjPoolIndex<Scope>, decl_part_type: DeclarativePartType)
     -> bool {
 
-    let mut no_errors = true;
-
     match pt.node_type {
         ParseTreeNodeType::PT_DECLARATION_LIST => {
-            no_errors &= analyze_declaration_list(
-                s, &pt.pieces[0].as_ref().unwrap(), decl_scope, use_scope,
-                decl_part_type);
-            no_errors &= analyze_declarative_item(
-                s, &pt.pieces[1].as_ref().unwrap(), decl_scope, use_scope,
-                decl_part_type);
+            if !analyze_declaration_list(s, &pt.pieces[0].as_ref().unwrap(),
+                                         decl_scope, use_scope,
+                                         decl_part_type) {
+                return false;
+            }
+            analyze_declarative_item(s, &pt.pieces[1].as_ref().unwrap(),
+                                     decl_scope, use_scope, decl_part_type)
         },
         _ => {
-            no_errors &= analyze_declarative_item(
-                s, pt, decl_scope, use_scope, decl_part_type);
+            analyze_declarative_item(s, pt, decl_scope, use_scope,
+                                     decl_part_type)
         },
-    };
-
-    no_errors
+    }
 }
 
 fn analyze_entity(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode,
@@ -556,7 +548,6 @@ fn analyze_entity(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode,
             dump_current_location(s, pt, true);
             s.errors +=
                 "ERROR: Name at end of entity must match name at beginning\n";
-            s.op_l.get_mut(s.work_lib.unwrap()).drop_tentative_design_unit();
             return false;
         }
     }
@@ -621,9 +612,8 @@ fn analyze_entity(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode,
 
     // Declarations
     if let Some(decl_pt) = pt.pieces[2].as_ref() {
-        let no_errors = analyze_declaration_list(s, decl_pt, decl_scope,
-            use_scope, DeclarativePartType::EntityDeclarativePart);
-        if !no_errors {
+        if !analyze_declaration_list(s, decl_pt, decl_scope, use_scope,
+                    DeclarativePartType::EntityDeclarativePart) {
             s.op_l.get_mut(s.work_lib.unwrap()).drop_tentative_design_unit();
             return false;
         }

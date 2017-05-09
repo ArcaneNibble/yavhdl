@@ -121,7 +121,6 @@ impl Scope {
         } else {
             None
         }
-
     }
 }
 
