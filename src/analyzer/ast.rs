@@ -161,7 +161,8 @@ impl EnumerationLiteral {
 pub enum AstNodeKind {
     Invalid,
     Other,
-    Type,
+    ScalarType,
+    DeclarativeRegion,
 }
 
 
@@ -207,7 +208,8 @@ impl AstNode {
         match self {
             &AstNode::Invalid => AstNodeKind::Invalid,
             &AstNode::EnumerationTypeDecl{..} | &AstNode::SubtypeDecl{..} =>
-                AstNodeKind::Type,
+                AstNodeKind::ScalarType,
+            &AstNode::Entity{..} => AstNodeKind::DeclarativeRegion,
             _ => AstNodeKind::Other,
         }
     }
@@ -233,6 +235,13 @@ impl AstNode {
             &AstNode::EnumerationTypeDecl {id, ..} => Some(id),
             &AstNode::Entity {id, ..} => Some(id),
             &AstNode::SubtypeDecl {id, ..} => Some(id),
+            _ => None
+        }
+    }
+
+    pub fn scope(&self) -> Option<ObjPoolIndex<Scope>> {
+        match self {
+            &AstNode::Entity {scope, ..} => Some(scope),
             _ => None
         }
     }

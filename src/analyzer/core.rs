@@ -412,6 +412,69 @@ fn analyze_name_single_nonoverloadable(s: &mut AnalyzerCoreStateBlob,
             // yields only non-overloadable things.
             None
         },
+
+        ParseTreeNodeType::PT_NAME_SELECTED => {
+            // Logic for selected names
+            // First figure out what the prefix is
+            let prefix = analyze_name_single_nonoverloadable(
+                s, &pt.pieces[0].as_ref().unwrap());
+            if prefix.is_none() {
+                return None;
+            }
+            let prefix = prefix.unwrap();
+            let suffix_pt = &pt.pieces[1].as_ref().unwrap();
+
+            // Make sure suffix can be a "single things"
+            if suffix_pt.node_type != ParseTreeNodeType::PT_BASIC_ID &&
+               suffix_pt.node_type != ParseTreeNodeType::PT_EXT_ID {
+                return None;
+            }
+            let id =
+                ScopeItemName::Identifier(analyze_identifier(s, suffix_pt));
+
+            match s.op_n.get(prefix).kind() {
+                AstNodeKind::DeclarativeRegion => {
+                    // TODO: The "only if we're currently inside" logic
+
+                    let scope = s.op_n.get(prefix).scope().unwrap();
+
+                    // GIANT FIXME: Copypasta
+
+                    // Try to find the thing
+                    if let Some(maybe_found_thing) =
+                        s.op_s.get(scope).get(id) {
+
+                        // We potentially found some things, so we need to
+                        // handle aliases (TODO) and if this thing isn't
+                        // actually a non-overloadable thing (otherwise we
+                        // are actually done already)
+
+                        // This should always be true
+                        assert!(maybe_found_thing.len() > 0);
+
+                        // Everything found must either all be overloadable
+                        // or none can be overloadable (it cannot be mixed)
+                        if s.op_n.get(maybe_found_thing[0])
+                            .is_an_overloadable_decl() {
+
+                            // Bad, was an overloadable thing
+                            None
+                        } else {
+                            // Wow, we are done!
+                            // FIXME: Aliases
+                            assert!(maybe_found_thing.len() == 1);
+                            Some(maybe_found_thing[0])
+                        }
+                    } else {
+                        None
+                    }
+                },
+                // TODO: Other things
+
+                // This is not a thing we can select into
+                _ => None,
+            }
+        },
         _ => panic!("Don't know how to handle this parse tree node!")
     }
 }
@@ -437,7 +500,10 @@ fn analyze_subtype_indication(s: &mut AnalyzerCoreStateBlob,
                 return None;
             }
 
-            if s.op_n.get(type_mark.unwrap()).kind() != AstNodeKind::Type {
+            if s.op_n.get(type_mark.unwrap()).kind() !=
+                AstNodeKind::ScalarType {
+                // FIXME: Other kinds of types
+
                 dump_current_location(s, pt_for_loc, true);
                 s.errors += "ERROR: name is not a type\n";
                 return None;
