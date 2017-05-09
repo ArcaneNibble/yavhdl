@@ -1,0 +1,40 @@
+{
+    "type": "DesignDatabase",
+    "libraries": [{
+        "type": "Library",
+        "id": "worklib",
+        "units": [
+            {
+                "type": "Entity",
+                "id": "test",
+                "first_line": 1, "first_column": 1,
+                "last_line": 4, "last_column": 10,
+                "file_name": "analyser_json_tests/selected_name_1.vhd",
+                "decls": [
+                    "__is_a_set",
+                    {
+                        "type": "EnumerationTypeDecl",
+                        "id": "test1",
+                        "first_line": 2, "first_column": 5,
+                        "last_line": 2, "last_column": 24,
+                        "file_name": "analyser_json_tests/selected_name_1.vhd"
+                    },{
+                        "type": "SubtypeDecl",
+                        "id": "test2",
+                        "first_line": 3, "first_column": 5,
+                        "last_line": 3, "last_column": 32,
+                        "file_name": "analyser_json_tests/selected_name_1.vhd",
+                        "subtype_indication": {
+                            "type": "SubtypeIndication",
+                            "type_mark": "test1"}
+                    },{
+                        "type": "EnumerationLitDecl",
+                        "id": "foo",
+                        "idx": 0,
+                        "enum_name": "test1"
+                    }
+                ]
+            }
+        ]
+    }]
+}
