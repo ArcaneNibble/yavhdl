@@ -234,7 +234,7 @@ fn try_add_declaration(s: &mut AnalyzerCoreStateBlob, name: ScopeItemName,
 }
 
 fn analyze_enum_lit(s: &mut AnalyzerCoreStateBlob,
-    lit_pt: &VhdlParseTreeNode, scope: ObjPoolIndex<Scope>, idx: &mut u64,
+    lit_pt: &VhdlParseTreeNode, scope: ObjPoolIndex<Scope>, idx: &mut i64,
     e_: ObjPoolIndex<AstNode>, pt_for_loc: &VhdlParseTreeNode) -> bool {
 
     let lit = match lit_pt.node_type {
@@ -283,7 +283,7 @@ fn analyze_enum_lit(s: &mut AnalyzerCoreStateBlob,
 }
 
 fn analyze_enum_lits(s: &mut AnalyzerCoreStateBlob,
-    lit_pt: &VhdlParseTreeNode, scope: ObjPoolIndex<Scope>, idx: &mut u64,
+    lit_pt: &VhdlParseTreeNode, scope: ObjPoolIndex<Scope>, idx: &mut i64,
     e_: ObjPoolIndex<AstNode>, pt_for_loc: &VhdlParseTreeNode) -> bool {
 
     match lit_pt.node_type {
@@ -334,7 +334,7 @@ fn analyze_type_decl(s: &mut AnalyzerCoreStateBlob,
             }
 
             // The literals
-            let mut idx: u64 = 0;
+            let mut idx: i64 = 0;
             let lits_ok = analyze_enum_lits(s,
                 &typedef_pt.pieces[0].as_ref().unwrap(), scope, &mut idx,
                 d_, pt);

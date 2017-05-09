@@ -172,7 +172,7 @@ pub enum AstNode {
     Invalid,
     EnumerationLitDecl {
         lit: EnumerationLiteral,
-        idx: u64,
+        idx: i64,
         corresponding_type_decl: ObjPoolIndex<AstNode>,
     },
     EnumerationTypeDecl {
