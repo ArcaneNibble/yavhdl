@@ -501,7 +501,7 @@ fn analyze_subtype_indication(s: &mut AnalyzerCoreStateBlob,
             }
 
             if s.op_n.get(type_mark.unwrap()).kind() !=
-                AstNodeKind::ScalarType {
+                AstNodeKind::Type {
                 // FIXME: Other kinds of types
 
                 dump_current_location(s, pt_for_loc, true);

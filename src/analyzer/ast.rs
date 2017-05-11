@@ -161,8 +161,7 @@ impl EnumerationLiteral {
 pub enum AstNodeKind {
     Invalid,
     Other,
-    ScalarType,
-    Subtype,
+    Type,
     DeclarativeRegion,
 }
 
@@ -208,7 +207,6 @@ impl Default for AstNode {
 impl AstNode {
     pub fn kind(&self) -> AstNodeKind {
         match self {
-            &AstNode::SubtypeDecl{base_type_kind, ..} => base_type_kind,
             _ => self.real_kind(),
         }
     }
@@ -216,8 +214,9 @@ impl AstNode {
     pub fn real_kind(&self) -> AstNodeKind {
         match self {
             &AstNode::Invalid => AstNodeKind::Invalid,
-            &AstNode::EnumerationTypeDecl{..} => AstNodeKind::ScalarType,
-            &AstNode::SubtypeDecl{..} => AstNodeKind::Subtype,
+            &AstNode::EnumerationTypeDecl{..} |
+            &AstNode::SubtypeDecl{..}
+                => AstNodeKind::Type,
             &AstNode::Entity{..} => AstNodeKind::DeclarativeRegion,
             _ => AstNodeKind::Other,
         }
