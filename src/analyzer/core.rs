@@ -626,6 +626,7 @@ fn analyze_entity(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode,
     }
 
     // Check for duplicate entity
+    // FIXME: Probably have to replace existing one at some point???
     let old_node_idx = s.op_l.get(s.work_lib.unwrap()).find_design_unit(id);
     if old_node_idx.is_some() {
         dump_current_location(s, pt, true);
@@ -679,7 +680,6 @@ fn analyze_entity(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode,
         };
     }
     s.op_s.get_mut(tgt_scope).add(ScopeItemName::Identifier(id), e_);
-    s.op_l.get_mut(s.work_lib.unwrap()).tentative_add_design_unit(id, e_);
 
     // TODO
 
@@ -687,13 +687,12 @@ fn analyze_entity(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode,
     if let Some(decl_pt) = pt.pieces[2].as_ref() {
         if !analyze_declaration_list(s, decl_pt, decl_scope, use_scope,
                     DeclarativePartType::EntityDeclarativePart) {
-            s.op_l.get_mut(s.work_lib.unwrap()).drop_tentative_design_unit();
             return false;
         }
     }
 
-    // Add the thing we analyzed to the library for real
-    s.op_l.get_mut(s.work_lib.unwrap()).commit_tentative_design_unit();
+    // Add the thing we analyzed to the library
+    s.op_l.get_mut(s.work_lib.unwrap()).add_design_unit(id, e_);
 
     true
 }

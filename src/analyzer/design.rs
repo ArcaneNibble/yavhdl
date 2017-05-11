@@ -37,8 +37,6 @@ pub enum Library {
 
         db_by_name: HashMap<Identifier, ObjPoolIndex<AstNode>>,
         db_by_order: Vec<ObjPoolIndex<AstNode>>,
-        temp_id: Option<Identifier>,
-        temp_node: Option<ObjPoolIndex<AstNode>>,
     }
 }
 
@@ -54,8 +52,6 @@ impl Library {
             id: id,
             db_by_name: HashMap::new(),
             db_by_order: Vec::new(),
-            temp_id: None,
-            temp_node: None,
         }
     }
 
@@ -77,55 +73,8 @@ impl Library {
 
         match self {
             &Library::Invalid => panic!("use of Invalid library"),
-            &Library::X {ref db_by_name, ref temp_id, ref temp_node, ..} => {
-
-                // Check the tentative one first if we have one
-                if let Some(temp_id) = *temp_id {
-                    if temp_id == name {
-                        return *temp_node;
-                    }
-                }
-
+            &Library::X {ref db_by_name, ..} => {
                 db_by_name.get(&name).cloned()
-            }
-        }
-    }
-
-    pub fn tentative_add_design_unit(&mut self,
-        name: Identifier, unit: ObjPoolIndex<AstNode>) {
-
-        match self {
-            &mut Library::Invalid => panic!("use of Invalid library"),
-            &mut Library::X {ref mut temp_id, ref mut temp_node, ..} => {
-
-                // Cannot add a new tentative thing if we already have one
-                assert!(temp_node.is_none());
-
-                *temp_id = Some(name);
-                *temp_node = Some(unit);
-            }
-        }
-    }
-
-    pub fn commit_tentative_design_unit(&mut self) {
-
-        let (name, node) = match self {
-            &mut Library::Invalid => panic!("use of Invalid library"),
-            &mut Library::X {ref mut temp_id, ref mut temp_node, ..} => {
-                (temp_id.take().unwrap(), temp_node.take().unwrap())
-            }
-        };
-
-        self.add_design_unit(name, node);
-    }
-
-    pub fn drop_tentative_design_unit(&mut self) {
-
-        match self {
-            &mut Library::Invalid => panic!("use of Invalid library"),
-            &mut Library::X {ref mut temp_id, ref mut temp_node, ..} => {
-                temp_id.take();
-                temp_node.take();
             }
         }
     }
