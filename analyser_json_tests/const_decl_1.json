@@ -1,0 +1,52 @@
+{
+    "type": "DesignDatabase",
+    "libraries": [{
+        "type": "Library",
+        "id": "worklib",
+        "units": [
+            {
+                "type": "Entity",
+                "id": "test",
+                "first_line": 1, "first_column": 1,
+                "last_line": 4, "last_column": 10,
+                "file_name": "analyser_json_tests/const_decl_1.vhd",
+                "decls": [
+                    "__is_a_set",
+                    {
+                        "type": "ConstantDecl",
+                        "id": "test3",
+                        "first_line": 3, "first_column": 5,
+                        "last_line": 3, "last_column": 34,
+                        "file_name": "analyser_json_tests/const_decl_1.vhd",
+                        "subtype_indication": {
+                            "type": "SubtypeIndication",
+                            "type_mark": "test1"
+                        },
+                        "value": null
+                    },{
+                        "type": "EnumerationTypeDecl",
+                        "id": "test1",
+                        "first_line": 2, "first_column": 5,
+                        "last_line": 2, "last_column": 24,
+                        "file_name": "analyser_json_tests/const_decl_1.vhd"
+                    },{
+                        "type": "ConstantDecl",
+                        "id": "test2",
+                        "first_line": 3, "first_column": 5,
+                        "last_line": 3, "last_column": 34,
+                        "file_name": "analyser_json_tests/const_decl_1.vhd",
+                        "subtype_indication": {
+                            "type": "SubtypeIndication",
+                            "type_mark": "test1"
+                        },
+                        "value": null
+                    },{
+                        "type": "EnumerationLitDecl",
+                        "id": "foo", "idx": 0,
+                        "enum_name": "test1"
+                    }
+                ]
+            }
+        ]
+    }]
+}
