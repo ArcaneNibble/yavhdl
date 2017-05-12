@@ -1,5 +1,4 @@
 entity test is
     type test1 is (foo);
-    subtype test2 is test.test1;
-    subtype test3 is test.test2;
+    constant test2, test3 : test1;
 begin end;

@@ -574,12 +574,6 @@ fn analyze_subtype_decl(s: &mut AnalyzerCoreStateBlob,
         return false;
     }
 
-    let base_type = match s.op_n.get(subtype_indication_.unwrap()) {
-        &AstNode::SubtypeIndication{type_mark, ..} => type_mark,
-        _ => panic!("AST invariant violated!"),
-    };
-    let base_type_kind = s.op_n.get(base_type).kind();
-
     let x_ = s.op_n.alloc();
     {
         let x = s.op_n.get_mut(x_);
@@ -587,7 +581,6 @@ fn analyze_subtype_decl(s: &mut AnalyzerCoreStateBlob,
             loc: loc,
             id: id,
             subtype_indication: subtype_indication_.unwrap(),
-            base_type_kind: base_type_kind,
         };
     }
 
@@ -606,6 +599,68 @@ fn analyze_subtype_decl(s: &mut AnalyzerCoreStateBlob,
     true
 }
 
+fn analyze_identifier_list(s: &mut AnalyzerCoreStateBlob,
+    pt: &VhdlParseTreeNode) -> Vec<Identifier> {
+
+    let mut ret = vec![];
+    let mut cur_pt = pt;
+
+    // Just parse in backwards order and reverse at the end
+    while cur_pt.node_type == ParseTreeNodeType::PT_ID_LIST_REAL {
+        let this_id =
+            analyze_identifier(s, &cur_pt.pieces[1].as_ref().unwrap());
+        ret.push(this_id);
+        cur_pt = &cur_pt.pieces[0].as_ref().unwrap();
+    }
+    let final_id = analyze_identifier(s, cur_pt);
+    ret.push(final_id);
+
+    ret.reverse();
+
+    ret
+}
+
+fn analyze_constant_decl(s: &mut AnalyzerCoreStateBlob,
+    pt: &VhdlParseTreeNode, scope: ObjPoolIndex<Scope>) -> bool {
+
+    let id_list = analyze_identifier_list(s, &pt.pieces[0].as_ref().unwrap());
+    let loc = pt_loc(s, pt);
+    let subtype_indication_ = analyze_subtype_indication(s,
+        &pt.pieces[1].as_ref().unwrap(), pt);
+
+    if subtype_indication_.is_none() {
+        return false;
+    }
+
+    // TODO: Hiding the current names
+
+    // TODO: Not implemented
+    assert!(pt.pieces[2].is_none());
+
+    for id in id_list {
+        let x_ = s.op_n.alloc();
+        {
+            let x = s.op_n.get_mut(x_);
+            *x = AstNode::ConstantDecl {
+                loc: loc,
+                id: id,
+                subtype_indication: subtype_indication_.unwrap(),
+                value: None,
+            };
+        }
+
+        if !try_add_declaration(s, ScopeItemName::Identifier(id), x_, scope) {
+            dump_current_location(s, pt, true);
+            s.errors += &format!(
+                "ERROR: Duplicate declaration of constant {}!\n",
+                s.sp.retrieve_latin1_str(id.orig_name).pretty_name());
+            return false;
+        }
+    }
+
+    true
+}
+
 fn analyze_declarative_item(s: &mut AnalyzerCoreStateBlob,
     pt: &VhdlParseTreeNode, decl_scope: ObjPoolIndex<Scope>,
     use_scope: ObjPoolIndex<Scope>, decl_part_type: DeclarativePartType)
@@ -616,6 +671,8 @@ fn analyze_declarative_item(s: &mut AnalyzerCoreStateBlob,
             analyze_type_decl(s, pt, decl_scope, decl_part_type),
         ParseTreeNodeType::PT_SUBTYPE_DECLARATION =>
             analyze_subtype_decl(s, pt, decl_scope, decl_part_type),
+        ParseTreeNodeType::PT_CONSTANT_DECLARATION =>
+            analyze_constant_decl(s, pt, decl_scope),
         _ => panic!("Don't know how to handle this parse tree node!")
     }
 }

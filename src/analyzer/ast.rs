@@ -162,6 +162,7 @@ pub enum AstNodeKind {
     Invalid,
     Other,
     Type,
+    Object,
     DeclarativeRegion,
 }
 
@@ -192,11 +193,16 @@ pub enum AstNode {
         loc: SourceLoc,
         id: Identifier,
         subtype_indication: ObjPoolIndex<AstNode>,
-        base_type_kind: AstNodeKind,
     },
     SubtypeIndication {
         type_mark: ObjPoolIndex<AstNode>,
         // TODO
+    },
+    ConstantDecl {
+        loc: SourceLoc,
+        id: Identifier,
+        subtype_indication: ObjPoolIndex<AstNode>,
+        value: Option<ObjPoolIndex<AstNode>>,
     },
 }
 
@@ -218,6 +224,7 @@ impl AstNode {
             &AstNode::SubtypeDecl{..}
                 => AstNodeKind::Type,
             &AstNode::Entity{..} => AstNodeKind::DeclarativeRegion,
+            &AstNode::ConstantDecl{..} => AstNodeKind::Object,
             _ => AstNodeKind::Other,
         }
     }
@@ -234,6 +241,7 @@ impl AstNode {
             &AstNode::EnumerationTypeDecl {loc, ..} => Some(loc),
             &AstNode::Entity {loc, ..} => Some(loc),
             &AstNode::SubtypeDecl {loc, ..} => Some(loc),
+            &AstNode::ConstantDecl {loc, ..} => Some(loc),
             _ => None
         }
     }
@@ -243,6 +251,7 @@ impl AstNode {
             &AstNode::EnumerationTypeDecl {id, ..} => Some(id),
             &AstNode::Entity {id, ..} => Some(id),
             &AstNode::SubtypeDecl {id, ..} => Some(id),
+            &AstNode::ConstantDecl {id, ..} => Some(id),
             _ => None
         }
     }
@@ -315,7 +324,19 @@ impl AstNode {
                 format!("{{\"type\": \"SubtypeIndication\"\
                          , \"type_mark\": {}}}",
                     type_mark.id().unwrap().debug_print(sp))
-            }
+            },
+
+            &AstNode::ConstantDecl {loc, id, subtype_indication, value} => {
+                format!("{{\"type\": \"ConstantDecl\", \"id\": {}{}\
+                         , \"subtype_indication\": {}, \"value\": {}}}",
+                    id.debug_print(sp), loc.debug_print(sp),
+                    op_n.get(subtype_indication).debug_print(sp, op_n, op_s),
+                    if let Some(value) = value {
+                        op_n.get(value).debug_print(sp, op_n, op_s)
+                    } else {
+                        String::from("null")
+                    })
+            },
 
             _ => panic!("don't know how to print this AstNode!")
         }
