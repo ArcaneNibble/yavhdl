@@ -348,131 +348,165 @@ fn analyze_type_decl(s: &mut AnalyzerCoreStateBlob,
     true
 }
 
+fn walk_scope_chain(s: &mut AnalyzerCoreStateBlob, item: ScopeItemName)
+    -> Option<Vec<ObjPoolIndex<AstNode>>> {
+
+    let mut ret = vec![];
+    let mut cur_scope_node = s.innermost_scope;
+    let mut looking_for_overloadable = false;
+    let mut first_time = true;
+    let mut used_param_result_type_profiles = vec![];
+    while cur_scope_node.is_some() {
+        let cur_scope_node_ = s.op_sc.get(cur_scope_node.unwrap());
+        if let &ScopeChainNode::X{this_scope, parent} = cur_scope_node_ {
+            // Try to find the thing
+            if let Some(maybe_found_thing) = s.op_s.get(this_scope).get(item) {
+                // We potentially found some things
+
+                // TODO: we need to handle aliases
+
+                // This should always be true
+                assert!(maybe_found_thing.len() > 0);
+
+                if first_time {
+                    // Everything found must either all be overloadable
+                    // or none can be overloadable (it cannot be mixed)
+                    looking_for_overloadable = s.op_n.get(maybe_found_thing[0])
+                        .is_an_overloadable_decl();
+
+                    first_time = false;
+                }
+
+                if !looking_for_overloadable {
+                    // We are looking for a non-overloadable thing, and we
+                    // have Definitely found at least one. This means that
+                    // we have found what we are looking for, and we are done!
+                    assert!(maybe_found_thing.len() == 1);
+                    ret.push(maybe_found_thing[0]);
+                    break;
+                } else {
+                    // We are looking for overloadable things. Anything that
+                    // isn't already shadowed is good
+
+                    for &maybe_found_i in maybe_found_thing {
+                        let this_param_result_profile =
+                            get_parameter_result_type_profile(s,
+                                maybe_found_i);
+
+                        let mut matched = false;
+                        for other_param_result_profile in
+                            &used_param_result_type_profiles {
+
+                            if this_param_result_profile ==
+                                *other_param_result_profile {
+
+                                matched = true;
+                                break;
+                            }
+                        }
+
+                        if !matched {
+                            // We can add it
+                            ret.push(maybe_found_i);
+                            used_param_result_type_profiles.push(
+                                this_param_result_profile);
+                        }
+                    }
+                }
+            }
+
+            cur_scope_node = parent;
+        } else {
+            panic!("AST invariant violated!")
+        }
+    }
+
+    if ret.len() > 0 {
+        Some(ret)
+    } else {
+        None
+    }
+}
+
+fn analyze_designator(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode)
+    -> ScopeItemName {
+
+    match pt.node_type {
+        ParseTreeNodeType::PT_BASIC_ID | ParseTreeNodeType::PT_EXT_ID => {
+            ScopeItemName::Identifier(analyze_identifier(s, pt))
+        },
+        ParseTreeNodeType::PT_LIT_STRING => {
+            let string_idx = {
+                s.sp.add_latin1_str(&pt.str1)
+            };
+            ScopeItemName::StringLiteral(string_idx)
+        },
+        ParseTreeNodeType::PT_LIT_CHAR => {
+            ScopeItemName::CharLiteral(pt.chr)
+        },
+        _ => panic!("Don't know how to handle this parse tree node!")
+    }
+}
+
 // The point of these functions is to do _only_ scope and visibility logic
 // (not overloading). There are three cases: overloadable (can get multiple),
 // non-overloadable and a single thing ("normal"), and non-overloadable and
 // multiple things (e.g. use clauses)
 // TODO: Braindump better
-fn analyze_name_single_nonoverloadable(s: &mut AnalyzerCoreStateBlob,
-    pt: &VhdlParseTreeNode) -> Option<ObjPoolIndex<AstNode>> {
+fn analyze_name(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode)
+    -> Option<Vec<ObjPoolIndex<AstNode>>> {
 
     match pt.node_type {
-        ParseTreeNodeType::PT_BASIC_ID | ParseTreeNodeType::PT_EXT_ID => {
-            // a simple_name
-            let id = ScopeItemName::Identifier(analyze_identifier(s, pt));
-
-            // This part has the actual scope chain walking!
-            let mut cur_scope_node = s.innermost_scope;
-            let mut found_result = None;
-            while cur_scope_node.is_some() {
-                let cur_scope_node_ = s.op_sc.get(cur_scope_node.unwrap());
-
-                if let &ScopeChainNode::X{this_scope, parent} =
-                    cur_scope_node_ {
-
-                    // Try to find the thing
-                    if let Some(maybe_found_thing) =
-                        s.op_s.get(this_scope).get(id) {
-
-                        // We potentially found some things, so we need to
-                        // handle aliases (TODO) and if this thing isn't
-                        // actually a non-overloadable thing (otherwise we
-                        // are actually done already)
-
-                        // This should always be true
-                        assert!(maybe_found_thing.len() > 0);
-
-                        // Everything found must either all be overloadable
-                        // or none can be overloadable (it cannot be mixed)
-                        if s.op_n.get(maybe_found_thing[0])
-                            .is_an_overloadable_decl() {
-
-                            // Bad, was an overloadable thing
-                            break;
-                        } else {
-                            // Wow, we are done!
-                            // FIXME: Aliases
-                            assert!(maybe_found_thing.len() == 1);
-                            found_result = Some(maybe_found_thing[0]);
-                            break;
-                        }
-                    }
-
-                    cur_scope_node = parent;
-                } else {
-                    panic!("AST invariant violated!")
-                }
-            }
-
-            found_result
-        },
+        // simple_name, operator_symbol, or character_literal
+        ParseTreeNodeType::PT_BASIC_ID | ParseTreeNodeType::PT_EXT_ID |
         ParseTreeNodeType::PT_LIT_STRING | ParseTreeNodeType::PT_LIT_CHAR => {
-            // This is an operator_symbol or a character_literal and so are
-            // definitely not what we want because this particular function
-            // yields only non-overloadable things.
-            None
+            let designator = analyze_designator(s, pt);
+            walk_scope_chain(s, designator)
         },
 
+        // selected_name
         ParseTreeNodeType::PT_NAME_SELECTED => {
-            // Logic for selected names
             // First figure out what the prefix is
-            let prefix = analyze_name_single_nonoverloadable(
-                s, &pt.pieces[0].as_ref().unwrap());
+            let prefix = analyze_name(s, &pt.pieces[0].as_ref().unwrap());
             if prefix.is_none() {
                 return None;
             }
             let prefix = prefix.unwrap();
             let suffix_pt = &pt.pieces[1].as_ref().unwrap();
 
-            // Make sure suffix can be a "single things"
-            if suffix_pt.node_type != ParseTreeNodeType::PT_BASIC_ID &&
-               suffix_pt.node_type != ParseTreeNodeType::PT_EXT_ID {
-                return None;
-            }
-            let id =
-                ScopeItemName::Identifier(analyze_identifier(s, suffix_pt));
+            if prefix.len() == 1 {
+                // There is a single thing here
+                let prefix = prefix[0];
+                let designator = analyze_designator(s, suffix_pt);
 
-            match s.op_n.get(prefix).kind() {
-                AstNodeKind::DeclarativeRegion => {
-                    // TODO: The "only if we're currently inside" logic
+                match s.op_n.get(prefix).kind() {
+                    AstNodeKind::DeclarativeRegion => {
+                        // TODO: The "only if we're currently inside" logic
 
-                    let scope = s.op_n.get(prefix).scope().unwrap();
+                        let scope = s.op_n.get(prefix).scope().unwrap();
 
-                    // GIANT FIXME: Copypasta
+                        // Try to find the thing
+                        if let Some(maybe_found_thing) =
+                            s.op_s.get(scope).get(designator) {
 
-                    // Try to find the thing
-                    if let Some(maybe_found_thing) =
-                        s.op_s.get(scope).get(id) {
+                            // TODO: handle aliases??
 
-                        // We potentially found some things, so we need to
-                        // handle aliases (TODO) and if this thing isn't
-                        // actually a non-overloadable thing (otherwise we
-                        // are actually done already)
+                            // This should always be true
+                            assert!(maybe_found_thing.len() > 0);
 
-                        // This should always be true
-                        assert!(maybe_found_thing.len() > 0);
-
-                        // Everything found must either all be overloadable
-                        // or none can be overloadable (it cannot be mixed)
-                        if s.op_n.get(maybe_found_thing[0])
-                            .is_an_overloadable_decl() {
-
-                            // Bad, was an overloadable thing
-                            None
+                            Some(maybe_found_thing.to_owned())
                         } else {
-                            // Wow, we are done!
-                            // FIXME: Aliases
-                            assert!(maybe_found_thing.len() == 1);
-                            Some(maybe_found_thing[0])
+                            None
                         }
-                    } else {
-                        None
-                    }
-                },
-                // TODO: Other things
+                    },
+                    // TODO: Other things
 
-                // This is not a thing we can select into
-                _ => None,
+                    // This is not a thing we can select into
+                    _ => None,
+                }
+            } else {
+                // This is a function call or something
+                panic!("NOT IMPLEMENTED YET!");
             }
         },
         _ => panic!("Don't know how to handle this parse tree node!")
@@ -491,19 +525,23 @@ fn analyze_subtype_indication(s: &mut AnalyzerCoreStateBlob,
             assert!(pt.pieces[1].is_none());
             assert!(pt.pieces[2].is_none());
 
-            let type_mark = analyze_name_single_nonoverloadable(
-                s, &pt.pieces[0].as_ref().unwrap());
+            let type_mark_ = analyze_name(s, &pt.pieces[0].as_ref().unwrap());
 
-            if type_mark.is_none() {
+            if type_mark_.is_none() {
+                dump_current_location(s, pt_for_loc, true);
+                s.errors +=  "ERROR: Bad name for type_mark\n";
+                return None;
+            }
+            let type_mark = type_mark_.unwrap();
+
+            if type_mark.len() != 1 {
                 dump_current_location(s, pt_for_loc, true);
                 s.errors +=  "ERROR: Bad name for type_mark\n";
                 return None;
             }
 
-            if s.op_n.get(type_mark.unwrap()).kind() !=
-                AstNodeKind::Type {
-                // FIXME: Other kinds of types
-
+            if s.op_n.get(type_mark[0]).kind() != AstNodeKind::Type {
+                // FIXME: Do I need to do special stuff here anymore?
                 dump_current_location(s, pt_for_loc, true);
                 s.errors += "ERROR: name is not a type\n";
                 return None;
@@ -513,7 +551,7 @@ fn analyze_subtype_indication(s: &mut AnalyzerCoreStateBlob,
             {
                 let x = s.op_n.get_mut(x_);
                 *x = AstNode::SubtypeIndication {
-                    type_mark: type_mark.unwrap(),
+                    type_mark: type_mark[0],
                 };
             }
 
