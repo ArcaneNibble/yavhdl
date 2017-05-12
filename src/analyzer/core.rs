@@ -31,6 +31,7 @@ use analyzer::util::*;
 
 use parser::*;
 
+use std::collections::HashSet;
 use std::ffi::OsStr;
 
 pub struct AnalyzerCoreStateBlob {
@@ -51,6 +52,7 @@ pub struct AnalyzerCoreStateBlob {
     work_lib: Option<ObjPoolIndex<Library>>,
     current_file_name: Option<StringPoolIndexOsStr>,
     innermost_scope: Option<ObjPoolIndex<ScopeChainNode>>,
+    blacklisted_names: HashSet<ScopeItemName>,
 }
 
 impl AnalyzerCoreStateBlob {
@@ -68,6 +70,7 @@ impl AnalyzerCoreStateBlob {
             work_lib: None,
             current_file_name: None,
             innermost_scope: None,
+            blacklisted_names: HashSet::new(),
         }
     }
 }
@@ -461,6 +464,11 @@ fn analyze_name(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode)
         ParseTreeNodeType::PT_BASIC_ID | ParseTreeNodeType::PT_EXT_ID |
         ParseTreeNodeType::PT_LIT_STRING | ParseTreeNodeType::PT_LIT_CHAR => {
             let designator = analyze_designator(s, pt);
+
+            if s.blacklisted_names.contains(&designator) {
+                return None;
+            }
+
             walk_scope_chain(s, designator)
         },
 
@@ -566,6 +574,8 @@ fn analyze_subtype_decl(s: &mut AnalyzerCoreStateBlob,
     decl_part_type: DeclarativePartType) -> bool {
 
     let id = analyze_identifier(s, &pt.pieces[0].as_ref().unwrap());
+    s.blacklisted_names.insert(ScopeItemName::Identifier(id));
+
     let loc = pt_loc(s, pt);
     let subtype_indication_ = analyze_subtype_indication(s,
         &pt.pieces[1].as_ref().unwrap(), pt);
@@ -584,10 +594,6 @@ fn analyze_subtype_decl(s: &mut AnalyzerCoreStateBlob,
         };
     }
 
-    // FIXME: Is it necessary to add this to the target scope first so that
-    // the name hiding rules are followed correctly? It does not seem like it
-    // will make any observable difference?
-
     if !try_add_declaration(s, ScopeItemName::Identifier(id), x_, scope) {
         dump_current_location(s, pt, true);
         s.errors += &format!(
@@ -595,6 +601,8 @@ fn analyze_subtype_decl(s: &mut AnalyzerCoreStateBlob,
             s.sp.retrieve_latin1_str(id.orig_name).pretty_name());
         return false;
     }
+
+    s.blacklisted_names.clear();
 
     true
 }
@@ -624,6 +632,10 @@ fn analyze_constant_decl(s: &mut AnalyzerCoreStateBlob,
     pt: &VhdlParseTreeNode, scope: ObjPoolIndex<Scope>) -> bool {
 
     let id_list = analyze_identifier_list(s, &pt.pieces[0].as_ref().unwrap());
+    for &id in &id_list {
+        s.blacklisted_names.insert(ScopeItemName::Identifier(id));
+    }
+
     let loc = pt_loc(s, pt);
     let subtype_indication_ = analyze_subtype_indication(s,
         &pt.pieces[1].as_ref().unwrap(), pt);
@@ -631,8 +643,6 @@ fn analyze_constant_decl(s: &mut AnalyzerCoreStateBlob,
     if subtype_indication_.is_none() {
         return false;
     }
-
-    // TODO: Hiding the current names
 
     // TODO: Not implemented
     assert!(pt.pieces[2].is_none());
@@ -657,6 +667,8 @@ fn analyze_constant_decl(s: &mut AnalyzerCoreStateBlob,
             return false;
         }
     }
+
+    s.blacklisted_names.clear();
 
     true
 }
