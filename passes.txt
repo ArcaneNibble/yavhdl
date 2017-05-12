@@ -1,0 +1,50 @@
+Pass 0: Lexer + Parser
+This pass begins with raw bytes and outputs a tree of data structures that
+organizes these bytes into tokens and a "parse tree." A parse tree does not
+contain any information whatsoever about any names, scopes, etc. This pass does
+output _one_ parse tree, but the parse tree can contain nodes that represent
+"this could be multiple things."
+
+------------------------- These are "analysis" passes -------------------------
+
+Pass 1: Scopes, kinds, and fixups
+This pass handles the scope and visibility rules and resolves all of the
+ambiguity in the parse tree. However, because of generic types, a lot of things
+have to be deferred until later. This pass only checks for the correct "kind"
+of thing, such as "type" or "object." However, most notably, this pass _cannot_
+handle overloads. Overload resolution requires information about
+potentially-generic types.
+
+Pass 1b: Semantically paired objects
+This is a simple pass that finds objects that should be paired (such as a
+package and a package body) and pairs them up. It will also raise an error
+if some of these paired items are missing.
+
+Pass 1c: Rules check
+This pass will check for rule violations that are checkable at this point in
+time.
+
+----------------------- These are "elaboration" passes -----------------------
+
+Pass 2: PATH_NAME
+The PATH_NAME attribute should be possible to determine here.
+
+Pass 3: Locally static expressions
+We need to process locally static expressions. They actually need to happen
+here in order to be able to do generate statements in the next step.
+
+Pass 4: Hierarchy and generics
+Instantiations, including generic maps, need to be processed.
+
+Pass 5: INSTANCE_NAME
+The INSTANCE_NAME attribute should be possible to determine here.
+
+Pass 6: Globally static expressions
+Now that hierarchy elaboration has completed, we can process globally static
+expressions.
+
+Pass 7: Overloads
+Now that everything has an actual type (not a generic), it is possible to
+perform overload resolution.
+
+TODO
