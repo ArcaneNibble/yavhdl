@@ -29,21 +29,20 @@ time.
 Pass 2: PATH_NAME
 The PATH_NAME attribute should be possible to determine here.
 
-Pass 3: Locally static expressions
-We need to process locally static expressions. They actually need to happen
-here in order to be able to do generate statements in the next step.
+Pass 3: Locally static expressions, generics, generate
+We need to process locally static expressions, instantiations, generic maps,
+and generate statements. We need to do these all at the same time because
+locally static expressions in generics will still be locally static inside
+the instantiated thing.
 
-Pass 4: Hierarchy and generics
-Instantiations, including generic maps, need to be processed.
-
-Pass 5: INSTANCE_NAME
+Pass 4: INSTANCE_NAME
 The INSTANCE_NAME attribute should be possible to determine here.
 
-Pass 6: Globally static expressions
+Pass 5: Globally static expressions
 Now that hierarchy elaboration has completed, we can process globally static
 expressions.
 
-Pass 7: Overloads
+Pass 6: Overloads
 Now that everything has an actual type (not a generic), it is possible to
 perform overload resolution.
 
