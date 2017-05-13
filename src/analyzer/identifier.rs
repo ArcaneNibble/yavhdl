@@ -33,12 +33,14 @@ pub struct Identifier {
     pub orig_name: StringPoolIndexLatin1,
     pub canonical_name: StringPoolIndexLatin1,
     pub is_extended_id: bool,
+    pub is_internal: bool,
 }
 
 impl PartialEq for Identifier {
     fn eq(&self, other: &Identifier) -> bool {
         (self.is_extended_id == other.is_extended_id) &&
-        (self.canonical_name == other.canonical_name)
+        (self.canonical_name == other.canonical_name) &&
+        (self.is_internal == other.is_internal)
     }
 }
 
@@ -46,6 +48,7 @@ impl Hash for Identifier {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.canonical_name.hash(state);
         self.is_extended_id.hash(state);
+        self.is_internal.hash(state);
     }
 }
 
@@ -89,6 +92,7 @@ impl Identifier {
             orig_name: name,
             canonical_name: canonical_name,
             is_extended_id: ext,
+            is_internal: false,
         })
     }
 
@@ -262,5 +266,27 @@ mod tests {
 
         let test1 = Identifier::new_unicode(&mut sp, "fÖo", false).unwrap();
         assert_eq!(test1.debug_print(&sp), "\"f\\u00d6o\"");
+    }
+
+    #[test]
+    fn identifier_internal() {
+        let mut sp = StringPool::new();
+
+        let test1 = Identifier::new_unicode(&mut sp, "foo", false).unwrap();
+        let test2 = Identifier::new_unicode(&mut sp, "foo", false).unwrap();
+        assert_eq!(hash(&test1), hash(&test2));
+        assert_eq!(test1, test2);
+
+        let mut test1 = Identifier::new_unicode(&mut sp, "foo", false).unwrap();
+        let mut test2 = Identifier::new_unicode(&mut sp, "foo", false).unwrap();
+        test1.is_internal = true;
+        test2.is_internal = true;
+        assert_eq!(hash(&test1), hash(&test2));
+        assert_eq!(test1, test2);
+
+        let mut test1 = Identifier::new_unicode(&mut sp, "foo", false).unwrap();
+        let test2 = Identifier::new_unicode(&mut sp, "foo", false).unwrap();
+        test1.is_internal = true;
+        assert!(test1 != test2);
     }
 }
