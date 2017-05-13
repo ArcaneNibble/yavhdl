@@ -451,6 +451,10 @@ fn analyze_name(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode)
         ParseTreeNodeType::PT_LIT_STRING | ParseTreeNodeType::PT_LIT_CHAR => {
             let designator = analyze_designator(s, pt);
 
+            // FIXME: I'm not sure this exactly follows the rules of the spec.
+            // However, I don't know if it is noticeable or not. I think
+            // that any time this rule can apply, the result can never be
+            // something overloadable.
             if s.blacklisted_names.contains(&designator) {
                 return None;
             }
@@ -507,6 +511,35 @@ fn analyze_name(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode)
     }
 }
 
+fn analyze_type_mark(s: &mut AnalyzerCoreStateBlob,
+    pt: &VhdlParseTreeNode, pt_for_loc: &VhdlParseTreeNode)
+    -> Option<ObjPoolIndex<AstNode>> {
+
+    let type_mark_ = analyze_name(s, pt);
+
+    if type_mark_.is_none() {
+        dump_current_location(s, pt_for_loc, true);
+        s.errors +=  "ERROR: Bad name for type_mark\n";
+        return None;
+    }
+    let type_mark = type_mark_.unwrap();
+
+    if type_mark.len() != 1 {
+        dump_current_location(s, pt_for_loc, true);
+        s.errors +=  "ERROR: Bad name for type_mark\n";
+        return None;
+    }
+
+    if s.op_n.get(type_mark[0]).kind() != AstNodeKind::Type {
+        // FIXME: Do I need to do special stuff here anymore?
+        dump_current_location(s, pt_for_loc, true);
+        s.errors += "ERROR: name is not a type\n";
+        return None;
+    }
+
+    Some(type_mark[0])
+}
+
 fn analyze_subtype_indication(s: &mut AnalyzerCoreStateBlob,
     pt: &VhdlParseTreeNode, pt_for_loc: &VhdlParseTreeNode)
     -> Option<ObjPoolIndex<AstNode>> {
@@ -519,25 +552,11 @@ fn analyze_subtype_indication(s: &mut AnalyzerCoreStateBlob,
             assert!(pt.pieces[1].is_none());
             assert!(pt.pieces[2].is_none());
 
-            let type_mark_ = analyze_name(s, &pt.pieces[0].as_ref().unwrap());
+            let type_mark =
+                analyze_type_mark(s, &pt.pieces[0].as_ref().unwrap(),
+                                  pt_for_loc);
 
-            if type_mark_.is_none() {
-                dump_current_location(s, pt_for_loc, true);
-                s.errors +=  "ERROR: Bad name for type_mark\n";
-                return None;
-            }
-            let type_mark = type_mark_.unwrap();
-
-            if type_mark.len() != 1 {
-                dump_current_location(s, pt_for_loc, true);
-                s.errors +=  "ERROR: Bad name for type_mark\n";
-                return None;
-            }
-
-            if s.op_n.get(type_mark[0]).kind() != AstNodeKind::Type {
-                // FIXME: Do I need to do special stuff here anymore?
-                dump_current_location(s, pt_for_loc, true);
-                s.errors += "ERROR: name is not a type\n";
+            if type_mark.is_none() {
                 return None;
             }
 
@@ -545,7 +564,7 @@ fn analyze_subtype_indication(s: &mut AnalyzerCoreStateBlob,
             {
                 let x = s.op_n.get_mut(x_);
                 *x = AstNode::SubtypeIndication {
-                    type_mark: type_mark[0],
+                    type_mark: type_mark.unwrap(),
                 };
             }
 
@@ -659,7 +678,7 @@ fn analyze_constant_decl(s: &mut AnalyzerCoreStateBlob,
 }
 
 fn analyze_subprogram_spec(s: &mut AnalyzerCoreStateBlob,
-    pt: &VhdlParseTreeNode, loc: SourceLoc,
+    pt: &VhdlParseTreeNode, pt_for_loc: &VhdlParseTreeNode,
     scope: ObjPoolIndex<Scope>) -> bool {
 
     match pt.node_type {
@@ -668,10 +687,17 @@ fn analyze_subprogram_spec(s: &mut AnalyzerCoreStateBlob,
                 ParseTreeFunctionPurity::PURITY_IMPURE => false,
                 _ => true,
             };
+            let loc = pt_loc(s, pt_for_loc);
             let designator =
                 analyze_designator(s, &pt.pieces[0].as_ref().unwrap());
+            s.blacklisted_names.insert(designator);
 
-            // TODO: Return
+            let return_type =
+                analyze_type_mark(s, &pt.pieces[1].as_ref().unwrap(),
+                                  pt_for_loc);
+            if return_type.is_none() {
+                return false;
+            }
 
             // Not implemented
             assert!(pt.pieces[2].is_none());
@@ -695,6 +721,7 @@ fn analyze_subprogram_spec(s: &mut AnalyzerCoreStateBlob,
                 *x = AstNode::GenericFunctionDecl {
                     loc: loc,
                     designator: internal_designator,
+                    return_type: return_type.unwrap(),
                     is_pure: is_pure,
                 };
             }
@@ -720,6 +747,9 @@ fn analyze_subprogram_spec(s: &mut AnalyzerCoreStateBlob,
                 return false;
             }
 
+            // FIXME: What is the correct spot to do this?
+            s.blacklisted_names.clear();
+
             true
         },
         _ => panic!("Don't know how to handle this parse tree node!")
@@ -730,8 +760,7 @@ fn analyze_subprogram_decl(s: &mut AnalyzerCoreStateBlob,
     pt: &VhdlParseTreeNode, scope: ObjPoolIndex<Scope>) -> bool {
 
     // FIXME: How exactly should this work?
-    let loc = pt_loc(s, pt);
-    analyze_subprogram_spec(s, &pt.pieces[0].as_ref().unwrap(), loc, scope)
+    analyze_subprogram_spec(s, &pt.pieces[0].as_ref().unwrap(), pt, scope)
 }
 
 

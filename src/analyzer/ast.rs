@@ -238,7 +238,8 @@ pub enum AstNode {
 
         // TODO: generics
         // TODO: args
-        // TODO: return
+
+        return_type: ObjPoolIndex<AstNode>,
 
         is_pure: bool,
     },
@@ -400,11 +401,15 @@ impl AstNode {
                     })
             },
 
-            &AstNode::GenericFunctionDecl {loc, designator, is_pure} => {
+            &AstNode::GenericFunctionDecl {loc, designator, is_pure,
+                return_type} => {
+
                 format!("{{\"type\": \"GenericFunctionDecl\"\
-                         , \"designator\": {}{}, \"pure\": {}}}",
+                         , \"designator\": {}{}, \"pure\": {}\
+                         , \"return_type\": {}}}",
                     designator.debug_print(sp), loc.debug_print(sp),
-                    if is_pure { "true" } else { "false" })
+                    if is_pure { "true" } else { "false" },
+                    op_n.get(return_type).id().unwrap().debug_print(sp))
             },
 
             &AstNode::FuncInstantiation {loc, designator, generic_func} => {
