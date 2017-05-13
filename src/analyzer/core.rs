@@ -116,21 +116,6 @@ fn analyze_identifier(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode)
     }
 }
 
-#[derive(Copy, Clone)]
-enum DeclarativePartType {
-    // ArchitectureDeclarativePart,
-    // BlockDeclarativePart,
-    // ConfigurationDeclarativePart,
-    EntityDeclarativePart,
-    // GenerateStatementBody,
-    // PackageBodyDeclarativePart,
-    // PackageDeclarativePart,
-    // ProcessDeclarativePart,
-    // ProtectedTypeDeclarativePart,
-    // ProtectedTypeBodyDeclarativePart,
-    // SubprogramDeclarativePart,
-}
-
 #[derive(Eq)]
 struct ParameterResultTypeProfile {
     result: Option<ObjPoolIndex<AstNode>>,
@@ -306,8 +291,7 @@ fn analyze_enum_lits(s: &mut AnalyzerCoreStateBlob,
 }
 
 fn analyze_type_decl(s: &mut AnalyzerCoreStateBlob,
-    pt: &VhdlParseTreeNode, scope: ObjPoolIndex<Scope>,
-    decl_part_type: DeclarativePartType) -> bool {
+    pt: &VhdlParseTreeNode, scope: ObjPoolIndex<Scope>) -> bool {
 
     let id = analyze_identifier(s, &pt.pieces[0].as_ref().unwrap());
 
@@ -570,8 +554,7 @@ fn analyze_subtype_indication(s: &mut AnalyzerCoreStateBlob,
 }
 
 fn analyze_subtype_decl(s: &mut AnalyzerCoreStateBlob,
-    pt: &VhdlParseTreeNode, scope: ObjPoolIndex<Scope>,
-    decl_part_type: DeclarativePartType) -> bool {
+    pt: &VhdlParseTreeNode, scope: ObjPoolIndex<Scope>) -> bool {
 
     let id = analyze_identifier(s, &pt.pieces[0].as_ref().unwrap());
     s.blacklisted_names.insert(ScopeItemName::Identifier(id));
@@ -675,14 +658,13 @@ fn analyze_constant_decl(s: &mut AnalyzerCoreStateBlob,
 
 fn analyze_declarative_item(s: &mut AnalyzerCoreStateBlob,
     pt: &VhdlParseTreeNode, decl_scope: ObjPoolIndex<Scope>,
-    use_scope: ObjPoolIndex<Scope>, decl_part_type: DeclarativePartType)
-    -> bool {
+    use_scope: ObjPoolIndex<Scope>) -> bool {
 
     match pt.node_type {
         ParseTreeNodeType::PT_FULL_TYPE_DECLARATION =>
-            analyze_type_decl(s, pt, decl_scope, decl_part_type),
+            analyze_type_decl(s, pt, decl_scope),
         ParseTreeNodeType::PT_SUBTYPE_DECLARATION =>
-            analyze_subtype_decl(s, pt, decl_scope, decl_part_type),
+            analyze_subtype_decl(s, pt, decl_scope),
         ParseTreeNodeType::PT_CONSTANT_DECLARATION =>
             analyze_constant_decl(s, pt, decl_scope),
         _ => panic!("Don't know how to handle this parse tree node!")
@@ -691,23 +673,18 @@ fn analyze_declarative_item(s: &mut AnalyzerCoreStateBlob,
 
 fn analyze_declaration_list(s: &mut AnalyzerCoreStateBlob,
     pt: &VhdlParseTreeNode, decl_scope: ObjPoolIndex<Scope>,
-    use_scope: ObjPoolIndex<Scope>, decl_part_type: DeclarativePartType)
-    -> bool {
+    use_scope: ObjPoolIndex<Scope>) -> bool {
 
     match pt.node_type {
         ParseTreeNodeType::PT_DECLARATION_LIST => {
             if !analyze_declaration_list(s, &pt.pieces[0].as_ref().unwrap(),
-                                         decl_scope, use_scope,
-                                         decl_part_type) {
+                                         decl_scope, use_scope) {
                 return false;
             }
             analyze_declarative_item(s, &pt.pieces[1].as_ref().unwrap(),
-                                     decl_scope, use_scope, decl_part_type)
+                                     decl_scope, use_scope)
         },
-        _ => {
-            analyze_declarative_item(s, pt, decl_scope, use_scope,
-                                     decl_part_type)
-        },
+        _ => analyze_declarative_item(s, pt, decl_scope, use_scope)
     }
 }
 
@@ -792,8 +769,7 @@ fn analyze_entity(s: &mut AnalyzerCoreStateBlob, pt: &VhdlParseTreeNode,
 
     // Declarations
     if let Some(decl_pt) = pt.pieces[2].as_ref() {
-        if !analyze_declaration_list(s, decl_pt, decl_scope, use_scope,
-                    DeclarativePartType::EntityDeclarativePart) {
+        if !analyze_declaration_list(s, decl_pt, decl_scope, use_scope) {
             return false;
         }
     }
