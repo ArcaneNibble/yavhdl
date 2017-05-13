@@ -95,9 +95,20 @@ impl ScopeItemName {
                 format!("\"{}\"", sp.retrieve_latin1_str(strlit)
                     .debug_escaped_name())
             },
-            &ScopeItemName::CharLiteral(c) => {
-                format!("'{}'", get_chr_escaped(c))
+            &ScopeItemName::CharLiteral(c) =>
+                format!("'{}'", get_chr_escaped(c)),
+        }
+    }
+
+    pub fn pretty_name(&self, sp: &StringPool) -> String {
+        match self {
+            &ScopeItemName::Identifier(id) =>
+                sp.retrieve_latin1_str(id.orig_name).pretty_name(),
+            &ScopeItemName::StringLiteral(strlit) => {
+                format!("\"{}\"", sp.retrieve_latin1_str(strlit).pretty_name())
             },
+            &ScopeItemName::CharLiteral(c) =>
+                format!("'{}'", LATIN1_PRETTYPRINT_TABLE[c as usize]),
         }
     }
 }

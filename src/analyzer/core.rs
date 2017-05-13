@@ -49,6 +49,7 @@ pub struct AnalyzerCoreStateBlob {
     pub warnings: String,
 
     ///// This stuff is local to some part of the parsing step
+    internal_name_count: u64,
     work_lib: Option<ObjPoolIndex<Library>>,
     current_file_name: Option<StringPoolIndexOsStr>,
     innermost_scope: Option<ObjPoolIndex<ScopeChainNode>>,
@@ -67,6 +68,7 @@ impl AnalyzerCoreStateBlob {
             errors: String::new(),
             warnings: String::new(),
 
+            internal_name_count: 0,
             work_lib: None,
             current_file_name: None,
             innermost_scope: None,
@@ -656,6 +658,83 @@ fn analyze_constant_decl(s: &mut AnalyzerCoreStateBlob,
     true
 }
 
+fn analyze_subprogram_spec(s: &mut AnalyzerCoreStateBlob,
+    pt: &VhdlParseTreeNode, loc: SourceLoc,
+    scope: ObjPoolIndex<Scope>) -> bool {
+
+    match pt.node_type {
+        ParseTreeNodeType::PT_FUNCTION_SPECIFICATION => {
+            let is_pure = match pt.purity {
+                ParseTreeFunctionPurity::PURITY_IMPURE => false,
+                _ => true,
+            };
+            let designator =
+                analyze_designator(s, &pt.pieces[0].as_ref().unwrap());
+
+            // TODO: Return
+
+            // Not implemented
+            assert!(pt.pieces[2].is_none());
+            assert!(pt.pieces[3].is_none());
+
+            // We need a new internal name
+            let internal_name =
+                format!("__internal_anon_{}", s.internal_name_count);
+            s.internal_name_count += 1;
+            let mut internal_designator_id =
+                Identifier::new_unicode(&mut s.sp, internal_name.as_str(),
+                    true).unwrap();
+            internal_designator_id.is_internal = true;
+            let internal_designator =
+                ScopeItemName::Identifier(internal_designator_id);
+
+            // This is the generic piece
+            let x_ = s.op_n.alloc();
+            {
+                let x = s.op_n.get_mut(x_);
+                *x = AstNode::GenericFunctionDecl {
+                    loc: loc,
+                    designator: internal_designator,
+                    is_pure: is_pure,
+                };
+            }
+            if !try_add_declaration(s, internal_designator, x_, scope) {
+                panic!("Internal compiler error!");
+            }
+
+            // This is the instantiation
+            let y_ = s.op_n.alloc();
+            {
+                let y = s.op_n.get_mut(y_);
+                *y = AstNode::FuncInstantiation {
+                    loc: loc,
+                    designator: designator,
+                    generic_func: x_,
+                };
+            }
+            if !try_add_declaration(s, designator, y_, scope) {
+                dump_current_location(s, pt, true);
+                s.errors += &format!(
+                    "ERROR: Duplicate declaration of function {}!\n",
+                    designator.pretty_name(&mut s.sp));
+                return false;
+            }
+
+            true
+        },
+        _ => panic!("Don't know how to handle this parse tree node!")
+    }
+}
+
+fn analyze_subprogram_decl(s: &mut AnalyzerCoreStateBlob,
+    pt: &VhdlParseTreeNode, scope: ObjPoolIndex<Scope>) -> bool {
+
+    // FIXME: How exactly should this work?
+    let loc = pt_loc(s, pt);
+    analyze_subprogram_spec(s, &pt.pieces[0].as_ref().unwrap(), loc, scope)
+}
+
+
 fn analyze_declarative_item(s: &mut AnalyzerCoreStateBlob,
     pt: &VhdlParseTreeNode, decl_scope: ObjPoolIndex<Scope>,
     use_scope: ObjPoolIndex<Scope>) -> bool {
@@ -667,6 +746,8 @@ fn analyze_declarative_item(s: &mut AnalyzerCoreStateBlob,
             analyze_subtype_decl(s, pt, decl_scope),
         ParseTreeNodeType::PT_CONSTANT_DECLARATION =>
             analyze_constant_decl(s, pt, decl_scope),
+        ParseTreeNodeType::PT_SUBPROGRAM_DECLARATION =>
+            analyze_subprogram_decl(s, pt, decl_scope),
         _ => panic!("Don't know how to handle this parse tree node!")
     }
 }
