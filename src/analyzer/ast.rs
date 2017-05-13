@@ -87,6 +87,21 @@ pub enum ScopeItemName {
     StringLiteral(StringPoolIndexLatin1),
 }
 
+impl ScopeItemName {
+    pub fn debug_print(&self, sp: &StringPool) -> String {
+        match self {
+            &ScopeItemName::Identifier(id) => id.debug_print(sp),
+            &ScopeItemName::StringLiteral(strlit) => {
+                format!("\"{}\"", sp.retrieve_latin1_str(strlit)
+                    .debug_escaped_name())
+            },
+            &ScopeItemName::CharLiteral(c) => {
+                format!("'{}'", get_chr_escaped(c))
+            },
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct Scope {
     items: HashMap<ScopeItemName, Vec<ObjPoolIndex<AstNode>>>,
@@ -164,6 +179,8 @@ pub enum AstNodeKind {
     Type,
     Object,
     DeclarativeRegion,
+    GenericSubprogram,
+    InstantiatedSubprogram,
 }
 
 
@@ -204,6 +221,24 @@ pub enum AstNode {
         subtype_indication: ObjPoolIndex<AstNode>,
         value: Option<ObjPoolIndex<AstNode>>,
     },
+    GenericFunctionDecl {
+        loc: SourceLoc,
+        designator: ScopeItemName,
+
+        // TODO: generics
+        // TODO: args
+        // TODO: return
+
+        is_pure: bool,
+    },
+    FuncInstantiation {
+        loc: SourceLoc,
+        designator: ScopeItemName,
+
+        // TODO: generic map
+
+        generic_func: ObjPoolIndex<AstNode>,
+    },
 }
 
 impl Default for AstNode {
@@ -242,6 +277,8 @@ impl AstNode {
             &AstNode::Entity {loc, ..} => Some(loc),
             &AstNode::SubtypeDecl {loc, ..} => Some(loc),
             &AstNode::ConstantDecl {loc, ..} => Some(loc),
+            &AstNode::GenericFunctionDecl {loc, ..} => Some(loc),
+            &AstNode::FuncInstantiation {loc, ..} => Some(loc),
             _ => None
         }
     }
@@ -253,6 +290,20 @@ impl AstNode {
             &AstNode::SubtypeDecl {id, ..} => Some(id),
             &AstNode::ConstantDecl {id, ..} => Some(id),
             _ => None
+        }
+    }
+
+    pub fn designator(&self) -> Option<ScopeItemName> {
+        match self {
+            &AstNode::GenericFunctionDecl {designator, ..} => Some(designator),
+            &AstNode::FuncInstantiation {designator, ..} => Some(designator),
+            _ => {
+                if let Some(id) = self.id() {
+                    Some(ScopeItemName::Identifier(id))
+                } else {
+                    None
+                }
+            }
         }
     }
 
@@ -335,6 +386,24 @@ impl AstNode {
                         op_n.get(value).debug_print(sp, op_n, op_s)
                     } else {
                         String::from("null")
+                    })
+            },
+
+            &AstNode::GenericFunctionDecl {loc, designator, is_pure} => {
+                format!("{{\"type\": \"GenericFunctionDecl\"\
+                         , \"designator\": {}{}, \"pure\": {}}}",
+                    designator.debug_print(sp), loc.debug_print(sp),
+                    if is_pure { "true" } else { "false" })
+            },
+
+            &AstNode::FuncInstantiation {loc, designator, generic_func} => {
+                format!("{{\"type\": \"FuncInstantiation\"\
+                         , \"designator\": {}{}, \"tgt\": {}}}",
+                    designator.debug_print(sp), loc.debug_print(sp),
+                    match op_n.get(generic_func) {
+                        &AstNode::GenericFunctionDecl {designator, ..} =>
+                            designator.debug_print(sp),
+                        _ => panic!("AST invariant violated!"),
                     })
             },
 
