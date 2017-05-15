@@ -677,6 +677,98 @@ fn analyze_constant_decl(s: &mut AnalyzerCoreStateBlob,
     true
 }
 
+fn analyze_interface_item(s: &mut AnalyzerCoreStateBlob,
+    pt: &VhdlParseTreeNode, used_names: &mut HashSet<Identifier>,
+    output_vec: &mut Vec<ObjPoolIndex<AstNode>>) -> bool {
+
+    match pt.node_type {
+        ParseTreeNodeType::PT_INTERFACE_CONSTANT_DECLARATION => {
+            let id_list = analyze_identifier_list(s,
+                &pt.pieces[0].as_ref().unwrap());
+
+            let loc = pt_loc(s, pt);
+            let subtype_indication_ = analyze_subtype_indication(s,
+                &pt.pieces[1].as_ref().unwrap(), pt);
+
+            if subtype_indication_.is_none() {
+                return false;
+            }
+
+            // TODO: Not implemented
+            assert!(pt.pieces[2].is_none());
+            assert!(pt.pieces[3].is_none());
+
+            for id in id_list {
+                if used_names.contains(&id) {
+                    dump_current_location(s, pt, true);
+                    s.errors += &format!(
+                        "ERROR: Duplicate declaration of interface constant \
+                        {}!\n",
+                        s.sp.retrieve_latin1_str(id.orig_name).pretty_name());
+                    return false;
+                }
+                used_names.insert(id);
+
+                let x_ = s.op_n.alloc();
+                {
+                    let x = s.op_n.get_mut(x_);
+                    *x = AstNode::InterfaceConstant {
+                        loc: loc,
+                        id: id,
+                        subtype_indication: subtype_indication_.unwrap(),
+                        value: None,
+                    };
+                }
+                output_vec.push(x_);
+            }
+        },
+        _ => panic!("Don't know how to handle this parse tree node!")
+    }
+
+    true
+}
+
+fn analyze_parameter_interface_list_real(s: &mut AnalyzerCoreStateBlob,
+    pt: &VhdlParseTreeNode, used_names: &mut HashSet<Identifier>,
+    output_vec: &mut Vec<ObjPoolIndex<AstNode>>) -> bool{
+
+    match pt.node_type {
+        ParseTreeNodeType::PT_INTERFACE_LIST => {
+            if !analyze_parameter_interface_list_real(s,
+                &pt.pieces[0].as_ref().unwrap(), used_names, output_vec) {
+
+                return false;
+            }
+            if !analyze_interface_item(s, &pt.pieces[1].as_ref().unwrap(),
+                used_names, output_vec) {
+                return false;
+            }
+        },
+        _ => {
+            if !analyze_interface_item(s, pt, used_names, output_vec) {
+                return false;
+            }
+        }
+    }
+
+    true
+}
+
+fn analyze_parameter_interface_list(s: &mut AnalyzerCoreStateBlob,
+    pt: &VhdlParseTreeNode) -> Option<Vec<ObjPoolIndex<AstNode>>> {
+
+    let mut ret = vec![];
+    let mut arg_names = HashSet::new();
+
+    if !analyze_parameter_interface_list_real(s, pt,
+        &mut arg_names, &mut ret) {
+
+        return None;
+    }
+
+    Some(ret)
+}
+
 fn analyze_subprogram_spec(s: &mut AnalyzerCoreStateBlob,
     pt: &VhdlParseTreeNode, pt_for_loc: &VhdlParseTreeNode,
     scope: ObjPoolIndex<Scope>) -> bool {
@@ -699,9 +791,14 @@ fn analyze_subprogram_spec(s: &mut AnalyzerCoreStateBlob,
                 return false;
             }
 
+            let args = analyze_parameter_interface_list(s,
+                &pt.pieces[3].as_ref().unwrap());
+            if args.is_none() {
+                return false;
+            }
+
             // Not implemented
             assert!(pt.pieces[2].is_none());
-            assert!(pt.pieces[3].is_none());
 
             // We need a new internal name
             let internal_name =
@@ -721,6 +818,7 @@ fn analyze_subprogram_spec(s: &mut AnalyzerCoreStateBlob,
                 *x = AstNode::GenericFunctionDecl {
                     loc: loc,
                     designator: internal_designator,
+                    args: args.unwrap(),
                     return_type: return_type.unwrap(),
                     is_pure: is_pure,
                 };

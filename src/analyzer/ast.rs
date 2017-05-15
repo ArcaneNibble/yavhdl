@@ -237,8 +237,8 @@ pub enum AstNode {
         designator: ScopeItemName,
 
         // TODO: generics
-        // TODO: args
 
+        args: Vec<ObjPoolIndex<AstNode>>,
         return_type: ObjPoolIndex<AstNode>,
 
         is_pure: bool,
@@ -250,6 +250,12 @@ pub enum AstNode {
         // TODO: generic map
 
         generic_func: ObjPoolIndex<AstNode>,
+    },
+    InterfaceConstant {
+        loc: SourceLoc,
+        id: Identifier,
+        subtype_indication: ObjPoolIndex<AstNode>,
+        value: Option<ObjPoolIndex<AstNode>>,
     },
 }
 
@@ -272,6 +278,7 @@ impl AstNode {
                 => AstNodeKind::Type,
             &AstNode::Entity{..} => AstNodeKind::DeclarativeRegion,
             &AstNode::ConstantDecl{..} => AstNodeKind::Object,
+            &AstNode::InterfaceConstant{..} => AstNodeKind::Object,
             _ => AstNodeKind::Other,
         }
     }
@@ -289,6 +296,7 @@ impl AstNode {
             &AstNode::Entity {loc, ..} => Some(loc),
             &AstNode::SubtypeDecl {loc, ..} => Some(loc),
             &AstNode::ConstantDecl {loc, ..} => Some(loc),
+            &AstNode::InterfaceConstant {loc, ..} => Some(loc),
             &AstNode::GenericFunctionDecl {loc, ..} => Some(loc),
             &AstNode::FuncInstantiation {loc, ..} => Some(loc),
             _ => None
@@ -301,6 +309,7 @@ impl AstNode {
             &AstNode::Entity {id, ..} => Some(id),
             &AstNode::SubtypeDecl {id, ..} => Some(id),
             &AstNode::ConstantDecl {id, ..} => Some(id),
+            &AstNode::InterfaceConstant {id, ..} => Some(id),
             _ => None
         }
     }
@@ -401,15 +410,45 @@ impl AstNode {
                     })
             },
 
-            &AstNode::GenericFunctionDecl {loc, designator, is_pure,
-                return_type} => {
+            &AstNode::InterfaceConstant {loc, id, subtype_indication,
+                value} => {
 
-                format!("{{\"type\": \"GenericFunctionDecl\"\
+                format!("{{\"type\": \"InterfaceConstant\", \"id\": {}{}\
+                         , \"subtype_indication\": {}, \"value\": {}}}",
+                    id.debug_print(sp), loc.debug_print(sp),
+                    op_n.get(subtype_indication).debug_print(sp, op_n, op_s),
+                    if let Some(value) = value {
+                        op_n.get(value).debug_print(sp, op_n, op_s)
+                    } else {
+                        String::from("null")
+                    })
+            },
+
+            &AstNode::GenericFunctionDecl {loc, designator, is_pure,
+                return_type, ref args} => {
+
+                let mut s = String::new();
+
+                s += &format!("{{\"type\": \"GenericFunctionDecl\"\
                          , \"designator\": {}{}, \"pure\": {}\
-                         , \"return_type\": {}}}",
+                         , \"return_type\": {}, \"args\": [",
                     designator.debug_print(sp), loc.debug_print(sp),
                     if is_pure { "true" } else { "false" },
-                    op_n.get(return_type).id().unwrap().debug_print(sp))
+                    op_n.get(return_type).id().unwrap().debug_print(sp));
+
+                let mut first_arg = true;
+                for arg in args {
+                    if !first_arg {
+                        s += ", ";
+                    }
+                    first_arg = false;
+
+                    s += &op_n.get(*arg).debug_print(sp, op_n, op_s);
+                }
+
+                s += "]}";
+
+                s
             },
 
             &AstNode::FuncInstantiation {loc, designator, generic_func} => {
