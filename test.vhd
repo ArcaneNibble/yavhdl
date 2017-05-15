@@ -1,5 +1,4 @@
 entity test is
     type test is (foo);
-    function test1 return test;
-    impure function test2 return test;
+    function test1 (a : test) return test;
 begin end;

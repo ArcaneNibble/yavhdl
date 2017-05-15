@@ -1705,7 +1705,9 @@ file_open_information:
     }
 
 /// Section 6.5
-interface_declaration:
+interface_declaration: _interface_declaration   { STORE_LOC($$, @$); }
+
+_interface_declaration:
     interface_object_declaration
     | interface_type_declaration
     | interface_subprogram_declaration
